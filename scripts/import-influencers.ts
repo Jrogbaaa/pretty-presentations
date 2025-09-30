@@ -42,10 +42,13 @@ interface RawInfluencerData {
  * Transform raw influencer data to match our schema
  */
 const transformInfluencerData = (raw: RawInfluencerData): any => {
+  // ALWAYS generate a clean ID, never trust raw.id (may have reserved chars)
+  const cleanHandle = (raw.handle || raw.id || '').replace('@', '');
+  
   return {
-    id: raw.id || generateId(raw.handle),
+    id: generateId(cleanHandle),
     name: raw.name || raw.fullName || '',
-    handle: (raw.handle || raw.id || '').replace('@', ''),
+    handle: cleanHandle,
     platform: raw.platform || 'Instagram',
     profileImage: raw.profileImage || raw.avatar || raw.photo || `https://unavatar.io/instagram/${raw.handle || raw.id}`,
     
