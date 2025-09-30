@@ -9,11 +9,13 @@
     "lint": "eslint",
     "test:firebase": "ts-node scripts/test-firebase.ts",
     "test:matching": "ts-node scripts/test-matching.ts",
-    "import:influencers": "ts-node scripts/import-influencers.ts"
+    "import:influencers": "ts-node scripts/import-influencers.ts",
+    "verify:vertex": "ts-node scripts/verify-vertex-ai.ts"
   },
   "dependencies": {
     "@firebase/vertexai-preview": "^0.0.4",
     "@google-cloud/aiplatform": "^5.7.0",
+    "@google/generative-ai": "^0.24.1",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.7",
     "firebase": "^12.3.0",
@@ -24,6 +26,7 @@
     "lucide-react": "^0.544.0",
     "mammoth": "^1.11.0",
     "next": "15.5.4",
+    "openai": "^5.23.2",
     "pdf-parse": "^1.1.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -33,6 +36,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.55.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

@@ -95,7 +95,7 @@ Return a JSON object with:
 }`;
 
   const result = await model.generateContent(prompt);
-  const response = await result.response;
+  const response = result.response;
   const text = response.text();
   
   try {
@@ -163,7 +163,7 @@ Return as JSON with this structure:
 Write in professional, persuasive Spanish-influenced English. Be specific and data-driven.`;
 
   const result = await model.generateContent(prompt);
-  const response = await result.response;
+  const response = result.response;
   const text = response.text();
 
   try {

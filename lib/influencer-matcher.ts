@@ -105,7 +105,7 @@ Consider: audience alignment, engagement quality, brand fit, content quality, au
 
   try {
     const result = await model.generateContent(prompt);
-    const response = await result.response;
+    const response = result.response;
     const text = response.text();
     const parsed = JSON.parse(text.replace(/```json\n?|\n?```/g, "")) as Array<{
       id: string;
@@ -216,7 +216,7 @@ Be specific, persuasive, and data-driven. Focus on audience alignment and ROI po
 
   try {
     const result = await model.generateContent(prompt);
-    const response = await result.response;
+    const response = result.response;
     return response.text().trim();
   } catch {
     return `${influencer.name} brings ${influencer.followers.toLocaleString()} engaged followers with a ${influencer.engagement}% engagement rate, perfectly aligned with your target demographic.`;

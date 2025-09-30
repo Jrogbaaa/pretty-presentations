@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { parseBriefDocument, extractBriefSummary, SAMPLE_BRIEF } from "@/lib/brief-parser";
+import { parseBriefDocument } from "@/lib/brief-parser-openai.server";
+import { extractBriefSummary, SAMPLE_BRIEF } from "@/lib/brief-parser";
 import { Upload, FileText, Sparkles } from "lucide-react";
 import type { ClientBrief } from "@/types";
 

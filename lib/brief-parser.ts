@@ -1,98 +1,56 @@
-import { model } from "./firebase";
-import type { ClientBrief } from "@/types";
-
 /**
- * Parse unstructured brief text into structured ClientBrief format
- * Handles briefs in English, Spanish, or mixed languages
+ * Client-safe brief parsing utilities
+ * These functions run in the browser and don't require server-side AI
  */
-export const parseBriefDocument = async (briefText: string): Promise<ClientBrief> => {
-  const prompt = `You are an expert at parsing client briefs for influencer marketing campaigns.
-
-Parse this brief into a structured format. The brief may be in Spanish, English, or mixed languages.
-
-Brief text:
-${briefText}
-
-Extract and return JSON with this exact structure:
-{
-  "clientName": "string (brand or company name)",
-  "campaignGoals": ["goal1", "goal2", ...] (specific objectives),
-  "budget": number (in euros, extract number only),
-  "targetDemographics": {
-    "ageRange": "string (e.g., 25-65+, 18-35)",
-    "gender": "string (e.g., All genders, 60% Female, Men and Women)",
-    "location": ["country1", "city1", ...] (if not specified, use ["Spain"]),
-    "interests": ["interest1", "interest2", ...],
-    "psychographics": "string (optional, lifestyle/values)"
-  },
-  "brandRequirements": ["requirement1", "requirement2", ...] (constraints, guidelines),
-  "timeline": "string (campaign period or deadline)",
-  "platformPreferences": ["Instagram", "TikTok", ...] (if not specified, suggest based on target),
-  "contentThemes": ["theme1", "theme2", ...] (creative direction, topics),
-  "additionalNotes": "string (urgency, special considerations, confidentiality, etc.)"
-}
-
-Key instructions:
-- Extract ALL relevant information, even if implicit
-- For Spanish briefs: "Presupuesto" = budget, "Territorio" = content themes, "Target" = demographics
-- Infer platform preferences from target age if not specified
-- Capture urgency/timeline information
-- Note any special requirements (confidentiality, guarantees, etc.)
-- Be comprehensive but accurate
-
-Return only the JSON, no explanation.`;
-
-  try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-    
-    // Clean up JSON response
-    const jsonText = text.replace(/```json\n?|\n?```/g, "").trim();
-    const parsed = JSON.parse(jsonText) as ClientBrief;
-    
-    // Validate required fields
-    if (!parsed.clientName || !parsed.campaignGoals || parsed.campaignGoals.length === 0) {
-      throw new Error("Failed to extract required fields from brief");
-    }
-    
-    // Set defaults for missing optional fields
-    if (!parsed.platformPreferences || parsed.platformPreferences.length === 0) {
-      parsed.platformPreferences = ["Instagram", "TikTok"];
-    }
-    
-    if (!parsed.contentThemes) {
-      parsed.contentThemes = [];
-    }
-    
-    if (!parsed.brandRequirements) {
-      parsed.brandRequirements = [];
-    }
-    
-    return parsed;
-  } catch (error) {
-    console.error("Error parsing brief:", error);
-    throw new Error("Unable to parse brief document. Please check the format and try again.");
-  }
-};
 
 /**
  * Extract key information from brief for quick preview
+ * This is a lightweight, client-side analysis that doesn't use AI
  */
-export const extractBriefSummary = (briefText: string): {
-  hasClient: boolean;
-  hasBudget: boolean;
-  hasTarget: boolean;
-  hasTimeline: boolean;
-  confidence: number;
-} => {
-  const hasClient = /client|cliente|brand|marca/i.test(briefText);
-  const hasBudget = /budget|presupuesto|€|eur|\d+k/i.test(briefText);
-  const hasTarget = /target|objetivo|audience|demographics/i.test(briefText);
-  const hasTimeline = /timeline|periodo|deadline|fecha|date/i.test(briefText);
+export const extractBriefSummary = (briefText: string) => {
+  const lowerText = briefText.toLowerCase();
   
-  const confidence = [hasClient, hasBudget, hasTarget, hasTimeline]
-    .filter(Boolean).length * 25;
+  // Check for client/brand name
+  const hasClient = 
+    lowerText.includes("client") || 
+    lowerText.includes("brand") ||
+    lowerText.includes("company") ||
+    lowerText.includes("cliente") ||
+    lowerText.includes("marca");
+  
+  // Check for budget
+  const hasBudget = 
+    lowerText.includes("budget") ||
+    lowerText.includes("€") ||
+    lowerText.includes("euro") ||
+    lowerText.includes("presupuesto") ||
+    /\d+k/.test(lowerText) ||
+    /\d+\s*(thousand|mil)/.test(lowerText);
+  
+  // Check for target audience
+  const hasTarget = 
+    lowerText.includes("target") ||
+    lowerText.includes("audience") ||
+    lowerText.includes("demographic") ||
+    lowerText.includes("age") ||
+    lowerText.includes("gender") ||
+    lowerText.includes("audiencia") ||
+    lowerText.includes("público");
+  
+  // Check for timeline
+  const hasTimeline = 
+    lowerText.includes("timeline") ||
+    lowerText.includes("deadline") ||
+    lowerText.includes("date") ||
+    lowerText.includes("week") ||
+    lowerText.includes("month") ||
+    lowerText.includes("plazo") ||
+    lowerText.includes("fecha");
+  
+  // Calculate confidence based on completeness
+  const checks = [hasClient, hasBudget, hasTarget, hasTimeline];
+  const completedChecks = checks.filter(Boolean).length;
+  const confidence = Math.round((completedChecks / checks.length) * 100);
   
   return {
     hasClient,
@@ -106,22 +64,50 @@ export const extractBriefSummary = (briefText: string): {
 /**
  * Sample brief for testing
  */
-export const SAMPLE_BRIEF = `Van a contar con un grupo de música para llevar a cabo una serie de conciertos de pop-rock bajo el sello de The band.
+export const SAMPLE_BRIEF = `Brief de Campaña - The Band Perfume
 
-La Brand manager nos pide que nos alejemos de esos conciertos que ya tienen. Buscan una idea creativa de influencia que les ayude a hacerse eco del lanzamiento del perfume cuya principal característica es que, bajo un mismo nombre, está la versión de hombre y la de mujer… y que a nivel visual y comunicación todo gira en torno a música.
+Cliente: The Band
+Producto: Lanzamiento nueva línea de perfumes de lujo
+Presupuesto: 50,000€
 
-Presupuesto: 75k€
-Territorio: Música y Lifestyle
-Target: mujeres y hombres 25-65+
-Periodo: octubre
-Objetivo: Awareness y cobertura es un lanzamiento
-KPI: Impresiones. Garantía de las impresiones que nos deis
+Objetivos de la Campaña:
+- Generar awareness sobre el lanzamiento de la nueva colección
+- Posicionar The Band como marca premium en el segmento de perfumería de lujo
+- Alcanzar 2M de impresiones en redes sociales
+- Generar tráfico cualificado a la web de e-commerce
 
-Ojo.. seamos discretos porfa con la poca info del docu.. ya que es un lanzamiento.
+Target:
+- Edad: 25-45 años
+- Género: 60% mujeres, 40% hombres
+- Ubicación: España (Madrid, Barcelona, Valencia)
+- Intereses: Moda, lifestyle premium, belleza, tendencias
+- Perfil socioeconómico: Medio-alto y alto
 
-¿Qué necesitamos de vosotros?
-1. Idea creativa: un claim, un hashtag, un hilo conductor que enlace las publicaciones de todos los talents elegidos.
-2. Una primera selección de talentos que encajen con la marca y brief.
-3. Una planificación de publicaciones con estimación de impresiones.
+Territorio de Contenido:
+- Unboxing y first impressions de la colección
+- Storytelling sobre las notas olfativas y proceso de creación
+- Lifestyle content integrando el perfume en rutinas diarias
+- Momentos especiales (eventos, cenas, viajes)
 
-Lo necesitamos para el martes 2/9, ¿lo veis factible?`;
+Requerimientos:
+- Contenido aspiracional pero auténtico
+- Mencionar notas principales del perfume
+- Link a la web en stories y bio
+- Uso del hashtag #TheBandFragrance
+- Tag @thebandofficial en todas las publicaciones
+
+Plataformas Preferidas:
+- Instagram (feed + stories + reels)
+- TikTok
+
+Timeline:
+- Lanzamiento: 15 de octubre
+- Duración campaña: 3 semanas
+- Primera semana: Teaser content
+- Segunda semana: Lanzamiento oficial
+- Tercera semana: Testimonials y resultados
+
+Notas Adicionales:
+- Urgente: Necesitamos propuesta antes del 5 de octubre
+- Confidencialidad: NDA requerido antes de compartir samples
+- Looking After You gestionará envío de productos a influencers seleccionados`;

@@ -34,7 +34,7 @@ Aspect ratio: ${aspectRatio}.
 Make it suitable for a professional business presentation.`;
 
     const result = await imageModel.generateContent(enhancedPrompt);
-    const response = await result.response;
+    const response = result.response;
 
     // Extract image data from response
     const parts = response.candidates?.[0]?.content?.parts || [];
@@ -92,7 +92,7 @@ export const editImage = async (
       { text: enhancedPrompt },
     ]);
 
-    const response = await result.response;
+    const response = result.response;
     const parts = response.candidates?.[0]?.content?.parts || [];
     
     for (const part of parts) {

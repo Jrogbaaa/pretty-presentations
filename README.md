@@ -2,7 +2,7 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Database**: 2,995 Influencers | **Tests**: 5/5 Passing ✅ | **UI**: Modern & Animated ✨
+**Status**: 🟢 **Production-Ready** | **Database**: 2,995 Influencers | **Tests**: 5/5 Passing ✅ | **UI**: Modern & Animated ✨ | **AI**: OpenAI-Powered 🤖
 
 ## 🚀 Features
 
@@ -17,7 +17,7 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 
 ### Core Features
 - **Professional Template System**: 3 agency-quality templates (Default, Red Bull Event, Scalpers Lifestyle) with AI auto-recommendation
-- **Brief Document Upload & Parsing**: Upload unstructured briefs in any format (English, Spanish, mixed) and automatically extract all key information
+- **Brief Document Upload & Parsing**: OpenAI-powered parsing of unstructured briefs in any format (English, Spanish, mixed) with guaranteed JSON extraction
 - **Brief Ingestion & Processing**: Accept and parse client briefs with campaign goals, budgets, demographics, and brand requirements
 - **Automated Presentation Generation**: Creates 9-11 professional slides in 16:9 format (varies by template)
 - **Canva-style Editor**: Drag-and-drop interface for customization
@@ -68,6 +68,7 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 - **Backend**: Firebase (Firestore, Storage, Vertex AI, Authentication)
 - **Database**: Firestore with offline persistence
 - **Influencer Data**: LAYAI Database (2,996 validated profiles)
+- **AI Brief Parsing**: OpenAI GPT-4o-mini for reliable document extraction
 - **AI Text Generation**: Google Gemini 1.5 Flash via Firebase Vertex AI
 - **AI Image Generation**: Google Gemini 2.0 Flash Exp via Firebase Vertex AI
 - **Export**: jsPDF, html2canvas
@@ -119,9 +120,13 @@ FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk@your_project.iam.gserviceaccount.c
 FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 
 # Vertex AI Configuration
+NEXT_PUBLIC_VERTEX_AI_LOCATION=us-central1
 NEXT_PUBLIC_VERTEX_AI_MODEL=gemini-1.5-flash
 NEXT_PUBLIC_VERTEX_AI_IMAGE_MODEL=gemini-2.0-flash-exp
 NEXT_PUBLIC_ENABLE_IMAGE_GENERATION=true
+
+# OpenAI Configuration (for brief parsing)
+OPENAI_API_KEY=sk-proj-your-key-here
 ```
 
 **See `env.example` for template**
@@ -305,6 +310,7 @@ Proprietary - Look After You Talent Agency
 
 - **Getting Started**: `GETTING_STARTED.md`
 - **Firebase Setup**: `FIREBASE_SETUP_CHECKLIST.md`
+- **Vertex AI Setup**: `VERTEX_AI_SETUP_FIX.md`
 - **Database Setup**: `DATABASE_SETUP.md`
 - **LAYAI Integration**: `LAYAI_INTEGRATION.md`
 - **Template System**: `TEMPLATES.md`

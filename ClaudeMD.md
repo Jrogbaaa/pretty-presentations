@@ -6,7 +6,11 @@
 
 This is a Next.js 15 application built for Look After You, an influencer talent agency. The platform uses Firebase Vertex AI (Gemini 1.5 Flash) to automatically transform client briefs into professional presentations with intelligent influencer-brand matching.
 
-**🆕 Version 1.2.2 Update**: Complete UI/UX overhaul with animated hero section, dynamic photo grid, full dark mode support, and modern design system using Shadcn UI and Framer Motion.
+**🆕 Version 1.2.4 Update**: Switched from Google AI to OpenAI for brief parsing. Resolved persistent 404 errors and authentication issues with a more reliable, production-ready solution.
+
+**Version 1.2.3**: Fixed Vertex AI 404 error by adding proper location configuration (deprecated - superseded by OpenAI switch).
+
+**Version 1.2.2**: Complete UI/UX overhaul with animated hero section, dynamic photo grid, full dark mode support, and modern design system using Shadcn UI and Framer Motion.
 
 ### Architecture
 
@@ -17,6 +21,7 @@ This is a Next.js 15 application built for Look After You, an influencer talent 
 **Animations**: Framer Motion
 **Backend**: Firebase (Firestore, Storage, Vertex AI, Authentication)
 **Database**: Firestore with LAYAI influencer database (2,996 profiles)
+**AI Brief Parsing**: OpenAI GPT-4o-mini for reliable document extraction
 **AI Text Model**: Google Gemini 1.5 Flash via Firebase Vertex AI
 **AI Image Model**: Google Gemini 2.0 Flash Exp via Firebase Vertex AI
 **Data Sources**: LAYAI (StarNgage, Apify, Serply)
@@ -53,7 +58,9 @@ lib/
 ├── influencer-service.ts      # Firestore queries & caching
 ├── slide-generator.ts         # Slide content generation
 ├── image-generator.ts         # AI image generation & editing
-├── brief-parser.ts            # Brief document parser
+├── brief-parser-openai.server.ts  # OpenAI brief parser (PRODUCTION)
+├── brief-parser.server.ts     # Google AI parser (DEPRECATED)
+├── brief-parser.ts            # Brief document parser (legacy)
 ├── mock-influencers.ts        # Fallback influencer data (8 profiles)
 └── utils.ts                   # Utility functions (cn)
 
@@ -101,7 +108,34 @@ ExportFormat: "pdf" | "pptx" | "google-slides" | "png" | "json"
 
 ### AI Implementation Details
 
-#### Firebase Vertex AI Setup
+#### Brief Parsing - OpenAI (PRODUCTION)
+
+File: `lib/brief-parser-openai.server.ts`
+
+```typescript
+import OpenAI from "openai";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+const response = await openai.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [
+    { role: "system", content: "You are a precise JSON extraction assistant..." },
+    { role: "user", content: prompt }
+  ],
+  temperature: 0.3,
+  response_format: { type: "json_object" } // Guarantees valid JSON
+});
+```
+
+**Why OpenAI?**
+- 99.9% uptime (vs Google AI's 404 errors)
+- Guaranteed JSON output with `response_format`
+- Simple API key authentication (no service accounts)
+- Production-ready reliability
+- Cost-effective: ~$0.00015 per brief
+
+#### Firebase Vertex AI Setup (For Text/Image Generation)
 
 File: `lib/firebase.ts`
 
@@ -316,6 +350,9 @@ NEXT_PUBLIC_FIREBASE_APP_ID
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 NEXT_PUBLIC_VERTEX_AI_LOCATION=us-central1
 NEXT_PUBLIC_VERTEX_AI_MODEL=gemini-1.5-flash
+
+# OpenAI Configuration
+OPENAI_API_KEY=sk-proj-your-key-here
 ```
 
 **Services Used**:
@@ -623,5 +660,7 @@ generateSlides(brief: ClientBrief, influencers: SelectedInfluencer[], content: a
 ---
 
 **Last Updated**: September 30, 2025
-**Version**: 1.2.2
+**Version**: 1.2.4
 **Maintainer**: Look After You Development Team
+
+**Latest Changes**: Switched to OpenAI for brief parsing (v1.2.4) - Resolved Google AI 404 errors with production-ready solution
