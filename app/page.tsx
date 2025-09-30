@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import BriefForm from "@/components/BriefForm";
 import BriefUpload from "@/components/BriefUpload";
-import { processBrief } from "@/lib/ai-processor";
+import { processBrief } from "@/lib/ai-processor-openai";
 import { mockInfluencers } from "@/lib/mock-influencers";
 import { ShuffleHero } from "@/components/ui/shuffle-grid";
 import { HeroSection } from "@/components/ui/hero-section-dark";

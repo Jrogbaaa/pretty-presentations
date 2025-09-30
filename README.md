@@ -2,7 +2,7 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Database**: 2,995 Influencers | **Tests**: 5/5 Passing ✅ | **UI**: Modern & Animated ✨ | **AI**: OpenAI-Powered 🤖
+**Status**: 🟢 **Production-Ready** | **Database**: 2,995 Influencers | **Tests**: 5/5 Passing ✅ | **UI**: Modern & Animated ✨ | **AI**: Hybrid OpenAI + Google 🤖
 
 ## 🚀 Features
 
@@ -68,8 +68,8 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 - **Backend**: Firebase (Firestore, Storage, Vertex AI, Authentication)
 - **Database**: Firestore with offline persistence
 - **Influencer Data**: LAYAI Database (2,996 validated profiles)
-- **AI Brief Parsing**: OpenAI GPT-4o-mini for reliable document extraction
-- **AI Text Generation**: Google Gemini 1.5 Flash via Firebase Vertex AI
+- **AI Text Processing**: OpenAI GPT-4o-mini for reliable brief parsing, validation, and content generation
+- **AI Influencer Ranking**: Google Gemini 1.5 Flash via Firebase Vertex AI
 - **AI Image Generation**: Google Gemini 2.0 Flash Exp via Firebase Vertex AI
 - **Export**: jsPDF, html2canvas
 - **Data Sources**: StarNgage, Apify, Serply (via LAYAI)
@@ -220,14 +220,19 @@ pretty-presentations/
 
 ## 🤖 AI Features
 
-### Text Generation (Gemini 1.5 Flash)
-- **Template Auto-Recommendation**: AI analyzes brief to suggest best presentation style (Event, Lifestyle, or Default)
+### Hybrid AI System (OpenAI + Google)
+
+**OpenAI GPT-4o-mini (Text Processing)**:
 - **Brief Document Parsing**: Extracts structured data from unstructured brief text (English, Spanish, mixed)
-- **Brief Validation**: Automatically checks brief completeness and flags missing information
-- **Smart Matching**: AI analyzes influencer profiles, engagement rates, and audience demographics
-- **Content Generation**: Creates persuasive, professional copy for each slide
+- **Brief Validation**: Checks brief completeness and flags missing information with guaranteed JSON output
+- **Content Generation**: Creates persuasive, professional copy for all slides
+- **Template Auto-Recommendation**: Analyzes brief to suggest best presentation style
+
+**Google Vertex AI (Visual & Ranking)**:
+- **Influencer Ranking**: AI analyzes profiles, engagement rates, and audience demographics
+- **Smart Matching**: Selects optimal mix of macro/micro/nano influencers
 - **Rationale Generation**: Explains why each influencer was selected
-- **Budget Optimization**: Selects optimal mix of macro/micro/nano influencers
+- **Budget Optimization**: Distributes budget across influencer tiers
 
 ### Image Generation (Gemini 2.0 Flash Exp)
 - **Custom Slide Backgrounds**: Generate branded backgrounds matching campaign theme

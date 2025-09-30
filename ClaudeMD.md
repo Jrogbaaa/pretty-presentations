@@ -6,9 +6,11 @@
 
 This is a Next.js 15 application built for Look After You, an influencer talent agency. The platform uses Firebase Vertex AI (Gemini 1.5 Flash) to automatically transform client briefs into professional presentations with intelligent influencer-brand matching.
 
-**🆕 Version 1.2.4 Update**: Switched from Google AI to OpenAI for brief parsing. Resolved persistent 404 errors and authentication issues with a more reliable, production-ready solution.
+**🆕 Version 1.2.5 Update**: Implemented hybrid AI system using OpenAI for all text processing and Google Vertex AI for images. Resolved Google AI 403/404 errors while maintaining image generation capabilities.
 
-**Version 1.2.3**: Fixed Vertex AI 404 error by adding proper location configuration (deprecated - superseded by OpenAI switch).
+**Version 1.2.4**: Switched from Google AI to OpenAI for brief parsing (superseded by v1.2.5 hybrid approach).
+
+**Version 1.2.3**: Fixed Vertex AI 404 error by adding proper location configuration (deprecated).
 
 **Version 1.2.2**: Complete UI/UX overhaul with animated hero section, dynamic photo grid, full dark mode support, and modern design system using Shadcn UI and Framer Motion.
 
@@ -21,9 +23,10 @@ This is a Next.js 15 application built for Look After You, an influencer talent 
 **Animations**: Framer Motion
 **Backend**: Firebase (Firestore, Storage, Vertex AI, Authentication)
 **Database**: Firestore with LAYAI influencer database (2,996 profiles)
-**AI Brief Parsing**: OpenAI GPT-4o-mini for reliable document extraction
-**AI Text Model**: Google Gemini 1.5 Flash via Firebase Vertex AI
-**AI Image Model**: Google Gemini 2.0 Flash Exp via Firebase Vertex AI
+**AI Text Processing**: OpenAI GPT-4o-mini (brief parsing, validation, content generation)
+**AI Influencer Ranking**: Google Gemini 1.5 Flash via Firebase Vertex AI
+**AI Image Generation**: Google Gemini 2.0 Flash Exp via Firebase Vertex AI
+**Architecture**: Hybrid OpenAI + Google for optimal reliability
 **Data Sources**: LAYAI (StarNgage, Apify, Serply)
 
 ### Key Directories & Files
@@ -53,11 +56,12 @@ components/
 lib/
 ├── firebase.ts                # Firebase initialization & config
 ├── firebase-throttler.ts      # Write throttling (15 writes/1.5s)
-├── ai-processor.ts            # Main AI orchestration
-├── influencer-matcher.ts      # 4-stage AI-powered matching
+├── ai-processor-openai.ts     # OpenAI-powered AI processor (PRODUCTION)
+├── ai-processor.ts            # Google AI processor (DEPRECATED)
+├── influencer-matcher.ts      # 4-stage AI-powered matching (uses Vertex AI)
 ├── influencer-service.ts      # Firestore queries & caching
 ├── slide-generator.ts         # Slide content generation
-├── image-generator.ts         # AI image generation & editing
+├── image-generator.ts         # AI image generation & editing (Vertex AI)
 ├── brief-parser-openai.server.ts  # OpenAI brief parser (PRODUCTION)
 ├── brief-parser.server.ts     # Google AI parser (DEPRECATED)
 ├── brief-parser.ts            # Brief document parser (legacy)
@@ -108,45 +112,73 @@ ExportFormat: "pdf" | "pptx" | "google-slides" | "png" | "json"
 
 ### AI Implementation Details
 
-#### Brief Parsing - OpenAI (PRODUCTION)
+#### Hybrid AI Architecture (v1.2.5)
 
-File: `lib/brief-parser-openai.server.ts`
+**Design Philosophy**: Use the best AI for each task
+- **OpenAI**: All text/JSON generation (reliable, guaranteed output)
+- **Google Vertex AI**: Image generation and influencer ranking (proven to work)
+
+#### OpenAI Text Processing (PRODUCTION)
+
+Files: `lib/ai-processor-openai.ts`, `lib/brief-parser-openai.server.ts`
 
 ```typescript
 import OpenAI from "openai";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Brief validation
 const response = await openai.chat.completions.create({
   model: "gpt-4o-mini",
   messages: [
-    { role: "system", content: "You are a precise JSON extraction assistant..." },
+    { role: "system", content: "You are a brief validation assistant..." },
     { role: "user", content: prompt }
   ],
-  temperature: 0.3,
+  temperature: 0.3, // Lower for structured outputs
   response_format: { type: "json_object" } // Guarantees valid JSON
+});
+
+// Content generation
+const contentResponse = await openai.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [...],
+  temperature: 0.7, // Higher for creative content
+  response_format: { type: "json_object" }
 });
 ```
 
-**Why OpenAI?**
-- 99.9% uptime (vs Google AI's 404 errors)
+**Why OpenAI for Text?**
+- 99.9% uptime (vs Google AI's 403/404 errors)
 - Guaranteed JSON output with `response_format`
 - Simple API key authentication (no service accounts)
-- Production-ready reliability
+- Consistent performance across all text tasks
 - Cost-effective: ~$0.00015 per brief
 
-#### Firebase Vertex AI Setup (For Text/Image Generation)
+#### Firebase Vertex AI (For Images & Ranking)
 
-File: `lib/firebase.ts`
+File: `lib/firebase.ts`, `lib/influencer-matcher.ts`
 
 ```typescript
 import { getVertexAI, getGenerativeModel } from "firebase/vertexai";
 
 const vertexAI = getVertexAI(app);
-const model = getGenerativeModel(vertexAI, {
+
+// For influencer ranking
+const textModel = getGenerativeModel(vertexAI, {
   model: "gemini-1.5-flash"
 });
+
+// For image generation
+const imageModel = getGenerativeModel(vertexAI, {
+  model: "gemini-2.0-flash-exp"
+});
 ```
+
+**Why Google for Images?**
+- Gemini 2.0 Flash Exp excels at image generation/editing
+- Native integration with Firebase Storage
+- Proven to work reliably
+- No equivalent OpenAI image editing capability
 
 #### AI Processing Pipeline
 
@@ -660,7 +692,7 @@ generateSlides(brief: ClientBrief, influencers: SelectedInfluencer[], content: a
 ---
 
 **Last Updated**: September 30, 2025
-**Version**: 1.2.4
+**Version**: 1.2.5
 **Maintainer**: Look After You Development Team
 
-**Latest Changes**: Switched to OpenAI for brief parsing (v1.2.4) - Resolved Google AI 404 errors with production-ready solution
+**Latest Changes**: Implemented hybrid AI system (v1.2.5) - OpenAI for all text processing, Google Vertex AI for images and ranking. Best of both worlds!
