@@ -1,0 +1,105 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidEmail() {
+      return isAuthenticated() && request.auth.token.email_verified == true;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId);
+      allow update, delete: if isOwner(userId);
+      
+      // User presentations subcollection
+      match /presentations/{presentationId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      // User campaigns subcollection
+      match /campaigns/{campaignId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // Influencers collection (read-only for all authenticated users)
+    match /influencers/{influencerId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only admin can write via Firebase Admin SDK
+      
+      // Influencer performance history subcollection
+      match /performance/{performanceId} {
+        allow read: if isAuthenticated();
+        allow write: if false;
+      }
+    }
+    
+    // Presentations collection (shared/public presentations)
+    match /presentations/{presentationId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && 
+        (resource.data.createdBy == request.auth.uid || 
+         request.auth.uid in resource.data.collaborators);
+      
+      // Presentation slides subcollection
+      match /slides/{slideId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && 
+          (get(/databases/$(database)/documents/presentations/$(presentationId)).data.createdBy == request.auth.uid ||
+           request.auth.uid in get(/databases/$(database)/documents/presentations/$(presentationId)).data.collaborators);
+      }
+    }
+    
+    // Brands collection (for brand information)
+    match /brands/{brandId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+    }
+    
+    // Templates collection (read-only for users)
+    match /templates/{templateId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only admin can write
+    }
+    
+    // Campaign management
+    match /campaigns/{campaignId} {
+      allow read: if isAuthenticated() && 
+        (resource.data.createdBy == request.auth.uid || 
+         request.auth.uid in resource.data.teamMembers);
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      
+      // Campaign searches subcollection
+      match /searches/{searchId} {
+        allow read, write: if isAuthenticated() && 
+          get(/databases/$(database)/documents/campaigns/$(campaignId)).data.createdBy == request.auth.uid;
+      }
+    }
+    
+    // System metadata (public read)
+    match /metadata/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Analytics and logs (write-only)
+    match /analytics/{document=**} {
+      allow read: if false;
+      allow write: if isAuthenticated();
+    }
+  }
+}

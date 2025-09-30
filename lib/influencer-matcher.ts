@@ -1,13 +1,32 @@
 import { model } from "./firebase";
+import { searchInfluencers } from "./influencer-service";
+import { mockInfluencers } from "./mock-influencers";
 import type { ClientBrief, Influencer, SelectedInfluencer } from "@/types";
 
 export const matchInfluencers = async (
   brief: ClientBrief,
-  influencerPool: Influencer[]
+  influencerPool?: Influencer[]
 ): Promise<SelectedInfluencer[]> => {
   try {
+    // Use provided pool or fetch from Firestore
+    let pool = influencerPool;
+    
+    if (!pool || pool.length === 0) {
+      try {
+        // Try to fetch from Firestore
+        pool = await searchInfluencers({
+          platforms: brief.platformPreferences,
+          locations: brief.targetDemographics.location,
+          maxBudget: brief.budget,
+        }, 200);
+      } catch (error) {
+        console.log('Firestore not available, using mock data');
+        pool = mockInfluencers;
+      }
+    }
+    
     // Step 1: Filter influencers by basic criteria
-    const filtered = filterByBasicCriteria(brief, influencerPool);
+    const filtered = filterByBasicCriteria(brief, pool);
 
     // Step 2: Use AI to rank and select best matches
     const ranked = await rankInfluencersWithAI(brief, filtered);
@@ -21,8 +40,8 @@ export const matchInfluencers = async (
     return enriched;
   } catch (error) {
     console.error("Error matching influencers:", error);
-    // Return top influencers as fallback
-    return influencerPool.slice(0, 5).map(inf => ({
+    // Return top mock influencers as fallback
+    return mockInfluencers.slice(0, 5).map(inf => ({
       ...inf,
       rationale: "Selected based on audience alignment and performance metrics",
       proposedContent: ["Sponsored Post", "Story Series", "Reel"],

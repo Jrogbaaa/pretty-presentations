@@ -29,8 +29,15 @@ const storage = getStorage(app);
 
 // Initialize Vertex AI
 const vertexAI = getVertexAI(app);
+
+// Text generation model (for briefs, content, matching)
 const model = getGenerativeModel(vertexAI, {
   model: process.env.NEXT_PUBLIC_VERTEX_AI_MODEL || "gemini-1.5-flash",
 });
 
-export { app, analytics, db, storage, vertexAI, model };
+// Image generation model (for backgrounds, graphics, editing)
+const imageModel = getGenerativeModel(vertexAI, {
+  model: process.env.NEXT_PUBLIC_VERTEX_AI_IMAGE_MODEL || "gemini-2.0-flash-exp",
+});
+
+export { app, analytics, db, storage, vertexAI, model, imageModel };

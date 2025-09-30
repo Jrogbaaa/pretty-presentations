@@ -6,12 +6,16 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:firebase": "ts-node scripts/test-firebase.ts",
+    "import:influencers": "ts-node scripts/import-influencers.ts"
   },
   "dependencies": {
     "@firebase/vertexai-preview": "^0.0.4",
     "@google-cloud/aiplatform": "^5.7.0",
+    "dotenv": "^16.4.7",
     "firebase": "^12.3.0",
+    "firebase-admin": "^13.0.3",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.3",
     "mammoth": "^1.11.0",
@@ -31,6 +35,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

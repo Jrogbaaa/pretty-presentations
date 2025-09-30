@@ -6,13 +6,18 @@
 
 This is a Next.js 15 application built for Look After You, an influencer talent agency. The platform uses Firebase Vertex AI (Gemini 1.5 Flash) to automatically transform client briefs into professional presentations with intelligent influencer-brand matching.
 
+**🆕 Version 1.2.0 Update**: Now with AI image generation & editing capabilities using Gemini 2.0 Flash Exp, plus LAYAI database (2,996 validated Spanish influencers) and production-ready Firebase infrastructure.
+
 ### Architecture
 
 **Framework**: Next.js 15 (App Router)
 **Language**: TypeScript (strict mode)
 **Styling**: Tailwind CSS
-**Backend**: Firebase (Firestore, Storage, Vertex AI)
-**AI Model**: Google Gemini 1.5 Flash via Firebase Vertex AI
+**Backend**: Firebase (Firestore, Storage, Vertex AI, Authentication)
+**Database**: Firestore with LAYAI influencer database (2,996 profiles)
+**AI Text Model**: Google Gemini 1.5 Flash via Firebase Vertex AI
+**AI Image Model**: Google Gemini 2.0 Flash Exp via Firebase Vertex AI
+**Data Sources**: LAYAI (StarNgage, Apify, Serply)
 
 ### Key Directories & Files
 
@@ -36,10 +41,20 @@ components/
 
 lib/
 ├── firebase.ts                # Firebase initialization & config
+├── firebase-throttler.ts      # Write throttling (15 writes/1.5s)
 ├── ai-processor.ts            # Main AI orchestration
-├── influencer-matcher.ts      # AI-powered influencer selection
+├── influencer-matcher.ts      # 4-stage AI-powered matching
+├── influencer-service.ts      # Firestore queries & caching
 ├── slide-generator.ts         # Slide content generation
-└── mock-influencers.ts        # Sample Spanish influencer database
+├── image-generator.ts         # AI image generation & editing
+└── mock-influencers.ts        # Fallback influencer data (8 profiles)
+
+scripts/
+├── import-influencers.ts      # LAYAI database import
+└── test-firebase.ts           # Firebase connection test
+
+data/
+└── influencers.json          # LAYAI database (2,996 profiles)
 
 types/
 └── index.ts                   # All TypeScript interfaces
