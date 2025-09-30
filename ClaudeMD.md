@@ -6,13 +6,15 @@
 
 This is a Next.js 15 application built for Look After You, an influencer talent agency. The platform uses Firebase Vertex AI (Gemini 1.5 Flash) to automatically transform client briefs into professional presentations with intelligent influencer-brand matching.
 
-**🆕 Version 1.2.0 Update**: Now with AI image generation & editing capabilities using Gemini 2.0 Flash Exp, plus LAYAI database (2,996 validated Spanish influencers) and production-ready Firebase infrastructure.
+**🆕 Version 1.2.2 Update**: Complete UI/UX overhaul with animated hero section, dynamic photo grid, full dark mode support, and modern design system using Shadcn UI and Framer Motion.
 
 ### Architecture
 
 **Framework**: Next.js 15 (App Router)
 **Language**: TypeScript (strict mode)
-**Styling**: Tailwind CSS
+**Styling**: Tailwind CSS v4
+**UI Components**: Shadcn UI, Lucide React Icons
+**Animations**: Framer Motion
 **Backend**: Firebase (Firestore, Storage, Vertex AI, Authentication)
 **Database**: Firestore with LAYAI influencer database (2,996 profiles)
 **AI Text Model**: Google Gemini 1.5 Flash via Firebase Vertex AI
@@ -29,9 +31,13 @@ app/
 └── layout.tsx                 # Root layout with metadata
 
 components/
-├── BriefForm.tsx              # Multi-step brief intake form
+├── BriefForm.tsx              # Dark mode brief intake form
+├── BriefUpload.tsx            # Modern upload with icons
 ├── PresentationEditor.tsx     # Main editor with zoom, navigation
 ├── SlideRenderer.tsx          # Renders appropriate slide component
+├── ui/                        # Shadcn UI components
+│   ├── hero-section-dark.tsx # Animated hero with retro grid
+│   └── shuffle-grid.tsx      # Dynamic 4x4 photo grid
 └── slides/
     ├── CoverSlide.tsx         # Cover slide (dark theme)
     ├── IndexSlide.tsx         # Table of contents
@@ -47,7 +53,9 @@ lib/
 ├── influencer-service.ts      # Firestore queries & caching
 ├── slide-generator.ts         # Slide content generation
 ├── image-generator.ts         # AI image generation & editing
-└── mock-influencers.ts        # Fallback influencer data (8 profiles)
+├── brief-parser.ts            # Brief document parser
+├── mock-influencers.ts        # Fallback influencer data (8 profiles)
+└── utils.ts                   # Utility functions (cn)
 
 scripts/
 ├── import-influencers.ts      # LAYAI database import
@@ -170,21 +178,106 @@ File: `lib/slide-generator.ts`
 - Brief Summary: Light gray background (#F3F4F6)
 - 16:9 aspect ratio (1920×1080px)
 
-### Components
+### UI Components
+
+#### HeroSection Component (`components/ui/hero-section-dark.tsx`)
+
+**Features**:
+- Animated retro grid background with CSS transforms
+- Customizable grid angle, cell size, opacity, and colors
+- Gradient text effects (purple to pink)
+- Spinning border button animation
+- Optional bottom image (dashboard preview)
+- Smooth scroll to brief section on CTA click
+- Full dark mode support
+
+**Props**:
+- `title`: Small badge text above heading
+- `subtitle`: Object with `regular` and `gradient` text
+- `description`: Main description text
+- `ctaText`: Button text
+- `ctaHref`: Button link
+- `onCtaClick`: Custom click handler
+- `bottomImage`: Optional image URLs (light/dark)
+- `gridOptions`: Grid customization (angle, size, opacity, colors)
+
+**Implementation**:
+```typescript
+<HeroSection
+  title="AI-Powered Presentations"
+  subtitle={{
+    regular: "Transform briefs into ",
+    gradient: "stunning presentations"
+  }}
+  description="..."
+  ctaText="Create Presentation"
+  onCtaClick={handleScrollToBrief}
+  gridOptions={{
+    angle: 65,
+    opacity: 0.3,
+    cellSize: 60,
+    lightLineColor: "#9333ea",
+    darkLineColor: "#7c3aed"
+  }}
+/>
+```
+
+#### ShuffleGrid Component (`components/ui/shuffle-grid.tsx`)
+
+**Features**:
+- 4x4 grid of 16 images from Unsplash
+- Automatic shuffling every 3 seconds
+- Framer Motion spring animations
+- Fixed height (450px)
+- Responsive layout
+- SSR-safe (no hydration mismatch)
+
+**Implementation Details**:
+- Uses `useState` with function initializer to prevent hydration issues
+- `useEffect` triggers first shuffle after mount
+- Cleanup function clears timeout on unmount
+- Spring transition with 1.5s duration
+- `layout` prop enables smooth repositioning
 
 #### BriefForm Component
 
 **Features**:
+- Full dark mode support with proper contrast
+- Color-coded tags (purple, blue, pink, orange, green)
+- Gradient buttons (purple to pink)
 - Multi-input with add/remove for arrays
-- Platform toggle buttons
+- Platform toggle buttons with selection states
 - Demographics sub-form
+- Template selection with visual previews
 - Real-time validation
 - Submit → generates presentation
+
+**Dark Mode Classes**:
+- Inputs: `bg-white dark:bg-gray-800`
+- Text: `text-gray-900 dark:text-white`
+- Borders: `border-gray-300 dark:border-gray-600`
+- Placeholders: `placeholder-gray-400 dark:placeholder-gray-500`
 
 **State Management**:
 - Local state for form data
 - Temporary states for input fields
 - Array operations (add/remove tags)
+
+#### BriefUpload Component
+
+**Features**:
+- Modern card design with gradient icon badge
+- Progress bar with purple-to-pink gradient
+- Real-time brief analysis
+- Lucide React icons (Upload, FileText, Sparkles)
+- Dark mode support
+- Sample brief loading
+- Auto-fill detection with confidence percentage
+
+**Analysis Display**:
+- Client Info, Budget, Target, Timeline indicators
+- Visual progress bar showing completeness
+- Color-coded status (green for complete, gray for missing)
 
 #### PresentationEditor Component
 
@@ -263,16 +356,42 @@ File: `app/editor/[id]/page.tsx`
 
 ### Styling Approach
 
-**Tailwind CSS** with utility classes:
+**Tailwind CSS v4** with utility classes:
 - Responsive breakpoints: `md:`, `lg:`
 - State variants: `hover:`, `focus:`, `disabled:`
-- Color system: gray, blue, purple, green, red, yellow
+- Dark mode: `dark:` prefix for all color classes
+- Color system: gray, purple, pink, blue, orange, green
+- Gradients: `from-purple-600 to-pink-600`
 - Spacing scale: p-*, m-*, gap-*
+
+**Custom Animations** (`app/globals.css`):
+```css
+@keyframes grid {
+  0% { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+.animate-grid {
+  animation: grid 15s linear infinite;
+}
+```
+
+**Shadcn UI Utilities**:
+```typescript
+// lib/utils.ts
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export const cn = (...inputs: ClassValue[]) => {
+  return twMerge(clsx(inputs));
+};
+```
 
 **Custom Styles**:
 - Inline styles for dynamic colors from `SlideDesign`
-- Gradient backgrounds for CTAs
-- Shadow utilities for depth
+- Gradient backgrounds for CTAs (purple to pink)
+- Shadow utilities for depth (xl, 2xl)
+- Backdrop blur for overlays
+- Spring animations via Framer Motion
 
 ### Accessibility
 
@@ -420,21 +539,30 @@ npm start
 
 **Core**:
 - next: ^15.x
-- react: ^18.x
-- react-dom: ^18.x
+- react: ^19.x
+- react-dom: ^19.x
 - typescript: ^5.x
 
+**UI & Animations**:
+- framer-motion: ^11.x (animations)
+- lucide-react: ^0.x (icons)
+- clsx: ^2.x (class utilities)
+- tailwind-merge: ^2.x (class merging)
+
 **Firebase**:
-- firebase: ^11.x (includes Vertex AI SDK)
+- firebase: ^12.x (includes Vertex AI SDK)
+- firebase-admin: ^13.x (server-side)
 
 **Utilities**:
-- jspdf: ^2.x
+- jspdf: ^3.x
 - html2canvas: ^1.x
+- dotenv: ^16.x
 
 **Dev**:
-- tailwindcss: ^3.x
-- eslint: ^8.x
+- tailwindcss: ^4.x
+- eslint: ^9.x
 - @types/node, @types/react
+- ts-node: ^10.x
 
 ### API Reference
 
@@ -464,8 +592,36 @@ generateSlides(brief: ClientBrief, influencers: SelectedInfluencer[], content: a
 **Email**: hello@lookafteryou.agency
 **Documentation**: This file + README.md + CHANGELOG.md
 
+### Modern UI Features (v1.2.2)
+
+#### Design System
+**Color Palette**:
+- Primary: Purple (#9333ea) to Pink (#ec4899)
+- Backgrounds: White/Gray-900 (dark mode)
+- Text: Gray-900/White with proper contrast
+- Accents: Blue, Orange, Green for different categories
+
+**Animation System**:
+- Retro grid: 15s linear infinite
+- Shuffle grid: Spring physics (1.5s duration)
+- Hover effects: Scale and shadow transforms
+- Transitions: All interactive elements
+
+**Component Library**:
+- Shadcn UI for reusable components
+- Lucide React for modern icons
+- Framer Motion for smooth animations
+- Tailwind CSS v4 for styling
+
+#### Accessibility
+- Dark mode with proper contrast ratios
+- Focus visible states on all interactive elements
+- ARIA labels on buttons and inputs
+- Keyboard navigation support
+- Screen reader friendly markup
+
 ---
 
 **Last Updated**: September 30, 2025
-**Version**: 1.0.0
+**Version**: 1.2.2
 **Maintainer**: Look After You Development Team

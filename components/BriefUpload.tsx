@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { parseBriefDocument, extractBriefSummary, SAMPLE_BRIEF } from "@/lib/brief-parser";
+import { Upload, FileText, Sparkles } from "lucide-react";
 import type { ClientBrief } from "@/types";
 
 interface BriefUploadProps {
@@ -59,58 +60,68 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-      <div className="mb-4">
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          Upload Brief Document
-        </h3>
-        <p className="text-gray-600 text-sm">
-          Paste your brief text below. Works with English, Spanish, or mixed language briefs.
-        </p>
+    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-8 mb-8 border border-gray-200 dark:border-gray-800">
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+            <Upload className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Upload Brief Document
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
+              Paste your brief text below. Works with English, Spanish, or mixed language briefs.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Text Area */}
-      <div className="mb-4">
+      <div className="mb-6">
         <textarea
           value={briefText}
           onChange={(e) => handleTextChange(e.target.value)}
           placeholder="Paste your brief here... (e.g., client briefs in Spanish or English)"
           rows={12}
-          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+          className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 font-mono text-sm transition-colors"
         />
       </div>
 
       {/* Brief Summary */}
       {summary && (
-        <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-semibold text-blue-900 mb-2">Brief Analysis</h4>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-            <div className={`flex items-center gap-2 ${summary.hasClient ? "text-green-700" : "text-gray-500"}`}>
-              <span>{summary.hasClient ? "✓" : "○"}</span>
+        <div className="mb-6 p-5 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <h4 className="font-semibold text-purple-900 dark:text-purple-300">Brief Analysis</h4>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mb-4">
+            <div className={`flex items-center gap-2 ${summary.hasClient ? "text-green-700 dark:text-green-400" : "text-gray-500 dark:text-gray-500"}`}>
+              <span className="text-lg">{summary.hasClient ? "✓" : "○"}</span>
               <span>Client Info</span>
             </div>
-            <div className={`flex items-center gap-2 ${summary.hasBudget ? "text-green-700" : "text-gray-500"}`}>
-              <span>{summary.hasBudget ? "✓" : "○"}</span>
+            <div className={`flex items-center gap-2 ${summary.hasBudget ? "text-green-700 dark:text-green-400" : "text-gray-500 dark:text-gray-500"}`}>
+              <span className="text-lg">{summary.hasBudget ? "✓" : "○"}</span>
               <span>Budget</span>
             </div>
-            <div className={`flex items-center gap-2 ${summary.hasTarget ? "text-green-700" : "text-gray-500"}`}>
-              <span>{summary.hasTarget ? "✓" : "○"}</span>
+            <div className={`flex items-center gap-2 ${summary.hasTarget ? "text-green-700 dark:text-green-400" : "text-gray-500 dark:text-gray-500"}`}>
+              <span className="text-lg">{summary.hasTarget ? "✓" : "○"}</span>
               <span>Target</span>
             </div>
-            <div className={`flex items-center gap-2 ${summary.hasTimeline ? "text-green-700" : "text-gray-500"}`}>
-              <span>{summary.hasTimeline ? "✓" : "○"}</span>
+            <div className={`flex items-center gap-2 ${summary.hasTimeline ? "text-green-700 dark:text-green-400" : "text-gray-500 dark:text-gray-500"}`}>
+              <span className="text-lg">{summary.hasTimeline ? "✓" : "○"}</span>
               <span>Timeline</span>
             </div>
           </div>
-          <div className="mt-3">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 bg-gray-200 rounded-full h-2">
+          <div>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                 <div
-                  className="bg-blue-600 h-2 rounded-full transition-all"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 h-3 rounded-full transition-all"
                   style={{ width: `${summary.confidence}%` }}
                 />
               </div>
-              <span className="text-sm font-medium text-blue-900">
+              <span className="text-sm font-semibold text-purple-900 dark:text-purple-300 min-w-[80px] text-right">
                 {summary.confidence}% Complete
               </span>
             </div>
@@ -120,38 +131,44 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
 
       {/* Error Display */}
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div className="mb-6 p-5 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl">
           <div className="flex items-start gap-3">
-            <span className="text-red-600 text-xl">⚠️</span>
+            <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-xl">⚠️</span>
+            </div>
             <div>
-              <h4 className="font-semibold text-red-900">Parsing Error</h4>
-              <p className="text-red-700 text-sm">{error}</p>
+              <h4 className="font-semibold text-red-900 dark:text-red-300 mb-1">Parsing Error</h4>
+              <p className="text-red-700 dark:text-red-400 text-sm">{error}</p>
             </div>
           </div>
         </div>
       )}
 
       {/* Action Buttons */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <button
           onClick={handleParse}
           disabled={isParsing || !briefText.trim()}
-          className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-md hover:from-blue-700 hover:to-purple-700 transition-all font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isParsing ? (
             <span className="flex items-center justify-center gap-2">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
               Parsing with AI...
             </span>
           ) : (
-            "Parse Brief & Auto-Fill Form"
+            <span className="flex items-center justify-center gap-2">
+              <Sparkles className="w-5 h-5" />
+              Parse Brief & Auto-Fill Form
+            </span>
           )}
         </button>
 
         <button
           onClick={handleLoadSample}
-          className="px-6 py-3 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors font-medium"
+          className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium flex items-center justify-center gap-2"
         >
+          <FileText className="w-5 h-5" />
           Load Sample
         </button>
 
@@ -162,7 +179,7 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
               setSummary(null);
               setError(null);
             }}
-            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+            className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium"
             aria-label="Clear"
           >
             Clear
@@ -171,9 +188,9 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
       </div>
 
       {/* Help Text */}
-      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-        <p className="text-sm text-gray-600">
-          <strong>💡 Tip:</strong> Our AI can parse briefs in any format. Just paste the text, and we&apos;ll extract:
+      <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 rounded-xl border border-blue-200 dark:border-blue-900">
+        <p className="text-sm text-gray-700 dark:text-gray-300">
+          <strong className="text-blue-600 dark:text-blue-400">💡 Tip:</strong> Our AI can parse briefs in any format. Just paste the text, and we&apos;ll extract:
           client name, budget, target demographics, campaign goals, timeline, and more.
         </p>
       </div>

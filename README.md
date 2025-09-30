@@ -2,9 +2,18 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Database**: 2,995 Influencers | **Tests**: 5/5 Passing ✅
+**Status**: 🟢 **Production-Ready** | **Database**: 2,995 Influencers | **Tests**: 5/5 Passing ✅ | **UI**: Modern & Animated ✨
 
 ## 🚀 Features
+
+### 🎨 Modern UI/UX (v1.2.2)
+- **Animated Hero Section**: Stunning retro grid background with smooth animations
+- **Dynamic Photo Grid**: 16-image shuffle grid with spring physics animations
+- **Full Dark Mode**: Beautiful dark theme across the entire application
+- **Gradient Design System**: Purple-to-pink gradients with modern aesthetics
+- **Enhanced Forms**: Dark mode support with color-coded input tags
+- **Smooth Animations**: Framer Motion-powered transitions and effects
+- **Lucide Icons**: Modern icon system throughout the interface
 
 ### Core Features
 - **Professional Template System**: 3 agency-quality templates (Default, Red Bull Event, Scalpers Lifestyle) with AI auto-recommendation
@@ -53,7 +62,9 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS v4
+- **UI Components**: Shadcn UI, Lucide React Icons
+- **Animations**: Framer Motion
 - **Backend**: Firebase (Firestore, Storage, Vertex AI, Authentication)
 - **Database**: Firestore with offline persistence
 - **Influencer Data**: LAYAI Database (2,996 validated profiles)
@@ -164,15 +175,19 @@ npm run import:influencers     # Import LAYAI database
 ```
 pretty-presentations/
 ├── app/                      # Next.js app directory
-│   ├── page.tsx             # Home page with brief form
+│   ├── page.tsx             # Modern landing page with animations
 │   ├── editor/[id]/         # Presentation editor
 │   ├── presentations/       # Presentations list
-│   └── layout.tsx           # Root layout
+│   ├── layout.tsx           # Root layout
+│   └── globals.css          # Global styles & animations
 ├── components/              # React components
-│   ├── BriefForm.tsx       # Brief input form
-│   ├── BriefUpload.tsx     # Brief document upload & parsing
+│   ├── BriefForm.tsx       # Dark mode brief input form
+│   ├── BriefUpload.tsx     # Modern upload with progress
 │   ├── PresentationEditor.tsx
 │   ├── SlideRenderer.tsx
+│   ├── ui/                 # Shadcn UI components
+│   │   ├── hero-section-dark.tsx  # Animated hero
+│   │   └── shuffle-grid.tsx       # Photo grid
 │   └── slides/             # Individual slide components
 ├── lib/                    # Utility functions
 │   ├── firebase.ts             # Firebase configuration
@@ -183,7 +198,8 @@ pretty-presentations/
 │   ├── influencer-service.ts   # Firestore queries & caching
 │   ├── slide-generator.ts      # Slide content generation
 │   ├── image-generator.ts      # AI image generation & editing
-│   └── mock-influencers.ts     # Fallback mock data
+│   ├── mock-influencers.ts     # Fallback mock data
+│   └── utils.ts                # Utility functions (cn)
 ├── scripts/                # Utility scripts
 │   ├── import-influencers.ts   # LAYAI database import
 │   └── test-firebase.ts        # Firebase connection test
