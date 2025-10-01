@@ -2,11 +2,11 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 1.3.2 | **Database**: 3,001 Spanish Influencers (VERIFIED ✅) | **Matching**: LAYAI Algorithm ⚡ | **Tests**: All Passing ✅ | **AI**: OpenAI GPT-4o-mini 🤖
+**Status**: 🟢 **Production-Ready** | **Version**: 1.4.0 | **Database**: 3,001 Spanish Influencers (VERIFIED ✅) | **Matching**: LAYAI Algorithm ⚡ | **Tests**: All Passing ✅ | **AI**: OpenAI GPT-4o-mini 🤖
 
-**Latest**: v1.3.2 **LAYAI INTEGRATION COMPLETE!** Real influencer matching with 9-factor scoring algorithm. Database cleaned (3,001 verified Spanish influencers), mock data removed, Instagram handles added to presentations. Firestore queries optimized (no indexes needed). 100% production ready! 🎉
+**Latest**: v1.4.0 **FIRESTORE INTEGRATION COMPLETE!** All presentations now automatically save to Firestore with full CRUD operations. Enhanced editor UI with collapsible sidebars, drag-to-pan canvas, and improved slide visibility. Presentations page now displays all saved presentations! 🚀
 
-**Previous**: v1.3.1 **Database integration** - Firestore setup with 4-stage matching algorithm and content theme filtering.
+**Previous**: v1.3.2 **LAYAI INTEGRATION COMPLETE!** Real influencer matching with 9-factor scoring algorithm. Database cleaned (3,001 verified Spanish influencers), mock data removed, Instagram handles added to presentations.
 
 **v1.3.0**: Delivers **complete Dentsu Story Lab-style presentations** end-to-end! AI generates sophisticated content (creative concepts with claims/hashtags, influencer demographics, scenario recommendations) AND frontend beautifully displays everything.
 
