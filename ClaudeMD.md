@@ -6,7 +6,9 @@
 
 This is a Next.js 15 application built for Look After You, an influencer talent agency. The platform uses Firebase Vertex AI (Gemini 1.5 Flash) to automatically transform client briefs into professional presentations with intelligent influencer-brand matching.
 
-**🔥 Version 1.3.1 Update (CRITICAL)**: **INFLUENCER DATABASE NOW ACTIVE!** Fixed critical bug where system was always using mock data. Now fetches real influencers from Firestore (~3k Spanish influencers) with intelligent 4-stage AI matching. Added content category filtering for more precise matches. See `INFLUENCER_DATABASE_INTEGRATION.md` for complete details.
+**🔥 Version 1.4.0 Update**: **FIRESTORE INTEGRATION COMPLETE!** All presentations now automatically save to Firestore with full CRUD operations via REST API. Enhanced editor UI with collapsible sidebars, drag-to-pan canvas, and improved slide visibility. Presentations page displays all saved presentations with loading states and error handling. All TypeScript errors fixed across slide components.
+
+**Version 1.3.1**: **INFLUENCER DATABASE NOW ACTIVE!** Fixed critical bug where system was always using mock data. Now fetches real influencers from Firestore (~3k Spanish influencers) with intelligent 4-stage AI matching. Added content category filtering for more precise matches.
 
 **Version 1.3.0**: Complete Dentsu Story Lab-style presentation system! Enhanced AI generates sophisticated content (creative concepts with claims/hashtags, influencer demographics, scenario recommendations) AND frontend beautifully displays all data. Campaign summaries shown as grids, hashtags as styled badges, influencer profiles with full demographics/rationale, dedicated scenario component with CPM.
 
@@ -35,7 +37,31 @@ This is a Next.js 15 application built for Look After You, an influencer talent 
 **Architecture**: Hybrid OpenAI + Google for optimal reliability
 **Data Sources**: LAYAI (StarNgage, Apify, Serply)
 
-### Production-Ready Features (v1.2.6)
+### Production-Ready Features
+
+**Firestore Integration (v1.4.0 ✨)**
+- `lib/presentation-service.ts` - Complete CRUD service for presentations
+  - `savePresentation()` - Save/update presentation in Firestore
+  - `getPresentation()` - Fetch single presentation by ID
+  - `getAllPresentations()` - List all presentations with filtering/pagination
+  - `updatePresentation()` - Partial updates to presentations
+  - `deletePresentation()` - Remove presentation from Firestore
+  - `duplicatePresentation()` - Clone existing presentation
+- `app/api/presentations/route.ts` - REST API endpoints (GET, POST)
+- `app/api/presentations/[id]/route.ts` - REST API endpoints (GET, PATCH, DELETE)
+- Automatic save on presentation generation
+- Real-time loading in editor
+- Error handling and user feedback
+- Future-ready for authentication
+
+**Enhanced Editor UI (v1.4.0 ✨)**
+- Collapsible sidebars (slides panel and properties panel)
+- Drag-to-pan canvas for easier navigation
+- Reset view button to center content
+- Helper text showing available interactions
+- Improved accessibility (ARIA labels, keyboard navigation)
+- Fixed TypeScript errors across all slide components
+- Better slide rendering and visibility
 
 **Error Handling**
 - `app/error.tsx` - React error boundary component
@@ -67,17 +93,22 @@ This is a Next.js 15 application built for Look After You, an influencer talent 
 
 ```
 app/
-├── page.tsx                    # Home page with brief form + offline detection
-├── editor/[id]/page.tsx       # Presentation editor (dynamic route)
-├── presentations/page.tsx     # List of saved presentations
-├── layout.tsx                 # Root layout with metadata
-└── error.tsx                  # Error boundary component
+├── page.tsx                           # Home page with brief form + offline detection
+├── editor/[id]/page.tsx              # Presentation editor (loads from Firestore)
+├── presentations/page.tsx            # List of saved presentations (Firestore)
+├── layout.tsx                        # Root layout with metadata
+├── error.tsx                         # Error boundary component
+└── api/
+    └── presentations/
+        ├── route.ts                  # GET /api/presentations, POST /api/presentations
+        └── [id]/
+            └── route.ts              # GET/PATCH/DELETE /api/presentations/[id]
 
 components/
-├── BriefForm.tsx              # Dark mode brief intake form
-├── BriefUpload.tsx            # Modern upload with icons
-├── PresentationEditor.tsx     # Main editor with zoom, navigation
-├── SlideRenderer.tsx          # Renders appropriate slide component
+├── BriefForm.tsx                     # Dark mode brief intake form
+├── BriefUpload.tsx                   # Modern upload with icons
+├── PresentationEditor.tsx            # Enhanced editor with collapsible sidebars, drag-to-pan
+├── SlideRenderer.tsx                 # Renders appropriate slide component
 ├── ui/                        # Shadcn UI components
 │   ├── hero-section-dark.tsx # Animated hero with retro grid
 │   └── shuffle-grid.tsx      # Dynamic 4x4 photo grid
@@ -95,6 +126,7 @@ lib/
 ├── ai-processor.ts            # Google AI processor (DEPRECATED)
 ├── influencer-matcher.ts      # 4-stage AI-powered matching (uses Vertex AI)
 ├── influencer-service.ts      # Firestore queries & caching
+├── presentation-service.ts    # Presentation CRUD operations (v1.4.0 ✨)
 ├── slide-generator.ts         # Slide content generation
 ├── image-generator.ts         # AI image generation & editing (Vertex AI)
 ├── brief-parser-openai.server.ts  # OpenAI brief parser (PRODUCTION)
