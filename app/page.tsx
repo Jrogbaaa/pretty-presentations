@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import BriefForm from "@/components/BriefForm";
 import BriefUpload from "@/components/BriefUpload";
 import { processBrief } from "@/lib/ai-processor-openai";
-import { mockInfluencers } from "@/lib/mock-influencers";
 import { ShuffleHero } from "@/components/ui/shuffle-grid";
 import { HeroSection } from "@/components/ui/hero-section-dark";
 import { Target, Zap, Sparkles, Upload, FileCheck, Presentation, WifiOff } from "lucide-react";
@@ -62,7 +61,9 @@ const HomePage = () => {
 
     try {
       // Process the brief and generate presentation
-      const result = await processBrief(brief, mockInfluencers);
+      // Pass empty array to fetch real influencers from Firestore database (~3k Spanish influencers)
+      // Will automatically fall back to mockInfluencers if Firestore is unavailable
+      const result = await processBrief(brief, []);
 
       if (result.warnings.length > 0 && result.confidence < 50) {
         setError(`Unable to process brief: ${result.warnings.join(", ")}`);
@@ -70,8 +71,19 @@ const HomePage = () => {
         return;
       }
 
-      // Store presentation in localStorage (in production, save to Firestore)
-      localStorage.setItem("current-presentation", JSON.stringify(result.presentation));
+      // Save presentation to Firestore
+      try {
+        await fetch("/api/presentations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(result.presentation),
+        });
+      } catch (saveError) {
+        console.error("Error saving presentation:", saveError);
+        // Continue anyway - presentation is in memory
+      }
 
       // Navigate to editor
       router.push(`/editor/${result.presentation.id}`);

@@ -55,47 +55,36 @@ export const searchInfluencers = async (
 ): Promise<Influencer[]> => {
   try {
     const influencersRef = collection(db, 'influencers');
+    
+    // SIMPLIFIED QUERY: Fetch more results and filter client-side
+    // This avoids needing composite indexes
     const constraints: QueryConstraint[] = [];
-
-    // Platform filter
-    if (filters.platforms && filters.platforms.length > 0) {
-      constraints.push(where('platform', 'in', filters.platforms.slice(0, 10))); // Firestore "in" limit
+    
+    // Only use simple platform filter if provided
+    if (filters.platforms && filters.platforms.length === 1) {
+      // Single platform - can use where clause
+      constraints.push(where('platform', '==', filters.platforms[0]));
     }
-
-    // Follower range
-    if (filters.minFollowers) {
-      constraints.push(where('followers', '>=', filters.minFollowers));
-    }
-    if (filters.maxFollowers) {
-      constraints.push(where('followers', '<=', filters.maxFollowers));
-    }
-
-    // Engagement rate
-    if (filters.minEngagement) {
-      constraints.push(where('engagement', '>=', filters.minEngagement));
-    }
-
-    // Content categories (array-contains-any)
-    if (filters.contentCategories && filters.contentCategories.length > 0) {
-      constraints.push(
-        where('contentCategories', 'array-contains-any', filters.contentCategories.slice(0, 10))
-      );
-    }
-
-    // Order by engagement (high to low)
-    constraints.push(orderBy('engagement', 'desc'));
-    constraints.push(limit(limitResults));
+    
+    // Fetch more results since we'll filter client-side
+    constraints.push(limit(limitResults * 4)); // Fetch 4x more to ensure we have enough after filtering
 
     const q = query(influencersRef, ...constraints);
     const querySnapshot = await getDocs(q);
 
-    const influencers = querySnapshot.docs.map((doc) => ({
+    let influencers = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as Influencer[];
 
-    // Apply client-side filters for complex criteria
-    return applyClientSideFilters(influencers, filters);
+    // Apply ALL filters client-side
+    influencers = applyClientSideFilters(influencers, filters);
+    
+    // Sort by engagement (client-side)
+    influencers.sort((a, b) => b.engagement - a.engagement);
+    
+    // Limit to requested amount
+    return influencers.slice(0, limitResults);
   } catch (error) {
     console.error('Error searching influencers:', error);
     throw error;
@@ -110,6 +99,38 @@ const applyClientSideFilters = (
   filters: InfluencerSearchFilters
 ): Influencer[] => {
   return influencers.filter((influencer) => {
+    // Platform filter (if multiple platforms or not filtered by query)
+    if (filters.platforms && filters.platforms.length > 0) {
+      if (!filters.platforms.includes(influencer.platform)) return false;
+    }
+    
+    // Content categories filter
+    if (filters.contentCategories && filters.contentCategories.length > 0) {
+      const hasMatchingCategory = influencer.contentCategories.some((cat) =>
+        filters.contentCategories!.some((filterCat) => 
+          cat.toLowerCase().includes(filterCat.toLowerCase()) ||
+          filterCat.toLowerCase().includes(cat.toLowerCase())
+        )
+      );
+      if (!hasMatchingCategory) return false;
+    }
+    
+    // Follower range
+    if (filters.minFollowers && influencer.followers < filters.minFollowers) {
+      return false;
+    }
+    if (filters.maxFollowers && influencer.followers > filters.maxFollowers) {
+      return false;
+    }
+    
+    // Engagement rate
+    if (filters.minEngagement && influencer.engagement < filters.minEngagement) {
+      return false;
+    }
+    if (filters.maxEngagement && influencer.engagement > filters.maxEngagement) {
+      return false;
+    }
+    
     // Location filter
     if (filters.locations && filters.locations.length > 0) {
       const hasLocation = influencer.demographics.location.some((loc) =>

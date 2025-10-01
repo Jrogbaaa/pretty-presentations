@@ -284,9 +284,10 @@ Generate sophisticated, agency-quality presentation content following this struc
 
 3. **Influencer Pool Analysis** - Categorize influencers by:
    - Segment (e.g., "For Her & For Him", "For Her", "For Him")
-   - Detailed profile with: followers, ER%, gender split, geo, credible audience %
+   - Detailed profile with: name, Instagram handle (@username), followers, ER%, gender split, geo, credible audience %
    - Specific deliverables (e.g., "1 Reel colaborativo, 2 Stories")
    - Strategic reason for selection (why they fit the campaign)
+   - IMPORTANT: Always include the Instagram handle for each influencer
 
 4. **Recommended Scenario** - Include:
    - Influencer mix by segment
@@ -330,6 +331,7 @@ Generate sophisticated, agency-quality presentation content following this struc
       "influencers": [
         {
           "name": "Influencer Name",
+          "handle": "@instagramhandle",
           "followers": 194600,
           "engagement": "8%",
           "genderSplit": {"female": 54, "male": 46},

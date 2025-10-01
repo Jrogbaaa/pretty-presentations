@@ -2,9 +2,10 @@ import type { Slide } from "@/types";
 
 interface IndexSlideProps {
   slide: Slide;
+  onEdit?: (field: string, value: string) => void;
 }
 
-const IndexSlide = ({ slide }: IndexSlideProps) => {
+const IndexSlide = ({ slide, onEdit }: IndexSlideProps) => {
   const campaignSummary = slide.content.customData?.campaignSummary;
   const keyNumbers = slide.content.customData?.keyNumbers;
   const hasCampaignSummary = campaignSummary || keyNumbers;

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Presentation } from "@/types";
 import SlideRenderer from "./SlideRenderer";
+import { ChevronLeft, ChevronRight, PanelLeftClose, PanelRightClose } from "lucide-react";
 
 interface PresentationEditorProps {
   presentation: Presentation;
@@ -13,6 +14,12 @@ interface PresentationEditorProps {
 const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEditorProps) => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [zoom, setZoom] = useState(0.5);
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [showProperties, setShowProperties] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   const currentSlide = presentation.slides[currentSlideIndex];
 
@@ -36,9 +43,33 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
     }
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - panOffset.x,
+      y: e.clientY - panOffset.y,
+    });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    setPanOffset({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y,
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleResetPan = () => {
+    setPanOffset({ x: 0, y: 0 });
+  };
+
   return (
     <div
-      className="flex flex-col h-screen bg-gray-100"
+      className="flex flex-col min-h-screen bg-gray-100"
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="application"
@@ -47,7 +78,16 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
       {/* Top Toolbar */}
       <div className="bg-white border-b shadow-sm px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold text-gray-900">{presentation.campaignName}</h1>
+          <button
+            type="button"
+            onClick={() => setShowSidebar(!showSidebar)}
+            className="p-2 hover:bg-gray-100 rounded transition-colors"
+            aria-label="Toggle slides sidebar"
+            tabIndex={0}
+          >
+            <PanelLeftClose className={`w-5 h-5 transition-transform ${showSidebar ? '' : 'rotate-180'}`} />
+          </button>
+          <h1 className="text-xl font-bold text-gray-900">{presentation.campaignName}</h1>
           <span className="text-sm text-gray-500">for {presentation.clientName}</span>
         </div>
 
@@ -55,9 +95,11 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
           {/* Zoom Controls */}
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => setZoom(Math.max(0.25, zoom - 0.1))}
-              className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+              className="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors font-semibold"
               aria-label="Zoom out"
+              tabIndex={0}
             >
               −
             </button>
@@ -65,37 +107,65 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
               {Math.round(zoom * 100)}%
             </span>
             <button
-              onClick={() => setZoom(Math.min(1, zoom + 0.1))}
-              className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+              type="button"
+              onClick={() => setZoom(Math.min(2, zoom + 0.1))}
+              className="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors font-semibold"
               aria-label="Zoom in"
+              tabIndex={0}
             >
               +
+            </button>
+            <button
+              type="button"
+              onClick={handleResetPan}
+              className="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors text-sm"
+              aria-label="Reset view"
+              tabIndex={0}
+            >
+              Reset
             </button>
           </div>
 
           {/* Export Options */}
           <button
+            type="button"
             onClick={() => onExport?.("pdf")}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors font-medium"
+            tabIndex={0}
+            aria-label="Export presentation to PDF"
           >
             Export to PDF
           </button>
           
           {onSave && (
             <button
+              type="button"
               onClick={() => onSave(presentation)}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors font-medium"
+              tabIndex={0}
+              aria-label="Save presentation"
             >
               Save
             </button>
           )}
+          
+          <button
+            type="button"
+            onClick={() => setShowProperties(!showProperties)}
+            className="p-2 hover:bg-gray-100 rounded transition-colors"
+            aria-label="Toggle properties panel"
+            tabIndex={0}
+          >
+            <PanelRightClose className={`w-5 h-5 transition-transform ${showProperties ? '' : 'rotate-180'}`} />
+          </button>
         </div>
       </div>
 
       {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden">
         {/* Slide Thumbnails Sidebar */}
-        <div className="w-64 bg-white border-r overflow-y-auto p-4">
+        {showSidebar && (
+          <div className="w-64 bg-white border-r overflow-y-auto p-4">
           <h2 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
             Slides ({presentation.slides.length})
           </h2>
@@ -103,12 +173,22 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
             {presentation.slides.map((slide, index) => (
               <button
                 key={slide.id}
+                type="button"
                 onClick={() => setCurrentSlideIndex(index)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setCurrentSlideIndex(index);
+                  }
+                }}
                 className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
                   currentSlideIndex === index
                     ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
+                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                 }`}
+                tabIndex={0}
+                aria-label={`Go to slide ${index + 1}: ${slide.title}`}
+                aria-current={currentSlideIndex === index ? "true" : "false"}
               >
                 <div className="flex items-center gap-3">
                   <span className="flex items-center justify-center w-8 h-8 rounded bg-gray-200 text-sm font-semibold">
@@ -127,16 +207,38 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
             ))}
           </div>
         </div>
+        )}
 
         {/* Slide Canvas */}
-        <div className="flex-1 overflow-auto p-8 flex items-center justify-center">
-          <div className="relative">
-            <SlideRenderer slide={currentSlide} scale={zoom} />
+        <div 
+          ref={canvasRef}
+          className="flex-1 overflow-hidden bg-gray-50 relative"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+        >
+          <div 
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            style={{
+              transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
+            }}
+          >
+            <div className="pointer-events-auto">
+              <SlideRenderer slide={currentSlide} scale={zoom} />
+            </div>
+          </div>
+
+          {/* Helper Text */}
+          <div className="absolute bottom-4 left-4 bg-black bg-opacity-60 text-white px-3 py-2 rounded text-sm pointer-events-none">
+            Drag to pan • Scroll to zoom • Arrow keys to navigate
           </div>
         </div>
 
         {/* Properties Panel */}
-        <div className="w-80 bg-white border-l overflow-y-auto p-6">
+        {showProperties && (
+          <div className="w-80 bg-white border-l overflow-y-auto p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Slide Properties</h2>
           
           <div className="space-y-6">
@@ -245,14 +347,18 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
             </div>
           </div>
         </div>
+        )}
       </div>
 
       {/* Bottom Navigation */}
       <div className="bg-white border-t px-6 py-4 flex items-center justify-between">
         <button
+          type="button"
           onClick={handlePrevSlide}
           disabled={currentSlideIndex === 0}
-          className="px-6 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          tabIndex={0}
+          aria-label="Previous slide"
         >
           ← Previous
         </button>
@@ -262,9 +368,12 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
         </div>
 
         <button
+          type="button"
           onClick={handleNextSlide}
           disabled={currentSlideIndex === presentation.slides.length - 1}
-          className="px-6 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          tabIndex={0}
+          aria-label="Next slide"
         >
           Next →
         </button>

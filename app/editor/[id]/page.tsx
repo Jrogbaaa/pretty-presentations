@@ -14,25 +14,48 @@ const EditorPage = () => {
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
-    // Load presentation from localStorage (in production, fetch from Firestore)
-    const stored = localStorage.getItem("current-presentation");
-    if (stored) {
-      const data = JSON.parse(stored);
-      if (data.id === params.id) {
-        setPresentation(data);
-      } else {
-        router.push("/");
+    const fetchPresentation = async () => {
+      try {
+        const response = await fetch(`/api/presentations/${params.id}`);
+        const data = await response.json();
+
+        if (data.success && data.presentation) {
+          setPresentation(data.presentation);
+        } else {
+          console.error("Presentation not found");
+          router.push("/presentations");
+        }
+      } catch (error) {
+        console.error("Error loading presentation:", error);
+        router.push("/presentations");
       }
-    } else {
-      router.push("/");
-    }
+    };
+
+    fetchPresentation();
   }, [params.id, router]);
 
-  const handleSave = (updatedPresentation: Presentation) => {
-    // Save to localStorage (in production, save to Firestore)
-    localStorage.setItem("current-presentation", JSON.stringify(updatedPresentation));
-    setPresentation(updatedPresentation);
-    alert("Presentation saved successfully!");
+  const handleSave = async (updatedPresentation: Presentation) => {
+    try {
+      const response = await fetch(`/api/presentations/${updatedPresentation.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedPresentation),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setPresentation(updatedPresentation);
+        alert("Presentation saved successfully!");
+      } else {
+        alert("Failed to save presentation");
+      }
+    } catch (error) {
+      console.error("Error saving presentation:", error);
+      alert("Failed to save presentation");
+    }
   };
 
   const handleExport = async (format: "pdf" | "pptx") => {

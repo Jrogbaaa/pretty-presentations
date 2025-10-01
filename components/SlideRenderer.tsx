@@ -35,15 +35,22 @@ const SlideRenderer = ({ slide, scale = 1 }: SlideRendererProps) => {
 
   return (
     <div
-      className="relative bg-white shadow-2xl"
+      className="relative shadow-2xl"
       style={{
         width: `${1920 * scale}px`,
         height: `${1080 * scale}px`,
-        transform: `scale(${scale})`,
-        transformOrigin: "top left",
       }}
     >
-      {renderSlide()}
+      <div 
+        className="origin-top-left bg-white overflow-hidden"
+        style={{
+          width: "1920px",
+          height: "1080px",
+          transform: `scale(${scale})`,
+        }}
+      >
+        {renderSlide()}
+      </div>
     </div>
   );
 };

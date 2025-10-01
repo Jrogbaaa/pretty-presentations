@@ -68,6 +68,9 @@ const TalentStrategySlide = ({ slide }: TalentStrategySlideProps) => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-lg truncate">{inf.name}</h4>
+                        {inf.handle && (
+                          <p className="text-sm text-gray-600">@{inf.handle.replace('@', '')}</p>
+                        )}
                         <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
                           <div>
                             <span className="text-gray-600">Followers:</span>

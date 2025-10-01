@@ -6,7 +6,9 @@
 
 This is a Next.js 15 application built for Look After You, an influencer talent agency. The platform uses Firebase Vertex AI (Gemini 1.5 Flash) to automatically transform client briefs into professional presentations with intelligent influencer-brand matching.
 
-**🆕 Version 1.3.0 Update**: Complete Dentsu Story Lab-style presentation system! Enhanced AI generates sophisticated content (creative concepts with claims/hashtags, influencer demographics, scenario recommendations) AND frontend beautifully displays all data. Campaign summaries shown as grids, hashtags as styled badges, influencer profiles with full demographics/rationale, dedicated scenario component with CPM.
+**🔥 Version 1.3.1 Update (CRITICAL)**: **INFLUENCER DATABASE NOW ACTIVE!** Fixed critical bug where system was always using mock data. Now fetches real influencers from Firestore (~3k Spanish influencers) with intelligent 4-stage AI matching. Added content category filtering for more precise matches. See `INFLUENCER_DATABASE_INTEGRATION.md` for complete details.
+
+**Version 1.3.0**: Complete Dentsu Story Lab-style presentation system! Enhanced AI generates sophisticated content (creative concepts with claims/hashtags, influencer demographics, scenario recommendations) AND frontend beautifully displays all data. Campaign summaries shown as grids, hashtags as styled badges, influencer profiles with full demographics/rationale, dedicated scenario component with CPM.
 
 **Version 1.2.7**: Dentsu-inspired slide UI refresh (Cover + Generic slides) and a robust end-to-end Playwright test (`tests/full-flow.spec.ts`) that exercises upload → parse → generate → editor with screenshots.
 
@@ -26,7 +28,7 @@ This is a Next.js 15 application built for Look After You, an influencer talent 
 **UI Components**: Shadcn UI, Lucide React Icons
 **Animations**: Framer Motion
 **Backend**: Firebase (Firestore, Storage, Vertex AI, Authentication)
-**Database**: Firestore with LAYAI influencer database (2,996 profiles)
+**Database**: Firestore with LAYAI influencer database (~3,000 profiles) - **NOW ACTIVE & IN USE ✅**
 **AI Text Processing**: OpenAI GPT-4o-mini (brief parsing, validation, content generation)
 **AI Influencer Ranking**: Google Gemini 1.5 Flash via Firebase Vertex AI
 **AI Image Generation**: Google Gemini 2.0 Flash Exp via Firebase Vertex AI
@@ -117,11 +119,62 @@ types/
 1. **Brief Submission** → BriefForm collects client data
 2. **AI Processing** → processBrief() orchestrates:
    - Brief validation (validateBrief)
-   - Influencer matching (matchInfluencers)
+   - **Influencer matching (matchInfluencers)** ← **NOW ACTIVE (v1.3.1) ✅**
    - Content generation (generatePresentationContent)
    - Slide assembly (generateSlides)
 3. **Editor** → PresentationEditor displays slides
 4. **Export** → PDF generation via jsPDF + html2canvas
+
+### Influencer Matching Flow (v1.3.1) 🔥 NEW
+
+**CRITICAL FIX**: System now fetches real influencers from Firestore instead of mock data!
+
+**Entry Point**: `app/page.tsx` line 67
+```typescript
+const result = await processBrief(brief, []); // Empty array triggers Firestore fetch
+```
+
+**4-Stage Matching Algorithm** (`lib/influencer-matcher.ts`):
+
+**Stage 1: Database Query** (lines 17-22)
+```typescript
+pool = await searchInfluencers({
+  platforms: brief.platformPreferences,        // ["Instagram", "TikTok"]
+  locations: brief.targetDemographics.location, // ["Spain"]
+  contentCategories: brief.contentThemes,      // ["Music", "Lifestyle"] ← NEW in v1.3.1
+  maxBudget: brief.budget,                     // 75000
+}, 200);
+```
+- Queries Firestore `/influencers` collection (~3,000 profiles)
+- Filters by platform, location, content categories, budget
+- Orders by engagement DESC
+- Result: ~100-500 matching influencers
+
+**Stage 2: AI Ranking** (lines 79-130)
+- Google Gemini 1.5 Flash evaluates influencers
+- Considers: audience alignment, brand fit, engagement quality, ROI potential
+- Returns scored list: `[{id, score, reason}, ...]`
+- Fallback: Sort by engagement if AI fails
+- Result: ~50 ranked influencers
+
+**Stage 3: Optimal Mix** (lines 132-172)
+- Selects 5-8 influencers with budget-optimized mix:
+  - 1 macro (>500K followers, max 50% budget)
+  - 2-3 mid-tier (50K-500K)
+  - 2-3 micro (<50K)
+- Ensures diversity and reach optimization
+
+**Stage 4: Enrichment** (lines 174-224)
+- AI generates strategic rationale for each
+- Calculates: `estimatedReach`, `estimatedEngagement`, `costEstimate`
+- Proposes content: `["Feed Post", "Story Series (3)", "Reel"]`
+- Returns fully enriched `SelectedInfluencer[]`
+
+**Display**: Appears in Talent Strategy slide (`components/slides/TalentStrategySlide.tsx`)
+- Rich mode: Full demographics, gender split, geo data, deliverables, rationale
+- Fallback mode: Grid of cards with basic info
+
+**Safety**: Automatic fallback to mock data if Firestore unavailable
 
 ### Type System
 

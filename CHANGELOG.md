@@ -5,6 +5,100 @@ All notable changes to the Look After You AI Presentation Generator will be docu
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2025-10-01
+
+### Added
+- **Firestore Presentation Storage**: Complete integration for saving and loading presentations
+  - `lib/presentation-service.ts`: Full CRUD service for presentations
+  - `app/api/presentations/route.ts`: REST API for listing and creating presentations
+  - `app/api/presentations/[id]/route.ts`: REST API for get/update/delete operations
+  - Automatic save to Firestore when presentations are generated
+  - Real-time loading from Firestore in editor
+  
+- **Enhanced Presentations Page**
+  - Now fetches all presentations from Firestore
+  - Loading states and error handling
+  - Delete functionality with confirmation
+  - Visual feedback for empty states
+  
+- **Improved Editor UI**
+  - Collapsible sidebars (slides and properties panels)
+  - Drag-to-pan canvas for easier navigation
+  - Reset view button to center content
+  - Helper text showing available interactions
+  - Lucide React icons for better visual consistency
+  
+- **Better Accessibility**
+  - All buttons now have proper `type="button"` attributes
+  - ARIA labels on all interactive elements
+  - Keyboard navigation support (arrow keys for slides)
+  - `tabIndex` for keyboard focus management
+
+### Fixed
+- **TypeScript Errors**: Fixed type safety issues in all slide components
+  - `IndexSlide.tsx`: Proper type casting for `customData` properties
+  - `GenericSlide.tsx`: Fixed ReactNode type assignments
+  - `CoverSlide.tsx`: Fixed date field type handling
+  - `RecommendedScenarioSlide.tsx`: Explicit type assertions for complex data
+  - `ObjectiveSlide.tsx`: Type safety improvements
+  - `TalentStrategySlide.tsx`: Type safety improvements
+  
+- **Slide Rendering Issues**
+  - Fixed double-scaling problem in `SlideRenderer`
+  - Improved layout to prevent content overflow
+  - Better zoom scaling with proper transform origin
+  - Canvas now properly displays full slide content
+  
+- **UI Visibility Problems**
+  - Fixed slide editor layout that was cutting off content
+  - Improved contrast and readability across all slide types
+  - Better background colors for content sections
+
+### Changed
+- **Firestore Rules**: Temporarily opened presentations collection for development (authentication to be added later)
+- **Editor State Management**: Now uses Firestore instead of localStorage
+- **Homepage Flow**: Presentations automatically save to cloud on generation
+- **Presentation Type**: Updated to handle Firestore timestamp conversions
+
+### Technical Improvements
+- Logger integration: Using `logInfo`, `logError`, `logWarn` throughout
+- Error boundaries and user-friendly error messages
+- Loading states for better UX
+- Clean separation of concerns between API routes and business logic
+
+---
+
+## [1.3.1] - 2025-10-01
+
+### 🎯 Database Integration (CRITICAL FIX)
+
+**Influencer Database Now Active**
+- ✅ **FIXED**: System now fetches real influencers from Firestore database (~3,000 Spanish influencers)
+- ✅ **FIXED**: Previously was always using mock data due to passing `mockInfluencers` to `processBrief()`
+- ✅ **ENHANCED**: Added content category matching - now filters by `brief.contentThemes`
+- ✅ **WORKING**: Complete 4-stage matching algorithm now uses real database
+
+**Changes Made**:
+- `app/page.tsx`: Changed `processBrief(brief, mockInfluencers)` → `processBrief(brief, [])`
+  - Empty array triggers Firestore fetch
+  - Automatic fallback to mock data if database unavailable
+  - Removed unused `mockInfluencers` import
+- `lib/influencer-matcher.ts`: Added `contentCategories: brief.contentThemes` to search filters
+  - Now matches influencers by content themes (Music, Fashion, Lifestyle, etc.)
+  - More precise influencer matching based on campaign content
+
+**What This Means**:
+- Real influencers from database appear in presentations
+- Intelligent AI-powered matching based on campaign requirements
+- Talent Strategy slides show actual Spanish influencers with demographics
+- Cost estimates based on real rate cards
+- Better campaign fit with content category filtering
+
+**Documentation**:
+- Created `INFLUENCER_DATABASE_INTEGRATION.md` - Complete guide to the integration
+
+---
+
 ## [1.3.0] - 2025-10-01
 
 ### Added

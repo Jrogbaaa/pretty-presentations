@@ -46,12 +46,9 @@ service cloud.firestore {
     }
     
     // Presentations collection (shared/public presentations)
+    // TEMPORARY: Allow all read/write for development (add authentication later)
     match /presentations/{presentationId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update, delete: if isAuthenticated() && 
-        (resource.data.createdBy == request.auth.uid || 
-         request.auth.uid in resource.data.collaborators);
+      allow read, write: if true; // TODO: Add authentication in production
       
       // Presentation slides subcollection
       match /slides/{slideId} {

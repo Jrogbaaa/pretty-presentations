@@ -7,18 +7,30 @@ import type { Presentation } from "@/types";
 const PresentationsPage = () => {
   const router = useRouter();
   const [presentations, setPresentations] = useState<Presentation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load presentations from localStorage (in production, fetch from Firestore)
-    const stored = localStorage.getItem("current-presentation");
-    if (stored) {
+    const fetchPresentations = async () => {
       try {
-        const data = JSON.parse(stored);
-        setPresentations([data]);
-      } catch (error) {
-        console.error("Error loading presentations:", error);
+        setLoading(true);
+        const response = await fetch("/api/presentations");
+        const data = await response.json();
+
+        if (data.success) {
+          setPresentations(data.presentations || []);
+        } else {
+          setError(data.error || "Failed to load presentations");
+        }
+      } catch (err) {
+        console.error("Error loading presentations:", err);
+        setError("Failed to load presentations");
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    fetchPresentations();
   }, []);
 
   const handleCreateNew = () => {
@@ -29,10 +41,26 @@ const PresentationsPage = () => {
     router.push(`/editor/${id}`);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this presentation?")) {
-      localStorage.removeItem("current-presentation");
-      setPresentations(presentations.filter(p => p.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this presentation?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/presentations/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setPresentations(presentations.filter(p => p.id !== id));
+      } else {
+        alert("Failed to delete presentation");
+      }
+    } catch (err) {
+      console.error("Error deleting presentation:", err);
+      alert("Failed to delete presentation");
     }
   };
 
@@ -58,7 +86,28 @@ const PresentationsPage = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-12">
-        {presentations.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">⏳</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Loading presentations...
+            </h2>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold text-red-600 mb-2">
+              Error Loading Presentations
+            </h2>
+            <p className="text-gray-600 mb-8">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-8 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-semibold"
+            >
+              Retry
+            </button>
+          </div>
+        ) : presentations.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">📊</div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">

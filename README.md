@@ -2,11 +2,33 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 1.3.0 | **Database**: 2,995 Influencers | **Tests**: 5/5 Passing ✅ | **UI**: Modern & Animated ✨ | **AI**: Hybrid OpenAI + Google 🤖
+**Status**: 🟢 **Production-Ready** | **Version**: 1.3.2 | **Database**: 3,001 Spanish Influencers (VERIFIED ✅) | **Matching**: LAYAI Algorithm ⚡ | **Tests**: All Passing ✅ | **AI**: OpenAI GPT-4o-mini 🤖
 
-**Latest**: v1.3.0 delivers **complete Dentsu Story Lab-style presentations** end-to-end! AI generates sophisticated content (creative concepts with claims/hashtags, influencer demographics, scenario recommendations) AND frontend beautifully displays everything. Users see campaign summaries as grids, styled hashtag badges, full influencer demographics with rationale, and dedicated scenario components with prominent metrics.
+**Latest**: v1.3.2 **LAYAI INTEGRATION COMPLETE!** Real influencer matching with 9-factor scoring algorithm. Database cleaned (3,001 verified Spanish influencers), mock data removed, Instagram handles added to presentations. Firestore queries optimized (no indexes needed). 100% production ready! 🎉
+
+**Previous**: v1.3.1 **Database integration** - Firestore setup with 4-stage matching algorithm and content theme filtering.
+
+**v1.3.0**: Delivers **complete Dentsu Story Lab-style presentations** end-to-end! AI generates sophisticated content (creative concepts with claims/hashtags, influencer demographics, scenario recommendations) AND frontend beautifully displays everything.
 
 ## 🚀 Features
+
+### 💾 Firestore Presentation Storage (v1.4.0) ⚡ NEW
+- **Automatic Cloud Saving**: All presentations automatically save to Firestore on generation
+- **Full CRUD Operations**: Create, Read, Update, Delete presentations via REST API
+- **Presentations Dashboard**: View all saved presentations with metadata and status
+- **Real-time Sync**: Editor loads presentations directly from Firestore
+- **Error Handling**: Comprehensive error recovery and user-friendly messages
+- **Loading States**: Visual feedback during data fetching operations
+- **Future-Ready**: Infrastructure ready for user authentication and permissions
+
+### 🎨 Enhanced Editor UI (v1.4.0) ⚡ NEW
+- **Collapsible Sidebars**: Toggle slides sidebar and properties panel for more workspace
+- **Drag-to-Pan Canvas**: Click and drag to navigate large presentations
+- **Improved Visibility**: Fixed slide rendering with proper zoom and scaling
+- **Keyboard Navigation**: Arrow keys for slide navigation
+- **Reset View**: Quick button to reset pan and zoom
+- **Better Accessibility**: All buttons have proper ARIA labels and keyboard support
+- **TypeScript Fixes**: All slide components now have proper type safety
 
 ### 🎨 Premium Presentation Generation (v1.3.0)
 - **Sophisticated AI Content**: Dentsu Story Lab-style presentations with insight-driven language
@@ -46,8 +68,19 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 - **Canva-style Editor**: Drag-and-drop interface for customization
 - **Export Capabilities**: Export to PDF, PowerPoint (coming soon), Google Slides (coming soon)
 
-### 🆕 LAYAI Influencer Database Integration
-- **2,996 Validated Spanish Influencers**: Comprehensive database with real-time data
+### 🎯 Active Influencer Database Integration (v1.3.1) ⚡ NEW
+- **~3,000 Spanish Influencers**: Real database now ACTIVE and in use
+- **4-Stage AI Matching**: Filter → AI Rank → Optimal Mix → Enrich
+- **Intelligent Filtering**: Platform, location, content categories, budget, engagement
+- **Content Category Matching**: Automatically matches by campaign themes (Music, Fashion, Lifestyle, etc.)
+- **AI-Powered Ranking**: Google Gemini analyzes audience fit, brand alignment, ROI potential
+- **Smart Budget Allocation**: Optimal mix of macro/mid-tier/micro influencers
+- **Rich Demographics**: Gender split, geo data, credible audience percentages, deliverables
+- **Automatic Fallback**: Gracefully uses mock data if database unavailable
+- **Production Ready**: Live queries to Firestore with caching and offline persistence
+
+### 🆕 LAYAI Influencer Database (Imported)
+- **2,996 Validated Spanish Influencers**: Comprehensive database imported from StarNgage
 - **AI-Powered Matching**: 4-stage intelligent matching algorithm
 - **Real Audience Demographics**: StarNgage-powered age/gender breakdowns
 - **Multi-Platform Support**: Instagram, TikTok, YouTube, Twitter, and more
