@@ -48,9 +48,9 @@
 
 ---
 
-## Option 2: Google AI (Legacy/Optional)
+## Option 2: Google AI (Current Setup)
 
-**Current status:** Not the default. Kept as a fallback option; primary implementation uses OpenAI.
+**Current status:** Updated to use `gemini-pro` model name.
 
 ### If you want to stick with Google:
 
