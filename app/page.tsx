@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import BriefForm from "@/components/BriefForm";
 import BriefUpload from "@/components/BriefUpload";
@@ -8,15 +8,41 @@ import { processBrief } from "@/lib/ai-processor-openai";
 import { mockInfluencers } from "@/lib/mock-influencers";
 import { ShuffleHero } from "@/components/ui/shuffle-grid";
 import { HeroSection } from "@/components/ui/hero-section-dark";
-import { Target, Zap, Sparkles, Upload, FileCheck, Presentation } from "lucide-react";
+import { Target, Zap, Sparkles, Upload, FileCheck, Presentation, WifiOff } from "lucide-react";
 import type { ClientBrief } from "@/types";
+import { getUserFriendlyError } from "@/types/errors";
 
 const HomePage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [parsedBrief, setParsedBrief] = useState<ClientBrief | null>(null);
   const [showUpload, setShowUpload] = useState(true);
+  const [isOnline, setIsOnline] = useState(true);
   const router = useRouter();
+
+  // Online/offline detection
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      setError(null);
+    };
+    
+    const handleOffline = () => {
+      setIsOnline(false);
+      setError('You are currently offline. Please check your internet connection.');
+    };
+    
+    // Check initial state
+    setIsOnline(navigator.onLine);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const handleParsedBrief = (brief: ClientBrief) => {
     setParsedBrief(brief);
@@ -25,6 +51,12 @@ const HomePage = () => {
   };
 
   const handleSubmit = async (brief: ClientBrief) => {
+    // Check online status
+    if (!isOnline) {
+      setError('You are offline. Please check your internet connection and try again.');
+      return;
+    }
+    
     setIsProcessing(true);
     setError(null);
 
@@ -45,7 +77,8 @@ const HomePage = () => {
       router.push(`/editor/${result.presentation.id}`);
     } catch (err) {
       console.error("Error processing brief:", err);
-      setError("Failed to generate presentation. Please try again.");
+      const friendlyError = getUserFriendlyError(err);
+      setError(friendlyError);
       setIsProcessing(false);
     }
   };
@@ -181,6 +214,18 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Offline Warning Banner */}
+      {!isOnline && (
+        <div className="sticky top-0 z-50 bg-orange-500 text-white py-3 px-6 shadow-lg">
+          <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
+            <WifiOff className="w-5 h-5" />
+            <p className="font-semibold">
+              You are currently offline. Features requiring internet will not work.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Brief Upload Section */}
       <section id="brief-section" className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-black">

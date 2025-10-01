@@ -90,7 +90,7 @@ pretty-presentations/
 - ✅ 9-11 slide professional presentation generation (template-specific)
 - ✅ Canva-style editor with zoom controls
 - ✅ PDF export functionality
-- ✅ Firebase Vertex AI integration (Gemini 1.5 Flash)
+- ✅ Hybrid AI: OpenAI GPT-4o-mini (text) + Vertex AI (images/ranking)
 
 ### 📊 Slide Types Generated
 1. **Portada (Cover)** - Dark theme with branding
@@ -252,4 +252,4 @@ npm install
 
 **Built with ❤️ using Next.js 15, Firebase Vertex AI, and Gemini 1.5 Flash**
 
-Last Updated: September 30, 2025
+Last Updated: October 1, 2025

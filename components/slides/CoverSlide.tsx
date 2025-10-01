@@ -7,26 +7,54 @@ interface CoverSlideProps {
 const CoverSlide = ({ slide }: CoverSlideProps) => {
   return (
     <div
-      className="w-full h-full flex flex-col items-center justify-center text-center p-12"
+      className="w-full h-full flex flex-col relative p-16"
       style={{
         backgroundColor: slide.design.backgroundColor,
         color: slide.design.textColor,
         fontFamily: slide.design.fontFamily,
       }}
     >
-      <div className="max-w-4xl space-y-8">
-        <h1 className="text-6xl font-bold leading-tight">
+      {/* Main Content - Left Aligned with Modern Layout */}
+      <div className="flex-1 flex flex-col justify-center max-w-5xl">
+        {/* Subtitle/Tagline */}
+        {slide.content.subtitle && (
+          <div className="mb-6">
+            <div 
+              className="inline-block px-4 py-2 text-sm font-semibold tracking-widest uppercase"
+              style={{
+                backgroundColor: slide.design.accentColor + '20',
+                color: slide.design.accentColor,
+              }}
+            >
+              {slide.content.subtitle}
+            </div>
+          </div>
+        )}
+
+        {/* Main Title - Extra Large */}
+        <h1 className="text-8xl font-black leading-none mb-8 tracking-tight">
           {slide.content.title}
         </h1>
-        <h2 className="text-3xl font-light opacity-90">
-          {slide.content.subtitle}
-        </h2>
-        <div className="pt-12 text-xl opacity-75">
-          {slide.content.body}
-        </div>
+
+        {/* Body/Description */}
+        {slide.content.body && (
+          <div className="text-2xl font-light leading-relaxed opacity-80 max-w-3xl">
+            {slide.content.body}
+          </div>
+        )}
       </div>
-      <div className="absolute bottom-8 right-8">
-        <div className="text-lg font-semibold">Look After You</div>
+
+      {/* Footer with Agency Branding */}
+      <div className="flex items-end justify-between mt-auto">
+        <div>
+          <div className="text-3xl font-bold tracking-tight">Look After You</div>
+          <div className="text-sm opacity-60 mt-1">Influencer Talent Agency</div>
+        </div>
+        {slide.content.date && (
+          <div className="text-sm opacity-60">
+            {slide.content.date}
+          </div>
+        )}
       </div>
     </div>
   );

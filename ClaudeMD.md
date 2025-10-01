@@ -6,7 +6,9 @@
 
 This is a Next.js 15 application built for Look After You, an influencer talent agency. The platform uses Firebase Vertex AI (Gemini 1.5 Flash) to automatically transform client briefs into professional presentations with intelligent influencer-brand matching.
 
-**🆕 Version 1.2.7 Update**: Dentsu-inspired slide UI refresh (Cover + Generic slides) and a robust end-to-end Playwright test (`tests/full-flow.spec.ts`) that exercises upload → parse → generate → editor with screenshots.
+**🆕 Version 1.3.0 Update**: Complete Dentsu Story Lab-style presentation system! Enhanced AI generates sophisticated content (creative concepts with claims/hashtags, influencer demographics, scenario recommendations) AND frontend beautifully displays all data. Campaign summaries shown as grids, hashtags as styled badges, influencer profiles with full demographics/rationale, dedicated scenario component with CPM.
+
+**Version 1.2.7**: Dentsu-inspired slide UI refresh (Cover + Generic slides) and a robust end-to-end Playwright test (`tests/full-flow.spec.ts`) that exercises upload → parse → generate → editor with screenshots.
 
 **Version 1.2.5**: Implemented hybrid AI system using OpenAI for all text processing and Google Vertex AI for images. Resolved Google AI 403/404 errors while maintaining image generation capabilities.
 

@@ -9,18 +9,68 @@ import type { TemplateStyle } from "@/types/templates";
 import { generateId } from "./ai-processor";
 
 interface PresentationContent {
-  objective: string;
+  campaignSummary: {
+    budget: string;
+    territory: string;
+    target: string;
+    period: string;
+    objective: string;
+  };
+  creativeIdeas: Array<{
+    title: string;
+    claim: string;
+    hashtags: string[];
+    execution: string;
+    extra?: string;
+  }>;
+  influencerPool: Array<{
+    category: string;
+    influencers: Array<{
+      name: string;
+      followers: number;
+      engagement: string;
+      genderSplit: { female: number; male: number };
+      geo: string;
+      credibleAudience: string;
+      deliverables: string[];
+      reason: string;
+    }>;
+  }>;
+  recommendedScenario: {
+    influencerMix: {
+      forHer?: string[];
+      forHim?: string[];
+      unisex?: string[];
+    };
+    contentPlan: {
+      reels?: number;
+      stories?: number;
+      posts?: number;
+      tiktoks?: number;
+      [key: string]: number | undefined;
+    };
+    impressions: string;
+    budget: string;
+    cpm: string;
+  };
   targetStrategy: string[];
-  creativeStrategy: string[];
-  briefSummary: string[];
-  talentRationale: string;
   mediaStrategy: {
-    platforms: Array<{ name: string; content: string[]; frequency: string }>;
+    platforms: Array<{ 
+      name: string; 
+      content: string[]; 
+      frequency: string;
+      rationale?: string;
+    }>;
     overview: string;
   };
   nextSteps: Array<{ phase: string; duration: string; description: string }>;
   recommendations: string[];
   confidence: number;
+  // Legacy fields for backward compatibility
+  objective?: string;
+  creativeStrategy?: string[];
+  briefSummary?: string[];
+  talentRationale?: string;
 }
 
 export const generateTemplateSlides = async (
@@ -45,7 +95,7 @@ export const generateTemplateSlides = async (
   slides.push(createCoverSlide(brief, template, createDesign));
 
   // 2. Campaign Summary / Index
-  slides.push(createSummarySlide(brief, template, createDesign));
+  slides.push(createSummarySlide(brief, content, template, createDesign));
 
   // 3. Objective Slide
   slides.push(createObjectiveSlide(content, template, createDesign));
@@ -65,9 +115,9 @@ export const generateTemplateSlides = async (
   // 8. Media Strategy
   slides.push(createMediaSlide(content, brief, template, createDesign));
 
-  // 9. Budget Slide (for Scalpers-style)
-  if (template.id === "scalpers-lifestyle") {
-    slides.push(createBudgetSlide(influencers, brief, template, createDesign));
+  // 9. Recommended Scenario (for Scalpers and premium templates)
+  if (template.id === "scalpers-lifestyle" || content.recommendedScenario) {
+    slides.push(createRecommendedScenarioSlide(content, influencers, brief, template, createDesign));
   }
 
   // 10. Next Steps
@@ -121,6 +171,7 @@ const createCoverSlide = (
 // SUMMARY SLIDE
 const createSummarySlide = (
   brief: ClientBrief,
+  content: PresentationContent,
   template: TemplateStyle,
   createDesign: (overrides?: Partial<SlideDesign>) => SlideDesign
 ): Slide => {
@@ -130,28 +181,31 @@ const createSummarySlide = (
     id: generateId(),
     type: "index" as SlideType,
     order: 1,
-    title: isScalpers ? "Campaign Summary" : "Índice",
+    title: isScalpers ? "Resumen de campaña" : "Índice",
     content: {
-      title: isScalpers ? "Campaign Summary" : "Índice",
+      title: isScalpers ? "Resumen de campaña" : "Índice",
       bullets: isScalpers
         ? [] // Scalpers uses key numbers instead
         : [
-            "Presentation Objective",
-            "Creative Strategy",
-            "Target Strategy",
-            "Talent Strategy",
-            "Media Strategy",
+            "Resumen de campaña",
+            "Ideas creativas",
+            "Pool de influencers",
+            "Escenario recomendado",
             "Next Steps",
           ],
       customData: {
-        keyNumbers: isScalpers
-          ? {
-              budget: `€${brief.budget.toLocaleString()}`,
-              target: brief.targetDemographics.ageRange,
-              period: brief.timeline,
-              platforms: brief.platformPreferences.join(", "),
-            }
+        campaignSummary: isScalpers && content.campaignSummary
+          ? content.campaignSummary
           : null,
+        keyNumbers: !isScalpers
+          ? null
+          : {
+              budget: content.campaignSummary?.budget || `€${brief.budget.toLocaleString()}`,
+              territory: content.campaignSummary?.territory || "Digital Campaign",
+              target: content.campaignSummary?.target || brief.targetDemographics.ageRange,
+              period: content.campaignSummary?.period || brief.timeline,
+              objective: content.campaignSummary?.objective || "Awareness",
+            },
       },
     },
     design: createDesign({
@@ -167,6 +221,10 @@ const createObjectiveSlide = (
   createDesign: (overrides?: Partial<SlideDesign>) => SlideDesign
 ): Slide => {
   const isRedBull = template.id === "red-bull-event";
+  const isScalpers = template.id === "scalpers-lifestyle";
+
+  // Use new campaignSummary.objective or fall back to legacy objective field
+  const objectiveText = content.campaignSummary?.objective || content.objective || "Drive awareness and engagement";
 
   return {
     id: generateId(),
@@ -175,10 +233,11 @@ const createObjectiveSlide = (
     title: "Campaign Objective",
     content: {
       title: isRedBull ? "OBJECTIVE" : "Campaign Objective",
-      subtitle: template.id === "scalpers-lifestyle" ? "AWARENESS" : undefined,
-      body: content.objective,
+      subtitle: isScalpers ? content.campaignSummary?.objective?.toUpperCase() : undefined,
+      body: objectiveText,
       customData: {
         layout: isRedBull ? "split" : "centered",
+        campaignSummary: content.campaignSummary || null,
       },
     },
     design: createDesign({
@@ -196,6 +255,14 @@ const createBriefingSlide = (
 ): Slide => {
   const isRedBull = template.id === "red-bull-event";
 
+  // Use legacy briefSummary or construct from campaignSummary
+  const briefPoints = content.briefSummary || [
+    `Budget: ${content.campaignSummary?.budget || `€${brief.budget.toLocaleString()}`}`,
+    `Target: ${content.campaignSummary?.target || brief.targetDemographics.ageRange}`,
+    `Period: ${content.campaignSummary?.period || brief.timeline}`,
+    `Territory: ${content.campaignSummary?.territory || brief.platformPreferences.join(", ")}`,
+  ];
+
   return {
     id: generateId(),
     type: "brief-summary" as SlideType,
@@ -203,14 +270,15 @@ const createBriefingSlide = (
     title: "Briefing",
     content: {
       title: "Briefing",
-      bullets: content.briefSummary,
+      bullets: briefPoints,
       customData: {
         gridLayout: isRedBull,
+        campaignSummary: content.campaignSummary || null,
         columns: isRedBull
           ? [
               { title: "Goal", items: brief.campaignGoals },
-              { title: "Target", items: [brief.targetDemographics.ageRange] },
-              { title: "Timing", items: [brief.timeline] },
+              { title: "Target", items: [content.campaignSummary?.target || brief.targetDemographics.ageRange] },
+              { title: "Timing", items: [content.campaignSummary?.period || brief.timeline] },
               { title: "Platforms", items: brief.platformPreferences },
             ]
           : null,
@@ -231,10 +299,41 @@ const createCreativeSlides = (
   createDesign: (overrides?: Partial<SlideDesign>) => SlideDesign
 ): Slide[] => {
   const slides: Slide[] = [];
+  const isScalpers = template.id === "scalpers-lifestyle";
+  const isRedBull = template.id === "red-bull-event";
 
-  if (template.id === "scalpers-lifestyle") {
-    // Create 3 creative idea variations for Scalpers
-    const creativeIdeas = [
+  // Use new creativeIdeas structure if available, otherwise fall back to legacy
+  if (content.creativeIdeas && content.creativeIdeas.length > 0) {
+    content.creativeIdeas.forEach((idea, index) => {
+      slides.push({
+        id: generateId(),
+        type: "creative-strategy" as SlideType,
+        order: 4 + index,
+        title: idea.title,
+        content: {
+          title: idea.title,
+          subtitle: idea.claim, // The claim becomes the subtitle
+          body: idea.execution,
+          customData: {
+            claim: idea.claim,
+            hashtags: idea.hashtags,
+            execution: idea.execution,
+            extra: idea.extra || null,
+            photoStyle: isRedBull ? "full-width" : null,
+            overlayText: isRedBull,
+          },
+        },
+        design: createDesign({
+          layout: isScalpers 
+            ? (index % 3 === 0 ? "single-column" : index % 3 === 1 ? "two-column" : "grid") 
+            : "single-column",
+          backgroundColor: isScalpers ? "#1A1A1A" : isRedBull ? "#001489" : template.colorPalette.background,
+        }),
+      });
+    });
+  } else if (isScalpers) {
+    // Fallback for Scalpers: Create generic creative ideas
+    const defaultIdeas = [
       {
         title: "Creative Idea: Storytelling",
         subtitle: "First Memory",
@@ -255,7 +354,7 @@ const createCreativeSlides = (
       },
     ];
 
-    creativeIdeas.forEach((idea, index) => {
+    defaultIdeas.forEach((idea, index) => {
       slides.push({
         id: generateId(),
         type: "creative-strategy" as SlideType,
@@ -265,7 +364,7 @@ const createCreativeSlides = (
           title: idea.title,
           subtitle: idea.subtitle,
           body: idea.body,
-          bullets: index === 0 ? content.creativeStrategy : [],
+          bullets: index === 0 ? (content.creativeStrategy || []) : [],
         },
         design: createDesign({
           layout: idea.layout,
@@ -273,7 +372,7 @@ const createCreativeSlides = (
         }),
       });
     });
-  } else if (template.id === "red-bull-event") {
+  } else if (isRedBull) {
     // Single concept slide with full-width photo style
     slides.push({
       id: generateId(),
@@ -282,7 +381,7 @@ const createCreativeSlides = (
       title: "Concept",
       content: {
         title: "Concept",
-        bullets: content.creativeStrategy,
+        bullets: content.creativeStrategy || [],
         customData: {
           photoStyle: "full-width",
           overlayText: true,
@@ -303,7 +402,7 @@ const createCreativeSlides = (
       content: {
         title: "Creative Strategy",
         subtitle: "Content Approach & Themes",
-        bullets: content.creativeStrategy,
+        bullets: content.creativeStrategy || [],
       },
       design: createDesign(),
     });
@@ -351,9 +450,9 @@ const createTalentSlide = (
     id: generateId(),
     type: "talent-strategy" as SlideType,
     order: 8,
-    title: isScalpers ? "Influencer Pool" : "Talent Strategy",
+    title: isScalpers ? "Pool de influencers" : "Talent Strategy",
     content: {
-      title: isScalpers ? "Influencer Pool" : "Talent Strategy",
+      title: isScalpers ? "Pool de influencers" : "Talent Strategy",
       subtitle: isScalpers ? "Her & Him" : "Recommended Influencer Mix",
       body: content.talentRationale,
       influencers: influencers,
@@ -377,6 +476,8 @@ const createTalentSlide = (
       ],
       customData: {
         layoutStyle: isScalpers ? "profile-rows" : "grid-cards",
+        // Include detailed influencer pool data from AI
+        influencerPool: content.influencerPool || null,
       },
     },
     design: createDesign({
@@ -411,7 +512,53 @@ const createMediaSlide = (
   };
 };
 
-// BUDGET SLIDE (Scalpers-specific)
+// RECOMMENDED SCENARIO SLIDE (Scalpers/Premium templates)
+const createRecommendedScenarioSlide = (
+  content: PresentationContent,
+  influencers: SelectedInfluencer[],
+  brief: ClientBrief,
+  template: TemplateStyle,
+  createDesign: (overrides?: Partial<SlideDesign>) => SlideDesign
+): Slide => {
+  // Calculate metrics if not provided
+  const totalCost = influencers.reduce((sum, inf) => sum + inf.costEstimate, 0);
+  const totalImpressions = influencers.reduce((sum, inf) => sum + inf.estimatedReach, 0);
+  const calculatedCpm = ((totalCost / totalImpressions) * 1000).toFixed(2);
+
+  return {
+    id: generateId(),
+    type: "brief-summary" as SlideType,
+    order: 10,
+    title: "Escenario recomendado",
+    content: {
+      title: "Escenario recomendado",
+      subtitle: "Recommended Influencer Mix & Content Plan",
+      customData: {
+        recommendedScenario: content.recommendedScenario || {
+          influencerMix: {
+            forHer: influencers.filter(i => i.name.includes("Her") || Math.random() > 0.5).map(i => i.name),
+            forHim: influencers.filter(i => i.name.includes("Him") || Math.random() > 0.5).map(i => i.name),
+          },
+          contentPlan: {
+            reels: influencers.length * 1,
+            stories: influencers.length * 2,
+            posts: Math.floor(influencers.length * 0.5),
+          },
+          impressions: totalImpressions.toLocaleString(),
+          budget: `€${totalCost.toLocaleString()}`,
+          cpm: `€${calculatedCpm}`,
+        },
+      },
+    },
+    design: createDesign({
+      backgroundColor: "#000000",
+      textColor: "#FFFFFF",
+      layout: "two-column",
+    }),
+  };
+};
+
+// BUDGET SLIDE (Legacy - now replaced by Recommended Scenario)
 const createBudgetSlide = (
   influencers: SelectedInfluencer[],
   brief: ClientBrief,

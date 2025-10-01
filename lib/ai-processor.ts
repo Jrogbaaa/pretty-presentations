@@ -118,49 +118,131 @@ const generatePresentationContent = async (
   brief: ClientBrief,
   influencers: SelectedInfluencer[]
 ) => {
-  const prompt = `You are a professional presentation writer for Look After You, an influencer talent agency.
+  const prompt = `You are a senior creative strategist at Dentsu Story Lab / Look After You, an elite influencer talent agency known for crafting premium, insight-driven campaign presentations.
 
-Create compelling, professional content for a client presentation based on this brief:
+Create a comprehensive, highly sophisticated campaign presentation based on this brief:
 
+**CLIENT BRIEF:**
 Client: ${brief.clientName}
 Campaign Goals: ${brief.campaignGoals.join(", ")}
 Budget: €${brief.budget}
 Target Audience: ${JSON.stringify(brief.targetDemographics)}
-Requirements: ${brief.brandRequirements.join(", ")}
+Brand Requirements: ${brief.brandRequirements.join(", ")}
 Timeline: ${brief.timeline}
 Platforms: ${brief.platformPreferences.join(", ")}
+Content Themes: ${brief.contentThemes?.join(", ") || "Lifestyle, Authenticity, Aspiration"}
 
-Selected Influencers: ${influencers.map(i => `${i.name} (@${i.handle}) - ${i.followers} followers, ${i.engagement}% engagement`).join("; ")}
+**MATCHED INFLUENCERS:**
+${influencers.map(i => `- ${i.name} (@${i.handle}): ${i.followers.toLocaleString()} followers, ${i.engagement}% ER, Cost: €${i.costEstimate?.toLocaleString()}`).join("\n")}
 
-Generate content for each section:
+**INSTRUCTIONS:**
+Generate sophisticated, agency-quality presentation content following this structure:
 
-1. Presentation Objective (2-3 powerful sentences)
-2. Target Strategy (audience insights, 4-5 bullet points)
-3. Creative Strategy (content themes and approach, 4-5 bullet points)
-4. Brief Summary (condensed highlights, 5-6 key points)
-5. Talent Strategy Rationale (why these influencers, 3-4 paragraphs)
-6. Media Strategy (platform breakdown and content plan, detailed)
-7. Next Steps (timeline with 4-5 phases)
-8. Recommendations for client success
-9. Overall confidence score (0-100)
+1. **Campaign Summary** - Key campaign parameters in a structured format
+2. **Creative Ideas** (3-4 distinct concepts) - Each with:
+   - A compelling title (e.g., "Mi Primer Concierto", "Actitud The Band")
+   - A powerful claim/tagline (e.g., "El perfume que suena como tu historia")
+   - 2-3 relevant hashtags
+   - Detailed execution description (2-3 sentences)
+   - Optional extra activation idea
 
-Return as JSON with this structure:
+3. **Influencer Pool Analysis** - Categorize influencers by:
+   - Segment (e.g., "For Her & For Him", "For Her", "For Him")
+   - Detailed profile with: followers, ER%, gender split, geo, credible audience %
+   - Specific deliverables (e.g., "1 Reel colaborativo, 2 Stories")
+   - Strategic reason for selection (why they fit the campaign)
+
+4. **Recommended Scenario** - Include:
+   - Influencer mix by segment
+   - Content plan breakdown (reels, stories, posts, etc.)
+   - Projected impressions
+   - Budget allocation
+   - CPM calculation
+
+5. **Target Strategy** - Psychographic and demographic insights (4-5 points)
+6. **Media Strategy** - Platform-specific content approach with rationale
+7. **Next Steps** - Timeline with specific phases and deliverables
+8. **Recommendations** - Strategic advice for campaign optimization
+
+**TONE & STYLE:**
+- Write in sophisticated, insight-driven language
+- Use Spanish where culturally appropriate (titles, hashtags, claims)
+- Be specific, not generic (avoid "engaging content", use "Instagram Reels featuring first concert stories")
+- Think like a premium agency: strategic, creative, data-informed
+
+**RETURN AS JSON:**
 {
-  "objective": "string",
-  "targetStrategy": ["bullet1", "bullet2", ...],
-  "creativeStrategy": ["bullet1", "bullet2", ...],
-  "briefSummary": ["point1", "point2", ...],
-  "talentRationale": "string (detailed paragraph)",
-  "mediaStrategy": {
-    "platforms": [{"name": "Instagram", "content": ["type1", "type2"], "frequency": "string"}],
-    "overview": "string"
+  "campaignSummary": {
+    "budget": "€75,000",
+    "territory": "Música y Lifestyle",
+    "target": "Hombres y Mujeres 25-65+",
+    "period": "Octubre",
+    "objective": "Awareness y cobertura (lanzamiento)"
   },
-  "nextSteps": [{"phase": "string", "duration": "string", "description": "string"}],
-  "recommendations": ["rec1", "rec2", ...],
-  "confidence": number
-}
-
-Write in professional, persuasive Spanish-influenced English. Be specific and data-driven.`;
+  "creativeIdeas": [
+    {
+      "title": "Creative concept title",
+      "claim": "Powerful tagline or claim",
+      "hashtags": ["#HashtagOne", "#HashtagTwo"],
+      "execution": "Detailed description of how this would be executed...",
+      "extra": "Optional: Additional activation idea"
+    }
+  ],
+  "influencerPool": [
+    {
+      "category": "For Her & For Him",
+      "influencers": [
+        {
+          "name": "Influencer Name",
+          "followers": 194600,
+          "engagement": "8%",
+          "genderSplit": {"female": 54, "male": 46},
+          "geo": "66% España",
+          "credibleAudience": "92%",
+          "deliverables": ["1 Reel colaborativo", "2 Stories"],
+          "reason": "Strategic rationale for this influencer"
+        }
+      ]
+    }
+  ],
+  "recommendedScenario": {
+    "influencerMix": {
+      "forHer": ["Name 1", "Name 2"],
+      "forHim": ["Name 3", "Name 4"],
+      "unisex": ["Name 5"]
+    },
+    "contentPlan": {
+      "reels": 5,
+      "stories": 10,
+      "posts": 3,
+      "tiktoks": 2
+    },
+    "impressions": "3.5M",
+    "budget": "€${brief.budget.toLocaleString()}",
+    "cpm": "Calculated CPM"
+  },
+  "targetStrategy": ["Insight 1", "Insight 2", "..."],
+  "mediaStrategy": {
+    "platforms": [
+      {
+        "name": "Instagram",
+        "content": ["Content type 1", "Content type 2"],
+        "frequency": "3x per week",
+        "rationale": "Why this approach works"
+      }
+    ],
+    "overview": "Overall media strategy narrative"
+  },
+  "nextSteps": [
+    {
+      "phase": "Discovery & Briefing",
+      "duration": "Week 1-2",
+      "description": "Specific deliverables and actions"
+    }
+  ],
+  "recommendations": ["Recommendation 1", "Recommendation 2", "..."],
+  "confidence": 90
+}`;
 
   const result = await model.generateContent(prompt);
   const response = result.response;
@@ -171,40 +253,109 @@ Write in professional, persuasive Spanish-influenced English. Be specific and da
     return parsed;
   } catch (error) {
     console.error("Error parsing AI response:", error);
-    // Fallback content
+    
+    // Calculate CPM for fallback
+    const totalCost = influencers.reduce((sum, inf) => sum + (inf.costEstimate || 0), 0);
+    const totalReach = influencers.reduce((sum, inf) => sum + inf.estimatedReach, 0);
+    const cpm = totalReach > 0 ? ((totalCost / totalReach) * 1000).toFixed(2) : "0";
+    
+    // Enhanced fallback content with new structure
     return {
-      objective: `Drive brand awareness and engagement for ${brief.clientName} through strategic influencer partnerships.`,
+      campaignSummary: {
+        budget: `€${brief.budget.toLocaleString()}`,
+        territory: brief.contentThemes?.join(" y ") || "Digital Campaign",
+        target: brief.targetDemographics.ageRange,
+        period: brief.timeline,
+        objective: "Awareness y engagement"
+      },
+      creativeIdeas: [
+        {
+          title: "Creative Idea: Authentic Storytelling",
+          claim: "Historias reales, conexión auténtica",
+          hashtags: ["#AuthenticStories", "#RealConnections"],
+          execution: "Influencers share personal stories that connect with the brand values, creating emotional resonance with the audience through genuine narrative.",
+          extra: "User-generated content campaign encouraging followers to share their own stories"
+        },
+        {
+          title: "Creative Idea: Lifestyle Integration",
+          claim: "Tu vida, nuestro producto",
+          hashtags: ["#LifestyleIntegration", "#EverydayMoments"],
+          execution: "Seamless product integration into daily routines, showing natural usage scenarios that inspire and educate the audience.",
+        },
+        {
+          title: "Creative Idea: Community Building",
+          claim: "Juntos somos más",
+          hashtags: ["#CommunityFirst", "#TogetherStronger"],
+          execution: "Create a sense of community through collaborative content, challenges, and interactive experiences that bring followers together.",
+        }
+      ],
+      influencerPool: [
+        {
+          category: "Primary Selection",
+          influencers: influencers.slice(0, 5).map(inf => ({
+            name: inf.name,
+            followers: inf.followers,
+            engagement: `${inf.engagement}%`,
+            genderSplit: { female: 50, male: 50 },
+            geo: "España (Primary)",
+            credibleAudience: "90%+",
+            deliverables: ["1 Reel", "2 Stories", "1 Post"],
+            reason: `Strong alignment with brand values and excellent engagement rate of ${inf.engagement}%. Authentic voice that resonates with target audience.`
+          }))
+        }
+      ],
+      recommendedScenario: {
+        influencerMix: {
+          forHer: influencers.slice(0, 2).map(i => i.name),
+          forHim: influencers.slice(2, 4).map(i => i.name),
+          unisex: influencers.slice(4, 5).map(i => i.name)
+        },
+        contentPlan: {
+          reels: influencers.length,
+          stories: influencers.length * 2,
+          posts: Math.floor(influencers.length * 0.5),
+        },
+        impressions: totalReach.toLocaleString(),
+        budget: `€${totalCost.toLocaleString()}`,
+        cpm: `€${cpm}`
+      },
       targetStrategy: [
         `Primary audience: ${brief.targetDemographics.ageRange}, ${brief.targetDemographics.gender}`,
         `Geographic focus: ${brief.targetDemographics.location.join(", ")}`,
         `Key interests: ${brief.targetDemographics.interests.join(", ")}`,
+        `Psychographic: Values authenticity, seeks inspiration, engaged with lifestyle content`,
       ],
+      mediaStrategy: {
+        platforms: brief.platformPreferences.map(p => ({
+          name: p,
+          content: ["Reels", "Stories", "Collaborative Posts"],
+          frequency: "3-4x per week",
+          rationale: `${p} offers strong engagement with target demographic and supports varied content formats`
+        })),
+        overview: "Multi-platform approach prioritizing video content and authentic storytelling to maximize reach and engagement",
+      },
+      nextSteps: [
+        { phase: "Discovery & Briefing", duration: "Week 1-2", description: "Finalize creative concepts, brief influencers, align on content calendar" },
+        { phase: "Production", duration: "Week 3-4", description: "Content creation, review cycles, approvals" },
+        { phase: "Launch & Amplification", duration: "Week 5", description: "Content goes live, paid amplification begins" },
+        { phase: "Optimization & Reporting", duration: "Ongoing", description: "Monitor performance, optimize approach, deliver insights" },
+      ],
+      recommendations: [
+        "Consider paid amplification for top-performing content to extend reach",
+        "Build long-term ambassadorships with highest performers",
+        "Leverage user-generated content to build community",
+        "Test varied content formats to identify what resonates best"
+      ],
+      confidence: 85,
+      // Legacy fields for backward compatibility
+      objective: `Drive brand awareness and engagement for ${brief.clientName} through strategic influencer partnerships.`,
       creativeStrategy: [
         "Authentic storytelling aligned with brand values",
         "High-quality visual content optimized for each platform",
         "Mix of educational and entertaining formats",
       ],
       briefSummary: brief.campaignGoals,
-      talentRationale: `We've selected ${influencers.length} influencers who align perfectly with your brand values and target audience.`,
-      mediaStrategy: {
-        platforms: brief.platformPreferences.map(p => ({
-          name: p,
-          content: ["Posts", "Stories", "Reels"],
-          frequency: "3x per week",
-        })),
-        overview: "Multi-platform approach for maximum reach",
-      },
-      nextSteps: [
-        { phase: "Approval", duration: "1 week", description: "Review and approve talent selection" },
-        { phase: "Production", duration: "2 weeks", description: "Content creation and review" },
-        { phase: "Launch", duration: "1 week", description: "Content goes live across platforms" },
-        { phase: "Optimization", duration: "Ongoing", description: "Monitor and optimize performance" },
-      ],
-      recommendations: [
-        "Consider paid amplification for top-performing content",
-        "Build long-term relationships with top performers",
-      ],
-      confidence: 85,
+      talentRationale: `We've selected ${influencers.length} influencers who align perfectly with your brand values and target audience. Each creator brings a unique voice and engaged community that will amplify your message authentically.`,
     };
   }
 };

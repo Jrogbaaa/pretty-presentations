@@ -66,7 +66,7 @@ export interface SlideContent {
   influencers?: SelectedInfluencer[];
   metrics?: Metric[];
   timeline?: TimelineItem[];
-  customData?: Record<string, any>;
+  customData?: Record<string, unknown>;
 }
 
 export interface SlideDesign {
@@ -137,7 +137,7 @@ export interface EditorElement {
   type: "text" | "image" | "shape" | "influencer-card" | "chart";
   position: { x: number; y: number };
   size: { width: number; height: number };
-  content: any;
+  content: Record<string, unknown>;
   style: React.CSSProperties;
   locked?: boolean;
 }

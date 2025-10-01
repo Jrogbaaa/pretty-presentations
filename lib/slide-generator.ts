@@ -8,18 +8,68 @@ import type {
 import { generateId } from "./ai-processor";
 
 interface PresentationContent {
-  objective: string;
+  campaignSummary: {
+    budget: string;
+    territory: string;
+    target: string;
+    period: string;
+    objective: string;
+  };
+  creativeIdeas: Array<{
+    title: string;
+    claim: string;
+    hashtags: string[];
+    execution: string;
+    extra?: string;
+  }>;
+  influencerPool: Array<{
+    category: string;
+    influencers: Array<{
+      name: string;
+      followers: number;
+      engagement: string;
+      genderSplit: { female: number; male: number };
+      geo: string;
+      credibleAudience: string;
+      deliverables: string[];
+      reason: string;
+    }>;
+  }>;
+  recommendedScenario: {
+    influencerMix: {
+      forHer?: string[];
+      forHim?: string[];
+      unisex?: string[];
+    };
+    contentPlan: {
+      reels?: number;
+      stories?: number;
+      posts?: number;
+      tiktoks?: number;
+      [key: string]: number | undefined;
+    };
+    impressions: string;
+    budget: string;
+    cpm: string;
+  };
   targetStrategy: string[];
-  creativeStrategy: string[];
-  briefSummary: string[];
-  talentRationale: string;
   mediaStrategy: {
-    platforms: Array<{ name: string; content: string[]; frequency: string }>;
+    platforms: Array<{ 
+      name: string; 
+      content: string[]; 
+      frequency: string;
+      rationale?: string;
+    }>;
     overview: string;
   };
   nextSteps: Array<{ phase: string; duration: string; description: string }>;
   recommendations: string[];
   confidence: number;
+  // Legacy fields for backward compatibility
+  objective?: string;
+  creativeStrategy?: string[];
+  briefSummary?: string[];
+  talentRationale?: string;
 }
 
 export const generateSlides = async (

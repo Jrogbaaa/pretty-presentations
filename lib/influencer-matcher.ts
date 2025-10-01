@@ -19,7 +19,7 @@ export const matchInfluencers = async (
           locations: brief.targetDemographics.location,
           maxBudget: brief.budget,
         }, 200);
-      } catch (error) {
+      } catch {
         console.log('Firestore not available, using mock data');
         pool = mockInfluencers;
       }
