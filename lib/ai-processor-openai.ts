@@ -107,7 +107,7 @@ export const processBrief = async (
 
     // Step 5: Create slides with template
     timer.lap('slide-generation-start');
-    const slides = await generateTemplateSlides(
+    let slides = await generateTemplateSlides(
       brief,
       matchedInfluencers,
       presentationContent,
@@ -115,10 +115,26 @@ export const processBrief = async (
     );
     timer.lap('slide-generation-complete');
 
+    // Step 5.5: Generate images for slides using Nano Banana
+    timer.lap('image-generation-start');
+    try {
+      const { generateImagesForSlides } = await import('./replicate-image-service');
+      slides = await generateImagesForSlides(slides, brief);
+      logInfo('Image generation complete', {
+        slidesWithImages: slides.filter(s => s.content.images?.length).length,
+        totalSlides: slides.length
+      });
+    } catch (error) {
+      logError('Image generation failed, continuing without images', { error });
+      // Continue without images if generation fails
+    }
+    timer.lap('image-generation-complete');
+
     // Step 6: Create presentation object
     const presentation: Presentation = {
       id: Date.now().toString(),
       title: `${brief.clientName} - Influencer Campaign`,
+      campaignName: brief.campaignGoals?.[0] || "Influencer Campaign",
       clientName: brief.clientName,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

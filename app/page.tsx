@@ -71,6 +71,23 @@ const HomePage = () => {
         return;
       }
 
+      // Upload images to Firebase Storage and replace base64 with URLs
+      let presentationToSave = result.presentation;
+      try {
+        const { uploadSlideImages } = await import("@/lib/storage-service");
+        const updatedSlides = await uploadSlideImages(
+          result.presentation.slides,
+          result.presentation.id
+        );
+        presentationToSave = {
+          ...result.presentation,
+          slides: updatedSlides,
+        };
+      } catch (uploadError) {
+        console.error("Error uploading images to Storage:", uploadError);
+        // Continue with base64 images if upload fails
+      }
+
       // Save presentation to Firestore
       try {
         await fetch("/api/presentations", {
@@ -78,11 +95,22 @@ const HomePage = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(result.presentation),
+          body: JSON.stringify(presentationToSave),
         });
       } catch (saveError) {
         console.error("Error saving presentation:", saveError);
         // Continue anyway - presentation is in memory
+      }
+
+      // Store presentation in sessionStorage for immediate display
+      // This allows the editor to show images immediately while Firestore loads
+      try {
+        sessionStorage.setItem(
+          `presentation-${result.presentation.id}`,
+          JSON.stringify(result.presentation)
+        );
+      } catch (storageError) {
+        console.warn("Could not store presentation in sessionStorage:", storageError);
       }
 
       // Navigate to editor

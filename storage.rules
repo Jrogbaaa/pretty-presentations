@@ -35,11 +35,10 @@ service firebase.storage {
     }
     
     // Presentation assets
+    // Allow public write for demo mode (TODO: Add authentication)
     match /presentations/{presentationId}/{allPaths=**} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && 
-        (isValidImage() || isValidDocument()) &&
-        request.resource.size < 50 * 1024 * 1024; // 50MB limit
+      allow read: if true; // Public read
+      allow write: if isValidImage() && request.resource.size < 10 * 1024 * 1024; // 10MB per image
     }
     
     // Exported presentations

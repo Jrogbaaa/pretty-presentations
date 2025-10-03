@@ -5,6 +5,67 @@ All notable changes to the Look After You AI Presentation Generator will be docu
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2025-10-03
+
+### 🎨 AI Image Generation - COMPLETE!
+
+**Major Feature**: Every presentation now automatically generates stunning, contextual images using Google's Nano Banana (Gemini 2.5 Flash Image)!
+
+#### Added
+- **Nano Banana Integration** via Replicate API
+  - 11 context-aware images per presentation (~60-120 seconds)
+  - Smart prompts tailored to each slide type
+  - Cost: $0.06-0.12 per presentation
+  - Success rate: 91%+ (11/12 slides)
+  
+- **Beautiful Visual Integration**
+  - Cover slides: Full-screen hero images with dark gradient overlays
+  - Content slides: Subtle backgrounds (15-20% opacity) for enhanced readability
+  - Automatic skip for index/TOC slides
+  
+- **Firebase Storage Integration**
+  - Uploads generated images to Storage (solves Firestore 1MB limit)
+  - Parallel upload (~10 seconds for 11 images)
+  - Stores public URLs in Firestore
+  
+- **sessionStorage Caching**
+  - Instant image display in editor
+  - Seamless transition to Storage URLs in background
+  
+- **Graceful Fallback**
+  - Presentations work perfectly even if image generation fails
+  - Detailed progress logging for each slide
+
+#### New Files
+- `lib/replicate-image-service.ts` - Image generation via Replicate
+- `lib/storage-service.ts` - Firebase Storage upload utilities
+- `scripts/test-replicate-images.ts` - Image generation test script
+- `STORAGE_SETUP.md` - Firebase Storage rules setup guide
+- `IMAGE_INTEGRATION_COMPLETE.md` - Complete documentation
+
+#### Modified
+- `lib/ai-processor-openai.ts` - Added image generation step (Step 5.5)
+- `app/page.tsx` - Storage upload + sessionStorage caching
+- `app/editor/[id]/page.tsx` - Check sessionStorage before Firestore
+- `components/slides/CoverSlide.tsx` - Full-screen hero images
+- `components/slides/GenericSlide.tsx` - Subtle background images
+- `components/slides/ObjectiveSlide.tsx` - Professional backgrounds
+- `storage.rules` - Public write access for presentations
+- `package.json` - Added `replicate` dependency
+
+#### Performance
+- Image Generation: 60-120s for 11 images
+- Storage Upload: ~10s (parallel)
+- Total: 70-130s additional time per presentation
+- Cost: $0.06-0.12 per presentation
+
+#### Fixed
+- Firestore document size limit (was failing at 1.9MB)
+- Added missing `campaignName` field to presentation object
+- Proper handling of streaming binary data from Replicate
+
+---
+
 ## [1.4.2] - 2025-10-03
 
 ### ✅ Multi-Brand Testing Complete

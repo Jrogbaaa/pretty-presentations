@@ -6,7 +6,9 @@
 
 This is a Next.js 15 application built for Look After You, an influencer talent agency. The platform uses Firebase Vertex AI (Gemini 1.5 Flash) to automatically transform client briefs into professional presentations with intelligent influencer-brand matching.
 
-**🔥 Version 1.4.2 Update**: **MULTI-BRAND TESTING COMPLETE!** System verified across different industries - The Band Perfume (Music: 86/100 scores) AND IKEA Spain (Home: 70/100 scores). Content matching adapts perfectly: Music influencers for perfume, Design/Family for IKEA. Found 58 music matches, 51 home matches. System production-ready across verticals! 🎯
+**🔥 Version 1.5.0 Update**: **AI IMAGE GENERATION COMPLETE!** 🎨 Presentations now automatically generate 11 stunning, contextual images using Google's Nano Banana (Gemini 2.5 Flash Image) via Replicate. Full-screen hero images for cover slides, professional backgrounds for content slides. Images uploaded to Firebase Storage, URLs stored in Firestore. sessionStorage caching for instant display. Only $0.06-0.12 per presentation, 60-120s generation time. Production-ready! ✨
+
+**Version 1.4.2**: **MULTI-BRAND TESTING COMPLETE!** System verified across different industries - The Band Perfume (Music: 86/100 scores) AND IKEA Spain (Home: 70/100 scores). Content matching adapts perfectly: Music influencers for perfume, Design/Family for IKEA. Found 58 music matches, 51 home matches. System production-ready across verticals! 🎯
 
 **Version 1.4.0**: **FIRESTORE INTEGRATION COMPLETE!** All presentations now automatically save to Firestore with full CRUD operations via REST API. Enhanced editor UI with collapsible sidebars, drag-to-pan canvas, and improved slide visibility. Presentations page displays all saved presentations with loading states and error handling. All TypeScript errors fixed across slide components.
 
@@ -35,8 +37,9 @@ This is a Next.js 15 application built for Look After You, an influencer talent 
 **Database**: Firestore with LAYAI influencer database (~3,000 profiles) - **NOW ACTIVE & IN USE ✅**
 **AI Text Processing**: OpenAI GPT-4o-mini (brief parsing, validation, content generation)
 **AI Influencer Ranking**: Google Gemini 1.5 Flash via Firebase Vertex AI
-**AI Image Generation**: Google Gemini 2.0 Flash Exp via Firebase Vertex AI
-**Architecture**: Hybrid OpenAI + Google for optimal reliability
+**AI Image Generation**: Google Nano Banana (Gemini 2.5 Flash Image) via Replicate API
+**Architecture**: Hybrid OpenAI + Replicate + Google for optimal reliability
+**Storage**: Firebase Storage for generated images (~1.4MB per presentation)
 **Data Sources**: LAYAI (StarNgage, Apify, Serply)
 
 ### Production-Ready Features

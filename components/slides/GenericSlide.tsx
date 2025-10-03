@@ -7,6 +7,7 @@ interface GenericSlideProps {
 
 const GenericSlide = ({ slide, onEdit }: GenericSlideProps) => {
   const hasContent = slide.content.bullets || slide.content.metrics || slide.content.timeline;
+  const hasImage = slide.content.images && slide.content.images.length > 0;
 
   return (
     <div
@@ -17,8 +18,31 @@ const GenericSlide = ({ slide, onEdit }: GenericSlideProps) => {
         fontFamily: slide.design.fontFamily,
       }}
     >
+      {/* Background Image (subtle, if available) */}
+      {hasImage && (
+        <>
+          <div 
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage: `url(${slide.content.images[0]})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              opacity: 0.15,
+            }}
+          />
+          {/* Gradient overlay for readability */}
+          <div 
+            className="absolute inset-0 z-0"
+            style={{
+              background: `linear-gradient(to right, ${slide.design.backgroundColor} 0%, transparent 50%, ${slide.design.backgroundColor} 100%)`,
+            }}
+          />
+        </>
+      )}
+
       {/* Header */}
-      <div className="mb-12">
+      <div className="mb-12 relative z-10">
         <h1 className="text-6xl font-black tracking-tight mb-4">
           {slide.content.title || slide.title}
         </h1>
@@ -28,7 +52,7 @@ const GenericSlide = ({ slide, onEdit }: GenericSlideProps) => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col justify-center">
+      <div className="flex-1 flex flex-col justify-center relative z-10">
         {/* Bullets */}
         {slide.content.bullets && Array.isArray(slide.content.bullets) && slide.content.bullets.length > 0 && (
           <div className="space-y-6">
@@ -95,7 +119,7 @@ const GenericSlide = ({ slide, onEdit }: GenericSlideProps) => {
       </div>
 
       {/* Footer */}
-      <div className="mt-auto pt-8 border-t" style={{ borderColor: slide.design.accentColor + "30" }}>
+      <div className="mt-auto pt-8 border-t relative z-10" style={{ borderColor: slide.design.accentColor + "30" }}>
         <div className="flex justify-between items-center opacity-60">
           <div className="text-lg">
             {slide.content.customData && typeof slide.content.customData === 'object' && 'agency' in slide.content.customData

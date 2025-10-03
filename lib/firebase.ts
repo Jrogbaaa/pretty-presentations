@@ -45,8 +45,9 @@ const model = genAI.getGenerativeModel({
 
 // Image generation model (for backgrounds, graphics, editing)
 // Using image generation model as per https://ai.google.dev/gemini-api/docs/image-generation
+// FIXED: Removed "-preview" suffix per official docs
 const imageModel = genAI.getGenerativeModel({
-  model: process.env.NEXT_PUBLIC_GOOGLE_AI_IMAGE_MODEL || "gemini-2.5-flash-image-preview",
+  model: process.env.NEXT_PUBLIC_GOOGLE_AI_IMAGE_MODEL || "gemini-2.5-flash-image",
 });
 
 export { app, analytics, db, storage, genAI, model, imageModel };

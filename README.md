@@ -2,9 +2,11 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 1.4.2 | **Database**: 3,001 Spanish Influencers (VERIFIED ✅) | **Matching**: LAYAI Algorithm ⚡ | **Tests**: All Passing ✅ | **AI**: OpenAI GPT-4o-mini 🤖
+**Status**: 🟢 **Production-Ready** | **Version**: 1.5.0 | **Database**: 3,001 Spanish Influencers (VERIFIED ✅) | **Matching**: LAYAI Algorithm ⚡ | **Tests**: All Passing ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨
 
-**Latest**: v1.4.2 **MULTI-BRAND TESTING COMPLETE!** Verified matching logic with The Band Perfume (Music) AND IKEA (Home/Lifestyle) campaigns. System correctly adapts content themes - Music influencers for perfume, Design/Family influencers for IKEA. Match scores: 86/100 (perfume), 70/100 (IKEA). Production-ready! 🎯
+**Latest**: v1.5.0 **AI IMAGE GENERATION COMPLETE!** 🎨 Presentations now automatically generate stunning, contextual images for all slides using Google's Nano Banana (Gemini 2.5 Flash Image) via Replicate. Hero images for cover slides, professional backgrounds for content slides. 11 images per presentation, ~$0.06 cost, 2-minute generation time. Production-ready! ✨
+
+**Previous**: v1.4.2 **MULTI-BRAND TESTING COMPLETE!** Verified matching logic with The Band Perfume (Music) AND IKEA (Home/Lifestyle) campaigns. System correctly adapts content themes - Music influencers for perfume, Design/Family influencers for IKEA. Match scores: 86/100 (perfume), 70/100 (IKEA). Production-ready! 🎯
 
 **Previous**: v1.4.0 **FIRESTORE INTEGRATION COMPLETE!** All presentations now automatically save to Firestore with full CRUD operations. Enhanced editor UI with collapsible sidebars, drag-to-pan canvas, and improved slide visibility. Presentations page now displays all saved presentations! 🚀
 
@@ -14,7 +16,20 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 
 ## 🚀 Features
 
-### 💾 Firestore Presentation Storage (v1.4.0) ⚡ NEW
+### 🍌 AI-Generated Images (v1.5.0) ⚡ NEW
+- **Automatic Image Generation**: Every presentation gets 11 stunning, contextual images powered by Google's Nano Banana (Gemini 2.5 Flash Image)
+- **Smart Prompts**: Context-aware image generation tailored to each slide type (cover, objective, strategy, etc.)
+- **Beautiful Integration**:
+  - **Cover slides**: Full-screen hero images with professional overlays
+  - **Content slides**: Subtle backgrounds (15-20% opacity) that enhance without distracting
+  - **Perfect readability**: Text remains crisp with gradient overlays for contrast
+- **Firebase Storage**: Images automatically uploaded to Storage, URLs stored in Firestore (solves 1MB document limit)
+- **Instant Display**: sessionStorage caching ensures images show immediately while Storage loads
+- **Fast & Affordable**: ~60-120 seconds for 11 images, only $0.06-0.12 per presentation
+- **Graceful Fallback**: Presentations work perfectly even if image generation fails
+- **Real-time Progress**: Detailed console logs track generation for each slide
+
+### 💾 Firestore Presentation Storage (v1.4.0)
 - **Automatic Cloud Saving**: All presentations automatically save to Firestore on generation
 - **Full CRUD Operations**: Create, Read, Update, Delete presentations via REST API
 - **Presentations Dashboard**: View all saved presentations with metadata and status
@@ -23,7 +38,7 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 - **Loading States**: Visual feedback during data fetching operations
 - **Future-Ready**: Infrastructure ready for user authentication and permissions
 
-### 🎨 Enhanced Editor UI (v1.4.0) ⚡ NEW
+### 🎨 Enhanced Editor UI (v1.4.0)
 - **Collapsible Sidebars**: Toggle slides sidebar and properties panel for more workspace
 - **Drag-to-Pan Canvas**: Click and drag to navigate large presentations
 - **Improved Visibility**: Fixed slide rendering with proper zoom and scaling

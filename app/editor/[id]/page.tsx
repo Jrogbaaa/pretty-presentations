@@ -16,18 +16,39 @@ const EditorPage = () => {
   useEffect(() => {
     const fetchPresentation = async () => {
       try {
+        // First, check sessionStorage for immediate display
+        const cachedKey = `presentation-${params.id}`;
+        const cachedData = sessionStorage.getItem(cachedKey);
+        
+        if (cachedData) {
+          try {
+            const cachedPresentation = JSON.parse(cachedData);
+            setPresentation(cachedPresentation);
+            // Clear from sessionStorage after using it
+            sessionStorage.removeItem(cachedKey);
+            // Don't return - still fetch from Firestore in background
+          } catch (parseError) {
+            console.warn("Could not parse cached presentation:", parseError);
+          }
+        }
+
+        // Fetch from Firestore (has uploaded images with URLs)
         const response = await fetch(`/api/presentations/${params.id}`);
         const data = await response.json();
 
         if (data.success && data.presentation) {
           setPresentation(data.presentation);
-        } else {
+        } else if (!cachedData) {
+          // Only redirect if we don't have cached data
           console.error("Presentation not found");
           router.push("/presentations");
         }
       } catch (error) {
         console.error("Error loading presentation:", error);
-        router.push("/presentations");
+        // Only redirect if we don't already have a presentation loaded
+        if (!presentation) {
+          router.push("/presentations");
+        }
       }
     };
 
