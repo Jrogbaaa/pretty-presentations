@@ -6,7 +6,9 @@
 
 This is a Next.js 15 application built for Look After You, an influencer talent agency. The platform uses Firebase Vertex AI (Gemini 1.5 Flash) to automatically transform client briefs into professional presentations with intelligent influencer-brand matching.
 
-**✨ Version 2.1.0 Update**: **POWERPOINT EXPORT & MULTI-FORMAT SUPPORT COMPLETE!** 📤 Presentations now export as editable PowerPoint (PPTX) files fully compatible with PowerPoint, Google Slides, and Canva! Text is 100% editable (not flattened images). Includes server-side image proxy (`/api/proxy-image/route.ts`) to bypass CORS restrictions, enhanced PDF export with all 13 slides rendering perfectly (fixed blank slides, removed `lab()` color errors, proxied images), and beautiful export dropdown menu with improved visibility (darker text, better contrast). Firebase Storage CORS configured via `cors.json` and gsutil. Export speeds: ~12-15s for PPTX, ~8-10s for PDF. All text, formatting, colors, and background images preserved. Production-tested! 🎉✨
+**✨ Version 2.2.0 Update**: **STREAMLINED POWERPOINT EXPORT!** 📤 Simplified export to focus exclusively on PowerPoint (PPTX) format - fully compatible with Google Slides, PowerPoint, and Canva! Removed PDF export (not supported by Google Slides). Clean single-button interface with direct "Export to PowerPoint" action. All text is 100% editable (not flattened images). Includes server-side image proxy to bypass CORS restrictions. Upload PPTX files directly to Google Slides (File → Open → Upload) for full editing capability. Export speed: ~12-15 seconds. All text, formatting, colors, and background images preserved. Production-tested! 🎉✨
+
+**Previous - Version 2.1.0**: **POWERPOINT EXPORT & MULTI-FORMAT SUPPORT COMPLETE!** 📤 Presentations export as editable PowerPoint (PPTX) files fully compatible with PowerPoint, Google Slides, and Canva! Text is 100% editable (not flattened images). Includes server-side image proxy (`/api/proxy-image/route.ts`) to bypass CORS restrictions, enhanced PDF export with all 13 slides rendering perfectly (fixed blank slides, removed `lab()` color errors, proxied images), and beautiful export dropdown menu with improved visibility (darker text, better contrast). Firebase Storage CORS configured via `cors.json` and gsutil. Export speeds: ~12-15s for PPTX, ~8-10s for PDF. All text, formatting, colors, and background images preserved. Production-tested! 🎉✨
 
 **Previous - Version 2.0.1**: **UI POLISH & REFINEMENTS COMPLETE!** Fixed navigation bar spacing with consistent text-sm (14px), prominent Export button with shadow effects, and visual dividers between sections. **Real slide preview thumbnails** now show actual miniature renderings of each slide using scaled SlideRenderer (scale={0.108}) - no more text-only previews! Fixed canvas spacing (p-12) and eliminated all overlapping elements with proper z-indexing. Comprehensive browser testing verified all features: Export PDF ✅, slide navigation ✅, zoom controls ✅, thumbnail rendering ✅. Production-tested and ready! 🚀✨
 
@@ -50,7 +52,7 @@ This is a Next.js 15 application built for Look After You, an influencer talent 
 **AI Influencer Ranking**: Google Gemini 1.5 Flash via Firebase Vertex AI
 **AI Image Generation**: Google Nano Banana (Gemini 2.5 Flash Image) via Replicate API
 **Data Visualization**: Recharts (charts/graphs) + React Spring (animations)
-**Export Formats**: PowerPoint (PPTX) via pptxgenjs, PDF via jsPDF + html2canvas
+**Export Format**: PowerPoint (PPTX) via pptxgenjs - compatible with Google Slides, PowerPoint, and Canva
 **Image Proxy**: Next.js API route for CORS-free image loading
 **Architecture**: Hybrid OpenAI + Replicate + Google for optimal reliability
 **Storage**: Firebase Storage for generated images (~1.4MB per presentation)
@@ -261,7 +263,7 @@ types/
    - Content generation (generatePresentationContent)
    - Slide assembly (generateSlides)
 3. **Editor** → PresentationEditor displays slides
-4. **Export** → PDF generation via jsPDF + html2canvas
+4. **Export** → PowerPoint (PPTX) generation via pptxgenjs
 
 ### Influencer Matching Flow (v1.3.1) 🔥 NEW
 
@@ -331,7 +333,7 @@ SelectedInfluencer extends Influencer with rationale, cost estimates
 RateCard, PerformanceMetrics, Demographics
 
 // Export
-ExportFormat: "pdf" | "pptx" | "google-slides" | "png" | "json"
+ExportFormat: "pptx" // PowerPoint only - compatible with Google Slides, PowerPoint, Canva
 ```
 
 ### AI Implementation Details
@@ -576,7 +578,7 @@ File: `lib/slide-generator.ts`
 - Main canvas with zoom controls
 - Properties panel (right side)
 - Keyboard navigation (←/→ arrows)
-- Export to PDF button
+- Export to PowerPoint button
 
 **Key State**:
 - `currentSlideIndex` - Active slide
@@ -617,7 +619,7 @@ OPENAI_API_KEY=sk-proj-your-key-here
 - Vertex AI: Gemini model access
 - Analytics: Usage tracking
 
-### Export Functionality (v2.1.0) ⚡ NEW
+### Export Functionality (v2.2.0) ⚡ UPDATED
 
 File: `app/editor/[id]/page.tsx`
 
@@ -631,17 +633,6 @@ File: `app/editor/[id]/page.tsx`
 7. Add footer with agency branding
 8. Save as `.pptx` file (~12-15s)
 
-**Enhanced PDF Export** 📄:
-1. Render all slides in hidden DOM container with IDs
-2. Capture computed styles BEFORE cloning
-3. Aggressively sanitize: strip `lab()` gradients, set explicit colors
-4. Proxy all external images through `/api/proxy-image`
-5. Convert images to base64 data URLs (avoids CORS)
-6. Capture each slide with html2canvas (useCORS: false)
-7. Add onclone callback to remove remaining gradients
-8. Add as page to jsPDF
-9. Save file (~8-10s)
-
 **Image Proxy Service** 🔄:
 - File: `app/api/proxy-image/route.ts`
 - Server-side Next.js API route
@@ -649,7 +640,7 @@ File: `app/editor/[id]/page.tsx`
 - Converts to base64 data URLs
 - Bypasses client-side CORS restrictions
 - Returns `{ dataUrl: "data:image/jpeg;base64,..." }`
-- Used by both PDF and PPTX exports
+- Essential for PPTX export
 
 **Firebase Storage CORS** 🔐:
 - File: `cors.json`
@@ -657,19 +648,22 @@ File: `app/editor/[id]/page.tsx`
 - Allows cross-origin GET requests
 - Enables direct image loading in exports
 
-**Export Menu UI** 🎨:
-- Dropdown with two options: PPTX (editable) and PDF (read-only)
-- Visual icons (orange for PPTX, red for PDF)
-- Descriptions for each format
-- Improved visibility (dark text, better contrast)
-- Click-outside to close
+**Export Button UI** 🎨:
+- Single "Export to PowerPoint" button (no dropdown)
+- Direct action - one click to PPTX
+- Clean, intuitive interface
 
 **Compatibility** ✅:
 - Microsoft PowerPoint
-- Google Slides (import PPTX)
+- **Google Slides** (File → Open → Upload PPTX) 🎯
 - Canva (import PPTX, edit text)
 - Keynote
 - LibreOffice Impress
+
+**Why PPTX Only?** 💡:
+- Google Slides does NOT support PDF imports
+- PPTX is the universal editable format
+- Simplified user experience
 
 ### State Management
 
@@ -763,7 +757,7 @@ export const cn = (...inputs: ClassValue[]) => {
 
 **Bottlenecks**:
 - AI generation time (30-60 seconds)
-- PDF export for large decks
+- Additional export formats (Google Slides API integration)
 - Canvas rendering performance
 
 ### Testing Strategy
@@ -861,7 +855,7 @@ npm start
 
 ### Known Issues & Workarounds
 
-1. **PDF export slow**: Reduce zoom/quality or export fewer slides
+1. **PPTX export slow**: Check network connection for image fetching
 2. **AI parsing errors**: Fallback content is provided
 3. **localStorage limits**: Migrate to Firestore for large data
 4. **No real influencer data**: Mock data provided until LAYAI integration
@@ -907,7 +901,7 @@ This guide serves as the strategic "brain" informing all AI decisions about temp
 - firebase-admin: ^13.x (server-side)
 
 **Utilities**:
-- jspdf: ^3.x
+- pptxgenjs: ^3.x
 - html2canvas: ^1.x
 - dotenv: ^16.x
 
@@ -949,7 +943,7 @@ generateSlides(brief: ClientBrief, influencers: SelectedInfluencer[], content: a
 
 1. **AI not generating content**: Check Firebase console for Vertex AI quota/errors
 2. **Slides not rendering**: Verify slide type matches SlideRenderer cases
-3. **Export failing**: Check console for canvas rendering errors
+3. **Export failing**: Check console for pptxgenjs errors and image proxy status
 4. **Form validation issues**: Log formData state before submission
 5. **Content overflow**: Check that chart heights are fixed and containers have max-height
 

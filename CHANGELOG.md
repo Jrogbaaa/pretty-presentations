@@ -5,6 +5,68 @@ All notable changes to the Look After You AI Presentation Generator will be docu
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-10-06
+
+### 📤 Streamlined PowerPoint Export
+
+**Focus:** Simplified export experience with Google Slides compatibility
+
+#### Changed
+
+- **Removed PDF Export Option**
+  - Google Slides does not support PDF imports (read-only format)
+  - PPTX is the universal editable format for all platforms
+  - Simplified user experience with clear, direct export action
+
+- **Streamlined Export UI**
+  - Single "Export to PowerPoint" button (no dropdown menu)
+  - Direct export action - one click to PPTX
+  - Cleaner, more intuitive interface
+  - Removed complexity and decision fatigue
+
+- **Code Cleanup**
+  - Removed `exportToPDF` function and all PDF-related code
+  - Removed `jsPDF` and `html2canvas` dependencies
+  - Removed export dropdown menu state management
+  - Simplified export handler to only support PPTX format
+
+#### Documentation
+
+- **Updated README.md**
+  - Highlighted Google Slides compatibility (upload PPTX directly)
+  - Explained why PPTX-only (Google Slides doesn't support PDF)
+  - Updated version to 2.2.0
+  - Simplified export instructions
+
+- **Updated CHANGELOG.md**
+  - Added v2.2.0 entry documenting changes
+  - Preserved v2.1.0 history for reference
+
+#### Technical Details
+
+- **Files Modified**
+  - `components/PresentationEditor.tsx` - Removed dropdown, simplified button
+  - `app/editor/[id]/page.tsx` - Removed PDF export function
+  - `README.md` - Updated export documentation
+  - `CHANGELOG.md` - Added v2.2.0 entry
+
+- **Files Removed**
+  - No files removed (only code within existing files)
+
+- **Dependencies Removed**
+  - `jsPDF` - No longer needed without PDF export
+  - `html2canvas` - No longer needed without PDF export
+
+#### Why This Change?
+
+Google Slides (the target platform) does **not support** uploading PDF files. Users attempting to upload PDFs see "Selected file [name.pdf] is not supported for upload." PPTX is the only format that works for:
+- ✅ Google Slides (File → Open → Upload)
+- ✅ Microsoft PowerPoint
+- ✅ Canva
+- ✅ All text remains editable
+
+This simplification improves user experience by removing a non-functional option and making the correct path obvious.
+
 ## [2.1.0] - 2025-10-06
 
 ### 📤 PowerPoint Export & Multi-Format Support

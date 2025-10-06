@@ -206,7 +206,7 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
       <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 rounded-xl border border-blue-200 dark:border-blue-900">
         <p className="text-sm text-gray-700 dark:text-gray-300">
           <strong className="text-blue-600 dark:text-blue-400">💡 Tip:</strong> Our AI can parse briefs in any format. Just paste the text, and we&apos;ll extract:
-          client name, budget, target demographics, campaign goals, timeline, and more.
+          client name, budget, target demographics, campaign goals, timeline, and more. After generating your presentation, use NanoBanana AI in the editor to add and customize images!
         </p>
       </div>
     </div>

@@ -2,9 +2,11 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 2.1.0 | **Database**: 3,001 Spanish Influencers (VERIFIED ✅) | **Matching**: LAYAI Algorithm ⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤
+**Status**: 🟢 **Production-Ready** | **Version**: 2.2.0 | **Database**: 3,001 Spanish Influencers (VERIFIED ✅) | **Matching**: LAYAI Algorithm ⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX 📤
 
-**Latest**: v2.1.0 **POWERPOINT EXPORT & MULTI-FORMAT SUPPORT!** 📤 Export presentations as editable PowerPoint files (PPTX) fully compatible with PowerPoint, Google Slides, and Canva! Text is 100% editable, not images. Includes server-side image proxy to bypass CORS, enhanced PDF export with all 13 slides rendering perfectly, and beautiful export dropdown menu. Firebase Storage CORS configured for seamless image loading. Export speeds: ~12-15s for PPTX, ~8-10s for PDF. All text, formatting, colors, and images preserved. Production-tested! 🎉✨
+**Latest**: v2.2.0 **STREAMLINED POWERPOINT EXPORT!** 📤 Simplified export to focus on PowerPoint (PPTX) format only - fully compatible with Google Slides, PowerPoint, and Canva! Upload PPTX files directly to Google Slides for full editing capability. Removed PDF export (not supported by Google Slides). All text is 100% editable, includes server-side image proxy to bypass CORS, and Firebase Storage CORS configured for seamless loading. Export speed: ~12-15 seconds. Clean, single-button interface. Production-tested! 🎉✨
+
+**Previous**: v2.1.0 **POWERPOINT EXPORT & MULTI-FORMAT SUPPORT!** 📤 Export presentations as editable PowerPoint files (PPTX) fully compatible with PowerPoint, Google Slides, and Canva! Text is 100% editable, not images. Includes server-side image proxy to bypass CORS, enhanced PDF export with all 13 slides rendering perfectly, and beautiful export dropdown menu. Firebase Storage CORS configured for seamless image loading. Export speeds: ~12-15s for PPTX, ~8-10s for PDF. All text, formatting, colors, and images preserved. Production-tested! 🎉✨
 
 **Previous**: v2.0.0 **UI DESIGN SYSTEM COMPLETE!** 🎨 Complete presentation editor redesign with Stripe-inspired design principles. New color palette (purple primary #635BFF), comprehensive spacing system, professional typography scale, shadow hierarchy, and animation tokens. Created reusable UI component library (Button, Input, Label). Updated PresentationEditor and NanoBananaPanel with clean, minimal interface. 60px top nav, 240px slide panel, 280px properties panel. WCAG AA compliant with enhanced focus states and keyboard navigation. See DESIGN_SYSTEM.md for complete specifications! ✨
 
@@ -24,32 +26,30 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 
 ## 🚀 Features
 
-### 📤 Multi-Format Export (v2.1.0) ⚡ NEW
+### 📤 PowerPoint Export (v2.2.0) ⚡ NEW
 - **PowerPoint (PPTX) Export**: 
-  - Fully editable presentations compatible with PowerPoint, Google Slides, and Canva
+  - Fully editable presentations compatible with PowerPoint, **Google Slides**, and Canva
+  - **Google Slides Integration**: Upload PPTX files directly to Google Slides (File → Open → Upload)
   - All text preserved as text objects (not flattened images)
   - Background images included via server-side proxy
   - Proper formatting, colors, and layouts maintained
   - 16:9 widescreen format with metadata
   - Export speed: ~12-15 seconds
-- **Enhanced PDF Export**:
-  - All 13 slides render perfectly (fixed blank page issues)
-  - Images proxied through server to avoid CORS
-  - Removed `lab()` color errors from gradients  
-  - Background images included
-  - Export speed: ~8-10 seconds
-- **Export Menu**:
-  - Beautiful dropdown with visual file type icons
-  - Clear descriptions for each format
-  - Improved visibility with better contrast
-  - Click-outside to close
+- **Streamlined Interface**:
+  - Single "Export to PowerPoint" button for clarity
+  - No dropdown menu - direct export action
+  - User-friendly and intuitive
 - **Image Proxy Service**:
   - Server-side proxy bypasses CORS restrictions
   - Converts Firebase images to base64 data URLs
-  - Works for both PDF and PPTX exports
+  - Ensures images work in exported presentations
 - **Firebase CORS Configuration**:
   - Storage bucket configured for cross-origin requests
   - Seamless image loading in exports
+- **Why PPTX Only?**:
+  - Google Slides **does not support** PDF imports (read-only format)
+  - PPTX is the universal editable format supported by all platforms
+  - Simplified user experience with one clear export path
 
 ### 🎨 Stripe-Inspired Design System (v2.0.1)
 - **Complete UI Redesign**: Clean, minimal interface with generous whitespace and subtle shadows
@@ -249,7 +249,7 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 - **AI Text Processing**: OpenAI GPT-4o-mini for reliable brief parsing, validation, and content generation
 - **AI Influencer Ranking**: Google Gemini 1.5 Flash via Firebase Vertex AI
 - **AI Image Generation**: Google Gemini 2.0 Flash Exp via Firebase Vertex AI
-- **Export**: jsPDF, html2canvas
+- **Export**: pptxgenjs
 - **Data Sources**: StarNgage, Apify, Serply (via LAYAI)
 
 ## 📦 Installation
@@ -351,7 +351,7 @@ npm run import:influencers     # Import LAYAI database
 3. **AI Processing**: The system analyzes your brief and matches it with the optimal influencers from the database
 4. **Generation**: AI creates professional slide content tailored to your brand and objectives
 5. **Editing**: Use the Canva-style editor to refine and customize your presentation
-6. **Export**: Download your presentation as PDF or other formats
+6. **Export**: Download your presentation as PowerPoint (PPTX) - fully editable in Google Slides, PowerPoint, or Canva
 
 ## 📚 Project Structure
 
@@ -465,8 +465,8 @@ For each selected influencer:
 ## 🔮 Future Enhancements
 
 ### Export & Collaboration
-- [ ] PowerPoint (.pptx) export
-- [ ] Google Slides export
+- [x] ~~PowerPoint (.pptx) export~~ ✅ **COMPLETED**
+- [x] ~~Google Slides compatibility~~ ✅ **COMPLETED** (via PPTX upload)
 - [ ] Real-time collaboration
 - [ ] Version history and rollback
 

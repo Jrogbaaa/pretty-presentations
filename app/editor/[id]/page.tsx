@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import PresentationEditor from "@/components/PresentationEditor";
 import type { Presentation } from "@/types";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import pptxgen from "pptxgenjs";
 
 const EditorPage = () => {
@@ -80,188 +78,19 @@ const EditorPage = () => {
     }
   };
 
-  const handleExport = async (format: "pdf" | "pptx") => {
+  const handleExport = async (format: "pptx") => {
     if (!presentation) return;
 
     setIsExporting(true);
 
     try {
-      if (format === "pdf") {
-        await exportToPDF(presentation);
-      } else if (format === "pptx") {
-        await exportToPPTX(presentation);
-      }
+      await exportToPPTX(presentation);
     } catch (error) {
       console.error("Export error:", error);
       alert("Failed to export presentation. Please try again.");
     } finally {
       setIsExporting(false);
     }
-  };
-
-  const exportToPDF = async (pres: Presentation) => {
-    const pdf = new jsPDF({
-      orientation: "landscape",
-      unit: "px",
-      format: [1920, 1080],
-    });
-
-    // Fetch image through proxy to avoid CORS
-    const proxyImage = async (url: string): Promise<string> => {
-      try {
-        const response = await fetch(`/api/proxy-image?url=${encodeURIComponent(url)}`);
-        const data = await response.json();
-        return data.dataUrl || '';
-      } catch (error) {
-        console.error('Error proxying image:', error);
-        return '';
-      }
-    };
-
-    // Aggressively sanitize element - strip ALL styles that could cause issues
-    const sanitizeForExport = async (originalElement: HTMLElement) => {
-      // Get all original elements and their computed styles FIRST
-      const originalElements = [originalElement, ...Array.from(originalElement.querySelectorAll('*'))] as HTMLElement[];
-      const styleMap = new Map<HTMLElement, CSSStyleDeclaration>();
-      
-      originalElements.forEach((el) => {
-        styleMap.set(el, window.getComputedStyle(el));
-      });
-      
-      // NOW clone
-      const clone = originalElement.cloneNode(true) as HTMLElement;
-      const clonedElements = [clone, ...Array.from(clone.querySelectorAll('*'))] as HTMLElement[];
-      
-      // Collect image proxy promises
-      const imageProxies: Promise<void>[] = [];
-      
-      // Process each cloned element
-      clonedElements.forEach((clonedEl, index) => {
-        const originalEl = originalElements[index];
-        const computed = styleMap.get(originalEl);
-        
-        if (!computed) return;
-        
-        // FORCE remove ALL background properties first
-        clonedEl.style.background = 'none';
-        clonedEl.style.backgroundImage = 'none';
-        clonedEl.style.backgroundBlendMode = 'normal';
-        
-        // Check for background image URL
-        const bgImage = computed.backgroundImage;
-        if (bgImage && bgImage !== 'none') {
-          const urlMatch = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
-          if (urlMatch && urlMatch[1]) {
-            const imageUrl = urlMatch[1];
-            if (imageUrl.startsWith('https://') || imageUrl.startsWith('http://')) {
-              imageProxies.push(
-                proxyImage(imageUrl).then((dataUrl) => {
-                  if (dataUrl) {
-                    clonedEl.style.backgroundImage = `url("${dataUrl}")`;
-                    clonedEl.style.backgroundSize = computed.backgroundSize;
-                    clonedEl.style.backgroundPosition = computed.backgroundPosition;
-                    clonedEl.style.backgroundRepeat = computed.backgroundRepeat;
-                  }
-                })
-              );
-            }
-          }
-        }
-        
-        // Set background color (use rgb/hex only)
-        const bgColor = computed.backgroundColor;
-        if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)') {
-          clonedEl.style.backgroundColor = bgColor;
-        }
-        
-        // Set text color
-        const textColor = computed.color;
-        if (textColor) {
-          clonedEl.style.color = textColor;
-        }
-        
-        // Convert IMG elements
-        if (clonedEl.tagName === 'IMG') {
-          const img = clonedEl as HTMLImageElement;
-          const originalImg = originalEl as HTMLImageElement;
-          if (originalImg.src && (originalImg.src.startsWith('https://') || originalImg.src.startsWith('http://'))) {
-            imageProxies.push(
-              proxyImage(originalImg.src).then((dataUrl) => {
-                if (dataUrl) {
-                  img.src = dataUrl;
-                }
-              })
-            );
-          }
-        }
-      });
-      
-      // Wait for all images to be proxied
-      await Promise.all(imageProxies);
-      
-      return clone;
-    };
-
-    // Small delay to ensure DOM is fully rendered
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // For each slide, render it and add to PDF
-    for (let i = 0; i < pres.slides.length; i++) {
-      const slideElement = document.getElementById(`slide-${i}`);
-      
-      if (slideElement) {
-        try {
-          // Sanitize the slide for export
-          const sanitizedSlide = await sanitizeForExport(slideElement);
-          
-          // Temporarily append to DOM for html2canvas (hidden)
-          sanitizedSlide.style.position = 'fixed';
-          sanitizedSlide.style.left = '-10000px';
-          sanitizedSlide.style.top = '-10000px';
-          document.body.appendChild(sanitizedSlide);
-          
-          try {
-            // Wait a moment for images to settle
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            const canvas = await html2canvas(sanitizedSlide, {
-              width: 1920,
-              height: 1080,
-              scale: 1,
-              useCORS: false,
-              allowTaint: true,
-              backgroundColor: '#ffffff',
-              logging: false,
-              onclone: (clonedDoc) => {
-                // Remove any remaining gradients in the cloned document
-                const allEls = clonedDoc.querySelectorAll('*') as NodeListOf<HTMLElement>;
-                allEls.forEach((el) => {
-                  if (el.style.backgroundImage && el.style.backgroundImage.includes('gradient')) {
-                    el.style.backgroundImage = 'none';
-                  }
-                });
-              },
-            });
-
-            const imgData = canvas.toDataURL("image/png");
-            
-            if (i > 0) {
-              pdf.addPage();
-            }
-            
-            pdf.addImage(imgData, "PNG", 0, 0, 1920, 1080);
-          } finally {
-            // Clean up cloned element
-            document.body.removeChild(sanitizedSlide);
-          }
-        } catch (error) {
-          console.error(`Error exporting slide ${i}:`, error);
-          // Continue with next slide
-        }
-      }
-    }
-
-    pdf.save(`${pres.campaignName}-${pres.clientName}.pdf`);
   };
 
   const exportToPPTX = async (pres: Presentation) => {

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import type { Presentation } from "@/types";
+import type { Presentation, Slide } from "@/types";
 import SlideRenderer from "./SlideRenderer";
+import NanoBananaPanel from "./NanoBananaPanel";
 import { 
   PanelLeftClose, 
   PanelRightClose,
@@ -17,13 +18,14 @@ import {
   Plus,
   ZoomIn,
   ZoomOut,
-  Maximize2
+  Maximize2,
+  Sparkles
 } from "lucide-react";
 
 interface PresentationEditorProps {
   presentation: Presentation;
   onSave?: (presentation: Presentation) => void;
-  onExport?: (format: "pdf" | "pptx") => void;
+  onExport?: (format: "pptx") => void;
 }
 
 const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEditorProps) => {
@@ -31,13 +33,14 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
   const [zoom, setZoom] = useState(0.5);
   const [showSidebar, setShowSidebar] = useState(true);
   const [showProperties, setShowProperties] = useState(false);
+  const [showNanoBanana, setShowNanoBanana] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [presentationState, setPresentationState] = useState(presentation);
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  const currentSlide = presentation.slides[currentSlideIndex];
+  const currentSlide = presentationState.slides[currentSlideIndex];
 
   const handlePrevSlide = () => {
     if (currentSlideIndex > 0) {
@@ -46,8 +49,44 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
   };
 
   const handleNextSlide = () => {
-    if (currentSlideIndex < presentation.slides.length - 1) {
+    if (currentSlideIndex < presentationState.slides.length - 1) {
       setCurrentSlideIndex(currentSlideIndex + 1);
+    }
+  };
+
+  const handleImageUpdate = (slideId: string, imageUrl: string) => {
+    setPresentationState((prev) => ({
+      ...prev,
+      slides: prev.slides.map((slide) =>
+        slide.id === slideId
+          ? {
+              ...slide,
+              content: {
+                ...slide.content,
+                images: [imageUrl],
+              },
+            }
+          : slide
+      ),
+    }));
+    
+    // Notify parent of changes
+    if (onSave) {
+      const updatedPresentation = {
+        ...presentationState,
+        slides: presentationState.slides.map((slide) =>
+          slide.id === slideId
+            ? {
+                ...slide,
+                content: {
+                  ...slide.content,
+                  images: [imageUrl],
+                },
+              }
+            : slide
+        ),
+      };
+      onSave(updatedPresentation);
     }
   };
 
@@ -89,19 +128,6 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
     setZoom(0.5);
     setPanOffset({ x: 0, y: 0 });
   };
-
-  // Close export menu when clicking outside
-  const handleClickOutside = (e: MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (showExportMenu && !target.closest('.export-dropdown')) {
-      setShowExportMenu(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [showExportMenu]);
 
   return (
     <div
@@ -153,11 +179,17 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
           </button>
           <button
             type="button"
-            className="w-9 h-9 flex items-center justify-center rounded hover:bg-background transition-fast text-text-secondary"
-            aria-label="Image tool"
+            onClick={() => {
+              setShowNanoBanana(!showNanoBanana);
+              setShowProperties(false);
+            }}
+            className={`w-9 h-9 flex items-center justify-center rounded hover:bg-background transition-fast ${
+              showNanoBanana ? "bg-primary/10 text-primary" : "text-text-secondary"
+            }`}
+            aria-label="NanoBanana AI Image Tool"
             tabIndex={0}
           >
-            <ImageIcon className="w-5 h-5" />
+            <Sparkles className="w-5 h-5" />
           </button>
           <button
             type="button"
@@ -179,61 +211,16 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
 
         {/* Right Section */}
         <div className="flex items-center gap-3">
-          <div className="relative export-dropdown">
-            <button
-              type="button"
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              className="h-9 px-4 bg-primary text-white rounded hover:bg-primary-hover active:bg-primary-active transition-fast text-sm font-medium shadow-sm hover:shadow"
-              tabIndex={0}
-              aria-label="Export presentation"
-            >
-              <div className="flex items-center gap-2">
-                <Share2 className="w-4 h-4" />
-                <span>Export</span>
-              </div>
-            </button>
-            
-            {/* Export dropdown menu */}
-            {showExportMenu && (
-              <div className="absolute top-full right-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onExport?.("pptx");
-                    setShowExportMenu(false);
-                  }}
-                  className="w-full px-4 py-3 text-left hover:bg-blue-50 transition-fast flex items-center gap-3 border-b border-gray-100"
-                  tabIndex={0}
-                >
-                  <svg className="w-5 h-5 text-orange-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
-                    <path d="M8 15h8v2H8zm0-4h8v2H8z"/>
-                  </svg>
-                  <div className="flex-1">
-                    <div className="font-semibold text-gray-900">PowerPoint (PPTX)</div>
-                    <div className="text-xs text-gray-600">Editable slides</div>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onExport?.("pdf");
-                    setShowExportMenu(false);
-                  }}
-                  className="w-full px-4 py-3 text-left hover:bg-blue-50 transition-fast flex items-center gap-3"
-                  tabIndex={0}
-                >
-                  <svg className="w-5 h-5 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
-                  </svg>
-                  <div className="flex-1">
-                    <div className="font-semibold text-gray-900">PDF</div>
-                    <div className="text-xs text-gray-600">Read-only format</div>
-                  </div>
-                </button>
-              </div>
-            )}
-          </div>
+          <button
+            type="button"
+            onClick={() => onExport?.("pptx")}
+            className="h-9 px-4 bg-primary text-white rounded hover:bg-primary-hover active:bg-primary-active transition-fast text-sm font-medium shadow-sm hover:shadow flex items-center gap-2"
+            tabIndex={0}
+            aria-label="Export to PowerPoint"
+          >
+            <Share2 className="w-4 h-4" />
+            <span>Export to PowerPoint</span>
+          </button>
           
           <div className="h-5 w-px bg-border" />
           
@@ -270,7 +257,7 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
             </div>
             
             <div className="space-y-md">
-              {presentation.slides.map((slide, index) => (
+              {presentationState.slides.map((slide, index) => (
                 <button
                   key={slide.id}
                   type="button"
@@ -379,17 +366,32 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
 
           <button
             type="button"
-            onClick={() => setShowProperties(!showProperties)}
+            onClick={() => {
+              setShowProperties(!showProperties);
+              if (!showProperties) {
+                setShowNanoBanana(false);
+              }
+            }}
             className="absolute top-4 right-4 z-10 w-9 h-9 flex items-center justify-center rounded bg-background-surface border border-border hover:bg-background transition-base text-text-secondary shadow-subtle"
             aria-label="Toggle properties panel"
             tabIndex={0}
           >
-            <PanelRightClose className={`w-5 h-5 transition-transform ${showProperties ? '' : 'rotate-180'}`} />
+            <PanelRightClose className={`w-5 h-5 transition-transform ${showProperties || showNanoBanana ? '' : 'rotate-180'}`} />
           </button>
         </div>
 
+        {/* NanoBanana Panel (Right Sidebar) - 280px width */}
+        {showNanoBanana && (
+          <NanoBananaPanel
+            currentSlide={currentSlide}
+            brief={presentationState.brief}
+            onImageUpdate={handleImageUpdate}
+            onClose={() => setShowNanoBanana(false)}
+          />
+        )}
+
         {/* Properties Panel (Right Sidebar) - 280px width */}
-        {showProperties && (
+        {showProperties && !showNanoBanana && (
           <div className="w-[280px] bg-background-surface border-l border-border overflow-y-auto p-xl">
             <h2 className="text-heading-3 text-text-primary mb-xl">Properties</h2>
             
@@ -516,7 +518,7 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
 
       {/* Hidden slides for export - rendered at full size with IDs */}
       <div className="fixed -left-[10000px] -top-[10000px] pointer-events-none" aria-hidden="true">
-        {presentation.slides.map((slide, index) => (
+        {presentationState.slides.map((slide, index) => (
           <div key={slide.id} id={`slide-${index}`}>
             <SlideRenderer slide={slide} scale={1} />
           </div>

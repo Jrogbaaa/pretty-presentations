@@ -24,6 +24,12 @@ export interface ClientBrief {
   contentThemes: string[];
   additionalNotes?: string;
   templateId?: TemplateId;
+  uploadedImages?: Array<{
+    id: string;
+    url: string;
+    name: string;
+    description?: string;
+  }>;
 }
 
 export interface Demographics {
