@@ -3,7 +3,7 @@
  * Prevents abuse of API endpoints by limiting requests per IP/user
  */
 
-interface RateLimitConfig {
+export interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds
   maxRequests: number; // Max requests per window
 }
@@ -13,7 +13,7 @@ interface RateLimitEntry {
   resetTime: number;
 }
 
-class RateLimiter {
+export class RateLimiter {
   private limits = new Map<string, RateLimitEntry>();
   private config: RateLimitConfig;
 
@@ -97,6 +97,15 @@ class RateLimiter {
 
 // Preset configurations for common rate limit scenarios
 export const RateLimitPresets = {
+  // Conservative: 10 requests per minute
+  CONSERVATIVE: { windowMs: 60000, maxRequests: 10 },
+  
+  // Moderate: 30 requests per minute
+  MODERATE: { windowMs: 60000, maxRequests: 30 },
+  
+  // Generous: 60 requests per minute
+  GENEROUS: { windowMs: 60000, maxRequests: 60 },
+  
   // Brief parsing: 20 requests per minute (generous for form submissions)
   briefParsing: { windowMs: 60000, maxRequests: 20 },
   
@@ -108,9 +117,19 @@ export const RateLimitPresets = {
   
   // Presentation generation: 5 requests per minute (very expensive)
   presentationGeneration: { windowMs: 60000, maxRequests: 5 },
-  
-  // Generic API: 30 requests per minute
-  api: { windowMs: 60000, maxRequests: 30 },
+};
+
+// Global map of rate limiters by operation name
+const limiters = new Map<string, RateLimiter>();
+
+/**
+ * Get or create a rate limiter for a specific operation
+ */
+const getLimiter = (operation: string, config: RateLimitConfig): RateLimiter => {
+  if (!limiters.has(operation)) {
+    limiters.set(operation, new RateLimiter(config));
+  }
+  return limiters.get(operation)!;
 };
 
 // Create different rate limiters for different endpoints
@@ -142,18 +161,25 @@ export const getClientIdentifier = (request: Request): string => {
 /**
  * Enforce rate limit and throw error if exceeded
  * Helper function for server actions that need rate limiting
+ * 
+ * @param identifier - Unique identifier for the client (e.g., user ID, IP address, operation name)
+ * @param config - Rate limit configuration (from RateLimitPresets)
+ * @param operation - Optional operation name for error messages
  */
 export const enforceRateLimit = (
-  limiter: RateLimiter,
   identifier: string,
-  operation: string = "operation"
+  config: RateLimitConfig,
+  operation?: string
 ): void => {
+  // Use identifier as operation key if no specific operation provided
+  const operationKey = operation || identifier;
+  const limiter = getLimiter(operationKey, config);
   const result = limiter.checkLimit(identifier);
   
   if (!result.allowed) {
     const resetDate = new Date(result.resetTime);
     throw new Error(
-      `Rate limit exceeded for ${operation}. Please try again after ${resetDate.toLocaleTimeString()}.`
+      `Rate limit exceeded for ${operationKey}. Please try again after ${resetDate.toLocaleTimeString()}.`
     );
   }
 };
