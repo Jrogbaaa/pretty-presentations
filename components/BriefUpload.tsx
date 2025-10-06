@@ -54,10 +54,24 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
     }
   };
 
-  const handleLoadSample = () => {
+  const handleLoadSample = async () => {
     setBriefText(SAMPLE_BRIEF);
     const briefSummary = extractBriefSummary(SAMPLE_BRIEF);
     setSummary(briefSummary);
+    
+    // Automatically parse the sample brief
+    setIsParsing(true);
+    setError(null);
+    
+    try {
+      const parsed = await parseBriefDocument(SAMPLE_BRIEF);
+      onParsed(parsed);
+    } catch (err) {
+      console.error("Parse error:", err);
+      setError(err instanceof Error ? err.message : "Failed to parse sample brief");
+    } finally {
+      setIsParsing(false);
+    }
   };
 
   return (
