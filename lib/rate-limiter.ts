@@ -1,279 +1,129 @@
-import { RateLimitError } from "@/types/errors";
-
 /**
- * Simple in-memory rate limiter using sliding window algorithm
- * For production, consider using Redis or a dedicated rate limiting service
+ * Rate Limiter
+ * Prevents abuse of API endpoints by limiting requests per IP/user
  */
 
 interface RateLimitConfig {
-  maxRequests: number;
-  windowMs: number;
+  windowMs: number; // Time window in milliseconds
+  maxRequests: number; // Max requests per window
 }
 
-interface RequestRecord {
-  timestamps: number[];
-  lastCleanup: number;
+interface RateLimitEntry {
+  count: number;
+  resetTime: number;
 }
 
-/**
- * In-memory storage for rate limit tracking
- * Note: This will be reset on server restart
- * For production with multiple instances, use Redis
- */
-const requestStore = new Map<string, RequestRecord>();
+class RateLimiter {
+  private limits = new Map<string, RateLimitEntry>();
+  private config: RateLimitConfig;
 
-/**
- * Cleanup interval (5 minutes)
- */
-const CLEANUP_INTERVAL = 5 * 60 * 1000;
-
-/**
- * Default rate limit configurations
- */
-export const RateLimitPresets = {
-  /** Very strict: 5 requests per minute */
-  STRICT: {
-    maxRequests: 5,
-    windowMs: 60 * 1000
-  },
-  
-  /** Standard: 10 requests per minute */
-  STANDARD: {
-    maxRequests: 10,
-    windowMs: 60 * 1000
-  },
-  
-  /** Moderate: 30 requests per minute */
-  MODERATE: {
-    maxRequests: 30,
-    windowMs: 60 * 1000
-  },
-  
-  /** Generous: 100 requests per minute */
-  GENEROUS: {
-    maxRequests: 100,
-    windowMs: 60 * 1000
-  },
-  
-  /** Per-hour limit: 500 requests per hour */
-  HOURLY: {
-    maxRequests: 500,
-    windowMs: 60 * 60 * 1000
+  constructor(config: RateLimitConfig = { windowMs: 60000, maxRequests: 10 }) {
+    this.config = config;
+    
+    // Clean up expired entries every minute
+    if (typeof setInterval !== "undefined") {
+      setInterval(() => this.cleanup(), 60000);
+    }
   }
-} as const;
 
-/**
- * Clean up old timestamps from a record
- */
-const cleanupRecord = (record: RequestRecord, windowMs: number, now: number): void => {
-  const cutoff = now - windowMs;
-  record.timestamps = record.timestamps.filter(timestamp => timestamp > cutoff);
-  record.lastCleanup = now;
-};
-
-/**
- * Periodic cleanup of old records to prevent memory leaks
- */
-const scheduleCleanup = (): void => {
-  setInterval(() => {
+  /**
+   * Check if request should be rate limited
+   * Returns true if allowed, false if rate limited
+   */
+  checkLimit(identifier: string): { allowed: boolean; remaining: number; resetTime: number } {
     const now = Date.now();
-    const recordsToDelete: string[] = [];
-    
-    for (const [key, record] of requestStore.entries()) {
-      // Remove records that haven't been used in 1 hour
-      if (now - record.lastCleanup > 60 * 60 * 1000) {
-        recordsToDelete.push(key);
-      }
+    const entry = this.limits.get(identifier);
+
+    // No entry or expired - allow and create new entry
+    if (!entry || now >= entry.resetTime) {
+      this.limits.set(identifier, {
+        count: 1,
+        resetTime: now + this.config.windowMs,
+      });
+
+      return {
+        allowed: true,
+        remaining: this.config.maxRequests - 1,
+        resetTime: now + this.config.windowMs,
+      };
     }
-    
-    recordsToDelete.forEach(key => requestStore.delete(key));
-    
-    if (recordsToDelete.length > 0) {
-      console.log(`Rate limiter: Cleaned up ${recordsToDelete.length} old records`);
+
+    // Entry exists and not expired
+    if (entry.count >= this.config.maxRequests) {
+      return {
+        allowed: false,
+        remaining: 0,
+        resetTime: entry.resetTime,
+      };
     }
-  }, CLEANUP_INTERVAL);
-};
 
-// Start cleanup on module load (only in Node.js environment)
-if (typeof window === 'undefined') {
-  scheduleCleanup();
-}
+    // Increment count
+    entry.count++;
+    this.limits.set(identifier, entry);
 
-/**
- * Check if a request should be rate limited
- * 
- * @param identifier - Unique identifier (e.g., user ID, IP address, API key)
- * @param config - Rate limit configuration
- * @returns true if request is allowed, false if rate limited
- * 
- * @example
- * ```typescript
- * const allowed = checkRateLimit(userId, RateLimitPresets.STANDARD);
- * if (!allowed) {
- *   throw new RateLimitError('Too many requests');
- * }
- * ```
- */
-export const checkRateLimit = (
-  identifier: string,
-  config: RateLimitConfig = RateLimitPresets.STANDARD
-): boolean => {
-  const now = Date.now();
-  
-  // Get or create record
-  let record = requestStore.get(identifier);
-  if (!record) {
-    record = {
-      timestamps: [],
-      lastCleanup: now
-    };
-    requestStore.set(identifier, record);
-  }
-  
-  // Cleanup old timestamps
-  cleanupRecord(record, config.windowMs, now);
-  
-  // Check if limit is exceeded
-  if (record.timestamps.length >= config.maxRequests) {
-    return false;
-  }
-  
-  // Add current timestamp
-  record.timestamps.push(now);
-  
-  return true;
-};
-
-/**
- * Check rate limit and throw error if exceeded
- * 
- * @param identifier - Unique identifier
- * @param config - Rate limit configuration
- * @throws RateLimitError if rate limit is exceeded
- * 
- * @example
- * ```typescript
- * await enforceRateLimit(userId, RateLimitPresets.STANDARD);
- * // Proceeds if allowed, throws if rate limited
- * ```
- */
-export const enforceRateLimit = (
-  identifier: string,
-  config: RateLimitConfig = RateLimitPresets.STANDARD
-): void => {
-  const allowed = checkRateLimit(identifier, config);
-  
-  if (!allowed) {
-    const record = requestStore.get(identifier);
-    const oldestTimestamp = record?.timestamps[0] || Date.now();
-    const retryAfter = Math.ceil((oldestTimestamp + config.windowMs - Date.now()) / 1000);
-    
-    throw new RateLimitError(
-      `Rate limit exceeded. Maximum ${config.maxRequests} requests per ${config.windowMs / 1000} seconds.`,
-      Math.max(retryAfter, 1)
-    );
-  }
-};
-
-/**
- * Get remaining requests for an identifier
- * 
- * @param identifier - Unique identifier
- * @param config - Rate limit configuration
- * @returns Number of remaining requests allowed
- */
-export const getRemainingRequests = (
-  identifier: string,
-  config: RateLimitConfig = RateLimitPresets.STANDARD
-): number => {
-  const record = requestStore.get(identifier);
-  if (!record) {
-    return config.maxRequests;
-  }
-  
-  const now = Date.now();
-  cleanupRecord(record, config.windowMs, now);
-  
-  return Math.max(0, config.maxRequests - record.timestamps.length);
-};
-
-/**
- * Get time until next request is allowed (in seconds)
- * 
- * @param identifier - Unique identifier
- * @param config - Rate limit configuration
- * @returns Seconds until next request is allowed, or 0 if allowed now
- */
-export const getRetryAfter = (
-  identifier: string,
-  config: RateLimitConfig = RateLimitPresets.STANDARD
-): number => {
-  const record = requestStore.get(identifier);
-  if (!record || record.timestamps.length < config.maxRequests) {
-    return 0;
-  }
-  
-  const now = Date.now();
-  cleanupRecord(record, config.windowMs, now);
-  
-  if (record.timestamps.length < config.maxRequests) {
-    return 0;
-  }
-  
-  const oldestTimestamp = record.timestamps[0];
-  const retryAfter = oldestTimestamp + config.windowMs - now;
-  
-  return Math.max(0, Math.ceil(retryAfter / 1000));
-};
-
-/**
- * Reset rate limit for an identifier (useful for testing or admin overrides)
- * 
- * @param identifier - Unique identifier to reset
- */
-export const resetRateLimit = (identifier: string): void => {
-  requestStore.delete(identifier);
-};
-
-/**
- * Get rate limit status for an identifier
- * 
- * @param identifier - Unique identifier
- * @param config - Rate limit configuration
- * @returns Status object with detailed information
- */
-export const getRateLimitStatus = (
-  identifier: string,
-  config: RateLimitConfig = RateLimitPresets.STANDARD
-) => {
-  const record = requestStore.get(identifier);
-  
-  if (!record) {
     return {
       allowed: true,
-      remaining: config.maxRequests,
-      limit: config.maxRequests,
-      retryAfter: 0,
-      resetAt: null as Date | null
+      remaining: this.config.maxRequests - entry.count,
+      resetTime: entry.resetTime,
     };
   }
+
+  /**
+   * Clean up expired entries
+   */
+  private cleanup(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.limits.entries()) {
+      if (now >= entry.resetTime) {
+        this.limits.delete(key);
+      }
+    }
+  }
+
+  /**
+   * Reset limit for a specific identifier
+   */
+  reset(identifier: string): void {
+    this.limits.delete(identifier);
+  }
+
+  /**
+   * Clear all limits
+   */
+  clearAll(): void {
+    this.limits.clear();
+  }
+}
+
+// Create different rate limiters for different endpoints
+export const imageGenerationLimiter = new RateLimiter({
+  windowMs: 60000, // 1 minute
+  maxRequests: 10, // 10 images per minute
+});
+
+export const imageEditLimiter = new RateLimiter({
+  windowMs: 60000, // 1 minute
+  maxRequests: 20, // 20 edits per minute (more lenient)
+});
+
+/**
+ * Get client identifier from request
+ * Uses IP address or user ID if available
+ */
+export const getClientIdentifier = (request: Request): string => {
+  // Try to get IP from headers
+  const forwarded = request.headers.get("x-forwarded-for");
+  const realIp = request.headers.get("x-real-ip");
   
-  const now = Date.now();
-  cleanupRecord(record, config.windowMs, now);
+  if (forwarded) {
+    return forwarded.split(",")[0].trim();
+  }
   
-  const remaining = Math.max(0, config.maxRequests - record.timestamps.length);
-  const allowed = remaining > 0;
-  const retryAfter = allowed ? 0 : getRetryAfter(identifier, config);
-  const resetAt = record.timestamps[0] 
-    ? new Date(record.timestamps[0] + config.windowMs)
-    : null;
-  
-  return {
-    allowed,
-    remaining,
-    limit: config.maxRequests,
-    retryAfter,
-    resetAt
-  };
+  if (realIp) {
+    return realIp;
+  }
+
+  // Fallback to a generic identifier (not ideal for production)
+  return "anonymous";
 };
 
