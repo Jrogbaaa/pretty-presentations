@@ -36,6 +36,15 @@ const getReplicateClient = () => {
 };
 
 /**
+ * Create a timeout promise that rejects after the specified duration
+ */
+const createTimeout = (ms: number, message: string) => {
+  return new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error(message)), ms);
+  });
+};
+
+/**
  * Generate an image for a specific slide using Nano Banana
  */
 export const generateSlideImage = async (
@@ -54,9 +63,9 @@ export const generateSlideImage = async (
       prompt: prompt.substring(0, 100) + "...",
     });
 
-    // Run Nano Banana model
+    // Run Nano Banana model with 60-second timeout
     // Using specific version hash from Replicate
-    let output: any = await replicate.run(
+    const replicateCall = replicate.run(
       "google/nano-banana:1b7b945e8f7edf7a034eba6cb2c20f2ab5dc7d090eea1c616e96da947be76aee",
       {
         input: {
@@ -66,6 +75,12 @@ export const generateSlideImage = async (
         }
       }
     );
+
+    // Add 60-second timeout to prevent hanging
+    let output: any = await Promise.race([
+      replicateCall,
+      createTimeout(60000, `Image generation timeout after 60s for ${slideType}`)
+    ]);
 
     // Handle streaming response (Replicate streams binary image data)
     if (output && typeof output[Symbol.asyncIterator] === 'function') {
@@ -117,6 +132,7 @@ export const generateSlideImage = async (
 
 /**
  * Generate images for all slides in a presentation
+ * Now uses parallel processing with a 2-minute overall timeout
  */
 export const generateImagesForSlides = async (
   slides: Slide[],
@@ -128,13 +144,12 @@ export const generateImagesForSlides = async (
 
   const updatedSlides = [...slides];
 
-  for (let i = 0; i < updatedSlides.length; i++) {
-    const slide = updatedSlides[i];
-
+  // Generate images in parallel for better performance
+  const imagePromises = updatedSlides.map(async (slide, index) => {
     // Skip slides that shouldn't have images
     if (shouldSkipImage(slide.type)) {
-      logInfo(`Skipping image for slide ${i + 1}`, { type: slide.type });
-      continue;
+      logInfo(`Skipping image for slide ${index + 1}`, { type: slide.type });
+      return { index, imageUrl: null };
     }
 
     try {
@@ -146,33 +161,47 @@ export const generateImagesForSlides = async (
       });
 
       if (imageUrl) {
-        // Add image to slide content
-        updatedSlides[i] = {
-          ...slide,
-          content: {
-            ...slide.content,
-            images: [imageUrl],
-          },
-        };
-
-        logInfo(`✅ Image added to slide ${i + 1}/${slides.length}`, {
+        logInfo(`✅ Image added to slide ${index + 1}/${slides.length}`, {
           type: slide.type,
         });
       } else {
-        logInfo(`⚠️ No image generated for slide ${i + 1}`, {
+        logInfo(`⚠️ No image generated for slide ${index + 1}`, {
           type: slide.type,
         });
       }
+      
+      return { index, imageUrl };
     } catch (error) {
-      logError(`Failed to generate image for slide ${i + 1}`, {
+      logError(`Failed to generate image for slide ${index + 1}`, {
         error,
         type: slide.type,
       });
-      // Continue with other slides even if one fails
+      return { index, imageUrl: null };
     }
+  });
 
-    // Add delay to avoid rate limits (Replicate has generous limits but still good practice)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  // Wait for all images with a 2-minute overall timeout
+  try {
+    const results = await Promise.race([
+      Promise.all(imagePromises),
+      createTimeout(120000, 'Overall image generation timeout after 2 minutes')
+    ]) as Array<{ index: number; imageUrl: string | null }>;
+
+    // Apply results to slides
+    results.forEach(({ index, imageUrl }) => {
+      if (imageUrl) {
+        updatedSlides[index] = {
+          ...updatedSlides[index],
+          content: {
+            ...updatedSlides[index].content,
+            images: [imageUrl],
+          },
+        };
+      }
+    });
+  } catch (error) {
+    logError('Image generation timed out or failed', { error });
+    // Continue with slides without images
   }
 
   const imagesGenerated = updatedSlides.filter((s) => s.content.images?.length).length;

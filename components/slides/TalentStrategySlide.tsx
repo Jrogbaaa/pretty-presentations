@@ -1,4 +1,5 @@
 import type { Slide } from "@/types";
+import { BarChartComparison, AnimatedNumber } from "@/components/charts";
 
 interface TalentStrategySlideProps {
   slide: Slide;
@@ -28,8 +29,24 @@ const TalentStrategySlide = ({ slide }: TalentStrategySlideProps) => {
         <p className="text-lg mb-6 leading-relaxed">{slide.content.body}</p>
       )}
 
-      {/* Metrics Overview */}
-      {slide.content.metrics && slide.content.metrics.length > 0 && (
+      {/* Metrics Overview - Now with Bar Chart Visualization */}
+      {slide.content.customData?.chartData && slide.content.customData.chartData.length > 0 ? (
+        <div className="mb-8">
+          <h3 className="text-2xl font-bold mb-4">Engagement Rate Comparison</h3>
+          <BarChartComparison
+            data={slide.content.customData.chartData}
+            metric="%"
+            averageLine={slide.content.customData.average || undefined}
+            averageLabel="Industry Average"
+            height={Math.min(350, slide.content.customData.chartData.length * 70 + 100)}
+          />
+          {slide.content.customData.insight && (
+            <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: slide.design.accentColor + "15" }}>
+              <p className="text-lg italic">💡 <strong>Insight:</strong> {slide.content.customData.insight}</p>
+            </div>
+          )}
+        </div>
+      ) : slide.content.metrics && slide.content.metrics.length > 0 ? (
         <div className="grid grid-cols-4 gap-4 mb-6">
           {slide.content.metrics.map((metric, index) => (
             <div
@@ -38,11 +55,13 @@ const TalentStrategySlide = ({ slide }: TalentStrategySlideProps) => {
               style={{ backgroundColor: slide.design.accentColor + "20" }}
             >
               <div className="text-sm opacity-70">{metric.label}</div>
-              <div className="text-2xl font-bold mt-1">{metric.value}</div>
+              <div className="text-2xl font-bold mt-1">
+                <AnimatedNumber value={typeof metric.value === 'number' ? metric.value : parseFloat(String(metric.value)) || 0} />
+              </div>
             </div>
           ))}
         </div>
-      )}
+      ) : null}
 
       {/* Rich Influencer Pool Display (with demographics) */}
       {hasRichData ? (
@@ -74,7 +93,13 @@ const TalentStrategySlide = ({ slide }: TalentStrategySlideProps) => {
                         <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
                           <div>
                             <span className="text-gray-600">Followers:</span>
-                            <span className="font-semibold ml-1">{inf.followers.toLocaleString()}</span>
+                            <span className="font-semibold ml-1">
+                              <AnimatedNumber 
+                                value={inf.followers} 
+                                decimals={0}
+                                className="inline-block"
+                              />
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-600">ER:</span>

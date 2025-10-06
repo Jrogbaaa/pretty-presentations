@@ -1,4 +1,5 @@
 import type { Slide } from "@/types";
+import { DonutChart, AnimatedNumber } from "@/components/charts";
 
 interface RecommendedScenarioSlideProps {
   slide: Slide;
@@ -66,7 +67,14 @@ const RecommendedScenarioSlide = ({ slide, onEdit }: RecommendedScenarioSlidePro
               {'impressions' in recommendedScenario && (
                 <div className="p-8 rounded-2xl" style={{ backgroundColor: slide.design.accentColor + "20" }}>
                   <div className="text-5xl font-black mb-2" style={{ color: slide.design.accentColor }}>
-                    {String(recommendedScenario.impressions)}
+                    <AnimatedNumber 
+                      value={typeof recommendedScenario.impressions === 'string' 
+                        ? parseFloat(recommendedScenario.impressions.replace(/[^0-9.]/g, '')) 
+                        : recommendedScenario.impressions as number
+                      }
+                      suffix={String(recommendedScenario.impressions).includes('M') ? 'M' : ''}
+                      decimals={String(recommendedScenario.impressions).includes('.') ? 1 : 0}
+                    />
                   </div>
                   <div className="text-xl opacity-70">Total Impressions</div>
                 </div>
@@ -90,6 +98,24 @@ const RecommendedScenarioSlide = ({ slide, onEdit }: RecommendedScenarioSlidePro
                 </div>
               )}
             </>
+          )}
+
+          {/* Budget Breakdown Donut Chart */}
+          {slide.content.customData?.budgetBreakdown && slide.content.customData.budgetBreakdown.length > 0 && (
+            <div className="mt-6">
+              <h4 className="text-2xl font-bold mb-4">Budget Allocation</h4>
+              <DonutChart
+                data={slide.content.customData.budgetBreakdown}
+                height={300}
+                innerRadius={60}
+                outerRadius={100}
+                centerLabel="Total"
+                centerValue={slide.content.customData.totalBudget 
+                  ? `€${(slide.content.customData.totalBudget / 1000).toFixed(0)}K`
+                  : undefined
+                }
+              />
+            </div>
           )}
 
           {/* Content Plan */}
