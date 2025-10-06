@@ -11,6 +11,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Focus:** Security, Accessibility, Error Handling, Testing
 
+#### Fixed (Patch Update)
+
+- **TalentStrategySlide Component Restoration** (`components/slides/TalentStrategySlide.tsx`)
+  - Fixed critical runtime error: "Element type is invalid"
+  - Component was accidentally emptied during v1.6.1 deployment
+  - Restored from git history with optimized layout (commit 50cbbd1)
+  - Now renders correctly with:
+    - Engagement rate comparison bar chart
+    - Rich influencer pool display with demographics
+    - Optimized layout preventing overflow
+    - All visualizations and data intact
+  - Editor now loads successfully on all slides
+
+- **Rate Limiter Export Fix** (`lib/rate-limiter.ts`)
+  - Fixed build error: "Export RateLimitPresets doesn't exist"
+  - Fixed runtime error: "limiter.checkLimit is not a function"
+  - Refactored `enforceRateLimit` to accept identifier and config
+  - Exported `RateLimitConfig` interface and `RateLimiter` class
+  - Added global limiter map for operation-specific rate limiting
+  - Brief parsing rate limiting now fully operational
+
 #### Added
 
 - **Offline Detection** (`hooks/useImageGeneration.ts`)
