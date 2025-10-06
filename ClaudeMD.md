@@ -847,12 +847,26 @@ matchInfluencers(brief: ClientBrief, influencerPool: Influencer[]): Promise<Sele
 generateSlides(brief: ClientBrief, influencers: SelectedInfluencer[], content: any): Promise<Slide[]>
 ```
 
+### Layout Optimization (v1.6.0)
+
+**Problem Solved**: Charts and content causing overflow on slides
+
+**Solution Implemented**:
+- Fixed chart heights (180px for bar charts, 250-300px for donut/line)
+- Compact layouts with tighter spacing
+- Smart truncation (deliverables show max 3, reasons limited to 2 lines)
+- Max-height containers with overflow protection
+- All content guaranteed to fit on one slide
+
+**Documentation**: See `LAYOUT_OPTIMIZATION.md` for complete guide
+
 ### Debugging Tips
 
 1. **AI not generating content**: Check Firebase console for Vertex AI quota/errors
 2. **Slides not rendering**: Verify slide type matches SlideRenderer cases
 3. **Export failing**: Check console for canvas rendering errors
 4. **Form validation issues**: Log formData state before submission
+5. **Content overflow**: Check that chart heights are fixed and containers have max-height
 
 ### Contact & Support
 
