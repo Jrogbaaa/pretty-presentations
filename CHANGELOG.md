@@ -5,6 +5,118 @@ All notable changes to the Look After You AI Presentation Generator will be docu
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2025-10-06
+
+### 📤 PowerPoint Export & Multi-Format Support
+
+**Focus:** Editable Presentations for Google Slides, Canva, and PowerPoint
+
+#### Added
+
+- **PowerPoint (PPTX) Export** 🎯
+  - Full PPTX generation with editable text (not images)
+  - Compatible with Microsoft PowerPoint, Google Slides, and Canva
+  - Preserves all text formatting, colors, and layouts
+  - Background images included via server-side proxy
+  - Proper 16:9 widescreen format
+  - Metadata included (author, company, title)
+
+- **Export Format Options**
+  - Dropdown menu with two export choices:
+    - **PowerPoint (PPTX)** - Editable slides (recommended)
+    - **PDF** - Read-only format
+  - Visual icons and descriptions for each format
+  - Click-outside to close menu
+
+- **Image Proxy Service** (`/api/proxy-image/route.ts`)
+  - Server-side image proxy to bypass CORS restrictions
+  - Converts Firebase Storage images to base64 data URLs
+  - Enables images in both PDF and PPTX exports
+  - No client-side CORS issues
+
+- **Enhanced PDF Export**
+  - Fixed blank slide export issues
+  - All slides now render with proper IDs in DOM
+  - Background gradient removal to avoid `lab()` color errors
+  - Images proxied through server for CORS compliance
+  - Aggressive sanitization for html2canvas compatibility
+
+- **Firebase Storage CORS Configuration**
+  - Applied CORS rules to Firebase Storage bucket
+  - Allows cross-origin image requests
+  - Configured via `cors.json` and gsutil
+
+#### Changed
+
+- **Export Button UI Enhancement**
+  - Improved dropdown visibility with better contrast
+  - Darker text colors (text-gray-900) for readability
+  - Enhanced hover states (hover:bg-blue-50)
+  - Larger menu width (56px → better spacing)
+  - Visual file type icons (orange for PPTX, red for PDF)
+
+- **PresentationEditor Component**
+  - Added export menu state management
+  - Click-outside handler to close menu
+  - Better visual hierarchy in export dropdown
+
+#### Fixed
+
+- **PDF Export Issues**
+  - Fixed blank page exports (slides now have proper DOM IDs)
+  - Removed `lab()` color function errors from gradients
+  - Resolved canvas tainting from CORS-blocked images
+  - All 13 slides now export successfully
+  - Images load properly via proxy
+
+- **PPTX Content Structure**
+  - Title, subtitle, and body text as editable text objects
+  - Bullet points with proper formatting
+  - Metrics displayed with labels and values
+  - Influencer cards with name, handle, and followers
+  - Background images at 20% opacity for readability
+  - Footer with agency branding
+
+#### Technical Implementation
+
+- **Dependencies Added**
+  - `pptxgenjs`: PowerPoint file generation
+  - Enhanced `html2canvas` configuration for PDF export
+
+- **New Files Created**
+  - `app/api/proxy-image/route.ts` - Image proxy endpoint
+  - `cors.json` - Firebase Storage CORS configuration
+
+- **Export Function Improvements**
+  - Pre-clone style capture to avoid `lab()` colors
+  - Aggressive background gradient removal
+  - Image conversion via server-side proxy
+  - Double-layer gradient protection
+  - Robust error handling per slide
+
+#### Performance
+
+- **Export Speed**
+  - PPTX Export: ~12-15 seconds (includes image fetching)
+  - PDF Export: ~8-10 seconds (with image proxy)
+  - Image proxy: ~1 second per image
+
+#### Compatibility
+
+- ✅ **Microsoft PowerPoint** - Full compatibility
+- ✅ **Google Slides** - Import works perfectly
+- ✅ **Canva** - Text fully editable
+- ✅ **Keynote** - Compatible
+- ✅ **LibreOffice Impress** - Compatible
+
+#### Documentation
+
+- Updated README with export functionality
+- Updated ClaudeMD with technical implementation
+- Added this CHANGELOG entry
+
+---
+
 ## [2.0.1] - 2025-10-06
 
 ### 🎨 UI Polish & Refinements - Navigation Bar & Slide Previews

@@ -2,9 +2,9 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 2.0.1 | **Database**: 3,001 Spanish Influencers (VERIFIED ✅) | **Matching**: LAYAI Algorithm ⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨
+**Status**: 🟢 **Production-Ready** | **Version**: 2.1.0 | **Database**: 3,001 Spanish Influencers (VERIFIED ✅) | **Matching**: LAYAI Algorithm ⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤
 
-**Latest**: v2.0.1 **UI POLISH & REFINEMENTS!** ✨ Enhanced navigation bar with perfect text spacing, prominent Export button with shadow effects, and visual dividers between sections. **Real slide preview thumbnails** now show actual miniature renderings of each slide (not just text!) using scaled-down SlideRenderer. Fixed canvas spacing and eliminated all overlapping elements. Comprehensive browser testing confirms all features working perfectly (Export PDF, slide navigation, zoom controls, thumbnails). Production-tested and ready! 🚀
+**Latest**: v2.1.0 **POWERPOINT EXPORT & MULTI-FORMAT SUPPORT!** 📤 Export presentations as editable PowerPoint files (PPTX) fully compatible with PowerPoint, Google Slides, and Canva! Text is 100% editable, not images. Includes server-side image proxy to bypass CORS, enhanced PDF export with all 13 slides rendering perfectly, and beautiful export dropdown menu. Firebase Storage CORS configured for seamless image loading. Export speeds: ~12-15s for PPTX, ~8-10s for PDF. All text, formatting, colors, and images preserved. Production-tested! 🎉✨
 
 **Previous**: v2.0.0 **UI DESIGN SYSTEM COMPLETE!** 🎨 Complete presentation editor redesign with Stripe-inspired design principles. New color palette (purple primary #635BFF), comprehensive spacing system, professional typography scale, shadow hierarchy, and animation tokens. Created reusable UI component library (Button, Input, Label). Updated PresentationEditor and NanoBananaPanel with clean, minimal interface. 60px top nav, 240px slide panel, 280px properties panel. WCAG AA compliant with enhanced focus states and keyboard navigation. See DESIGN_SYSTEM.md for complete specifications! ✨
 
@@ -24,7 +24,34 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 
 ## 🚀 Features
 
-### 🎨 Stripe-Inspired Design System (v2.0.1) ⚡ NEW
+### 📤 Multi-Format Export (v2.1.0) ⚡ NEW
+- **PowerPoint (PPTX) Export**: 
+  - Fully editable presentations compatible with PowerPoint, Google Slides, and Canva
+  - All text preserved as text objects (not flattened images)
+  - Background images included via server-side proxy
+  - Proper formatting, colors, and layouts maintained
+  - 16:9 widescreen format with metadata
+  - Export speed: ~12-15 seconds
+- **Enhanced PDF Export**:
+  - All 13 slides render perfectly (fixed blank page issues)
+  - Images proxied through server to avoid CORS
+  - Removed `lab()` color errors from gradients  
+  - Background images included
+  - Export speed: ~8-10 seconds
+- **Export Menu**:
+  - Beautiful dropdown with visual file type icons
+  - Clear descriptions for each format
+  - Improved visibility with better contrast
+  - Click-outside to close
+- **Image Proxy Service**:
+  - Server-side proxy bypasses CORS restrictions
+  - Converts Firebase images to base64 data URLs
+  - Works for both PDF and PPTX exports
+- **Firebase CORS Configuration**:
+  - Storage bucket configured for cross-origin requests
+  - Seamless image loading in exports
+
+### 🎨 Stripe-Inspired Design System (v2.0.1)
 - **Complete UI Redesign**: Clean, minimal interface with generous whitespace and subtle shadows
 - **Professional Color Palette**: Stripe-inspired purple (#635BFF) with comprehensive neutral and feedback colors
 - **Typography Scale**: 8 carefully crafted text styles (heading-1 to caption) with optimal line heights

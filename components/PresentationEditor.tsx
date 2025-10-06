@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Presentation } from "@/types";
 import SlideRenderer from "./SlideRenderer";
 import { 
@@ -34,6 +34,7 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
   const [isDragging, setIsDragging] = useState(false);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const currentSlide = presentation.slides[currentSlideIndex];
@@ -88,6 +89,19 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
     setZoom(0.5);
     setPanOffset({ x: 0, y: 0 });
   };
+
+  // Close export menu when clicking outside
+  const handleClickOutside = (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (showExportMenu && !target.closest('.export-dropdown')) {
+      setShowExportMenu(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showExportMenu]);
 
   return (
     <div
@@ -165,18 +179,61 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
 
         {/* Right Section */}
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onExport?.("pdf")}
-            className="h-9 px-4 bg-primary text-white rounded hover:bg-primary-hover active:bg-primary-active transition-fast text-sm font-medium shadow-sm hover:shadow"
-            tabIndex={0}
-            aria-label="Export presentation to PDF"
-          >
-            <div className="flex items-center gap-2">
-              <Share2 className="w-4 h-4" />
-              <span>Export</span>
-            </div>
-          </button>
+          <div className="relative export-dropdown">
+            <button
+              type="button"
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="h-9 px-4 bg-primary text-white rounded hover:bg-primary-hover active:bg-primary-active transition-fast text-sm font-medium shadow-sm hover:shadow"
+              tabIndex={0}
+              aria-label="Export presentation"
+            >
+              <div className="flex items-center gap-2">
+                <Share2 className="w-4 h-4" />
+                <span>Export</span>
+              </div>
+            </button>
+            
+            {/* Export dropdown menu */}
+            {showExportMenu && (
+              <div className="absolute top-full right-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onExport?.("pptx");
+                    setShowExportMenu(false);
+                  }}
+                  className="w-full px-4 py-3 text-left hover:bg-blue-50 transition-fast flex items-center gap-3 border-b border-gray-100"
+                  tabIndex={0}
+                >
+                  <svg className="w-5 h-5 text-orange-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+                    <path d="M8 15h8v2H8zm0-4h8v2H8z"/>
+                  </svg>
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900">PowerPoint (PPTX)</div>
+                    <div className="text-xs text-gray-600">Editable slides</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onExport?.("pdf");
+                    setShowExportMenu(false);
+                  }}
+                  className="w-full px-4 py-3 text-left hover:bg-blue-50 transition-fast flex items-center gap-3"
+                  tabIndex={0}
+                >
+                  <svg className="w-5 h-5 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+                  </svg>
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900">PDF</div>
+                    <div className="text-xs text-gray-600">Read-only format</div>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
           
           <div className="h-5 w-px bg-border" />
           
@@ -455,6 +512,15 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
             </div>
           </div>
         )}
+      </div>
+
+      {/* Hidden slides for export - rendered at full size with IDs */}
+      <div className="fixed -left-[10000px] -top-[10000px] pointer-events-none" aria-hidden="true">
+        {presentation.slides.map((slide, index) => (
+          <div key={slide.id} id={`slide-${index}`}>
+            <SlideRenderer slide={slide} scale={1} />
+          </div>
+        ))}
       </div>
     </div>
   );

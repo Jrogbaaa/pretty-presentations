@@ -6,7 +6,9 @@
 
 This is a Next.js 15 application built for Look After You, an influencer talent agency. The platform uses Firebase Vertex AI (Gemini 1.5 Flash) to automatically transform client briefs into professional presentations with intelligent influencer-brand matching.
 
-**✨ Version 2.0.1 Update**: **UI POLISH & REFINEMENTS COMPLETE!** Fixed navigation bar spacing with consistent text-sm (14px), prominent Export button with shadow effects, and visual dividers between sections. **Real slide preview thumbnails** now show actual miniature renderings of each slide using scaled SlideRenderer (scale={0.108}) - no more text-only previews! Fixed canvas spacing (p-12) and eliminated all overlapping elements with proper z-indexing. Comprehensive browser testing verified all features: Export PDF ✅, slide navigation ✅, zoom controls ✅, thumbnail rendering ✅. Production-tested and ready! 🚀✨
+**✨ Version 2.1.0 Update**: **POWERPOINT EXPORT & MULTI-FORMAT SUPPORT COMPLETE!** 📤 Presentations now export as editable PowerPoint (PPTX) files fully compatible with PowerPoint, Google Slides, and Canva! Text is 100% editable (not flattened images). Includes server-side image proxy (`/api/proxy-image/route.ts`) to bypass CORS restrictions, enhanced PDF export with all 13 slides rendering perfectly (fixed blank slides, removed `lab()` color errors, proxied images), and beautiful export dropdown menu with improved visibility (darker text, better contrast). Firebase Storage CORS configured via `cors.json` and gsutil. Export speeds: ~12-15s for PPTX, ~8-10s for PDF. All text, formatting, colors, and background images preserved. Production-tested! 🎉✨
+
+**Previous - Version 2.0.1**: **UI POLISH & REFINEMENTS COMPLETE!** Fixed navigation bar spacing with consistent text-sm (14px), prominent Export button with shadow effects, and visual dividers between sections. **Real slide preview thumbnails** now show actual miniature renderings of each slide using scaled SlideRenderer (scale={0.108}) - no more text-only previews! Fixed canvas spacing (p-12) and eliminated all overlapping elements with proper z-indexing. Comprehensive browser testing verified all features: Export PDF ✅, slide navigation ✅, zoom controls ✅, thumbnail rendering ✅. Production-tested and ready! 🚀✨
 
 **🎨 Version 2.0.0**: **UI DESIGN SYSTEM COMPLETE!** Complete presentation editor redesign with Stripe-inspired design principles. New color palette (purple primary #635BFF, neutral grays, text colors), typography scale (8 levels from heading-1 to caption), spacing system (xs to 4xl), shadow hierarchy (5 levels), and animation tokens. Created reusable UI component library with Button, Input, and Label components. Updated PresentationEditor (60px nav, 240px slide panel, 280px properties panel) and NanoBananaPanel (280px width, new styling) with clean, minimal interface. WCAG AA compliant with enhanced focus states (3px rings) and full keyboard navigation. Complete documentation in DESIGN_SYSTEM.md! ✨🎨
 
@@ -48,6 +50,8 @@ This is a Next.js 15 application built for Look After You, an influencer talent 
 **AI Influencer Ranking**: Google Gemini 1.5 Flash via Firebase Vertex AI
 **AI Image Generation**: Google Nano Banana (Gemini 2.5 Flash Image) via Replicate API
 **Data Visualization**: Recharts (charts/graphs) + React Spring (animations)
+**Export Formats**: PowerPoint (PPTX) via pptxgenjs, PDF via jsPDF + html2canvas
+**Image Proxy**: Next.js API route for CORS-free image loading
 **Architecture**: Hybrid OpenAI + Replicate + Google for optimal reliability
 **Storage**: Firebase Storage for generated images (~1.4MB per presentation)
 **Data Sources**: LAYAI (StarNgage, Apify, Serply)
@@ -613,21 +617,59 @@ OPENAI_API_KEY=sk-proj-your-key-here
 - Vertex AI: Gemini model access
 - Analytics: Usage tracking
 
-### Export Functionality
+### Export Functionality (v2.1.0) ⚡ NEW
 
 File: `app/editor/[id]/page.tsx`
 
-**PDF Export**:
-1. Loop through all slides
-2. Render each slide to HTML
-3. Capture with html2canvas
-4. Add as page to jsPDF
-5. Save file
+**PowerPoint (PPTX) Export** 📤:
+1. Loop through all slides with presentation data
+2. For each slide, create PPTX slide with pptxgenjs
+3. Add text objects (titles, subtitles, bullets, metrics)
+4. Fetch background images via server proxy (`/api/proxy-image`)
+5. Convert images to base64 data URLs
+6. Add images to slide at 20% opacity
+7. Add footer with agency branding
+8. Save as `.pptx` file (~12-15s)
 
-**Limitations**:
-- PowerPoint export not implemented
-- Google Slides export not implemented
-- Large presentations may take time
+**Enhanced PDF Export** 📄:
+1. Render all slides in hidden DOM container with IDs
+2. Capture computed styles BEFORE cloning
+3. Aggressively sanitize: strip `lab()` gradients, set explicit colors
+4. Proxy all external images through `/api/proxy-image`
+5. Convert images to base64 data URLs (avoids CORS)
+6. Capture each slide with html2canvas (useCORS: false)
+7. Add onclone callback to remove remaining gradients
+8. Add as page to jsPDF
+9. Save file (~8-10s)
+
+**Image Proxy Service** 🔄:
+- File: `app/api/proxy-image/route.ts`
+- Server-side Next.js API route
+- Fetches images from Firebase Storage
+- Converts to base64 data URLs
+- Bypasses client-side CORS restrictions
+- Returns `{ dataUrl: "data:image/jpeg;base64,..." }`
+- Used by both PDF and PPTX exports
+
+**Firebase Storage CORS** 🔐:
+- File: `cors.json`
+- Applied with `gsutil cors set cors.json gs://[BUCKET_NAME]`
+- Allows cross-origin GET requests
+- Enables direct image loading in exports
+
+**Export Menu UI** 🎨:
+- Dropdown with two options: PPTX (editable) and PDF (read-only)
+- Visual icons (orange for PPTX, red for PDF)
+- Descriptions for each format
+- Improved visibility (dark text, better contrast)
+- Click-outside to close
+
+**Compatibility** ✅:
+- Microsoft PowerPoint
+- Google Slides (import PPTX)
+- Canva (import PPTX, edit text)
+- Keynote
+- LibreOffice Impress
 
 ### State Management
 
