@@ -95,16 +95,28 @@ class RateLimiter {
   }
 }
 
-// Create different rate limiters for different endpoints
-export const imageGenerationLimiter = new RateLimiter({
-  windowMs: 60000, // 1 minute
-  maxRequests: 10, // 10 images per minute
-});
+// Preset configurations for common rate limit scenarios
+export const RateLimitPresets = {
+  // Brief parsing: 20 requests per minute (generous for form submissions)
+  briefParsing: { windowMs: 60000, maxRequests: 20 },
+  
+  // Image generation: 10 requests per minute (expensive operation)
+  imageGeneration: { windowMs: 60000, maxRequests: 10 },
+  
+  // Image editing: 20 requests per minute (less expensive than generation)
+  imageEditing: { windowMs: 60000, maxRequests: 20 },
+  
+  // Presentation generation: 5 requests per minute (very expensive)
+  presentationGeneration: { windowMs: 60000, maxRequests: 5 },
+  
+  // Generic API: 30 requests per minute
+  api: { windowMs: 60000, maxRequests: 30 },
+};
 
-export const imageEditLimiter = new RateLimiter({
-  windowMs: 60000, // 1 minute
-  maxRequests: 20, // 20 edits per minute (more lenient)
-});
+// Create different rate limiters for different endpoints
+export const imageGenerationLimiter = new RateLimiter(RateLimitPresets.imageGeneration);
+export const imageEditLimiter = new RateLimiter(RateLimitPresets.imageEditing);
+export const briefParsingLimiter = new RateLimiter(RateLimitPresets.briefParsing);
 
 /**
  * Get client identifier from request
@@ -125,5 +137,24 @@ export const getClientIdentifier = (request: Request): string => {
 
   // Fallback to a generic identifier (not ideal for production)
   return "anonymous";
+};
+
+/**
+ * Enforce rate limit and throw error if exceeded
+ * Helper function for server actions that need rate limiting
+ */
+export const enforceRateLimit = (
+  limiter: RateLimiter,
+  identifier: string,
+  operation: string = "operation"
+): void => {
+  const result = limiter.checkLimit(identifier);
+  
+  if (!result.allowed) {
+    const resetDate = new Date(result.resetTime);
+    throw new Error(
+      `Rate limit exceeded for ${operation}. Please try again after ${resetDate.toLocaleTimeString()}.`
+    );
+  }
 };
 
