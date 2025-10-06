@@ -446,6 +446,24 @@ const createTalentSlide = (
 ): Slide => {
   const isScalpers = template.id === "scalpers-lifestyle";
 
+  // Calculate average engagement rate for comparison
+  const avgEngagement = influencers.length > 0
+    ? influencers.reduce((sum, inf) => sum + inf.engagement, 0) / influencers.length
+    : 0;
+
+  // Create chart data for bar chart visualization (top influencers by engagement)
+  const chartData = influencers
+    .sort((a, b) => b.engagement - a.engagement)
+    .slice(0, 8) // Top 8 influencers
+    .map(inf => ({
+      label: inf.name,
+      value: inf.engagement,
+      color: template.colorPalette.accent,
+    }));
+
+  // Industry average engagement rate (typical for influencers is 2-3%)
+  const industryAverage = 2.5;
+
   return {
     id: generateId(),
     type: "talent-strategy" as SlideType,
@@ -467,7 +485,7 @@ const createTalentSlide = (
         },
         {
           label: "Avg. Engagement Rate",
-          value: `${(influencers.reduce((sum, inf) => sum + inf.engagement, 0) / influencers.length).toFixed(1)}%`,
+          value: `${avgEngagement.toFixed(1)}%`,
         },
         {
           label: "Total Investment",
@@ -478,6 +496,12 @@ const createTalentSlide = (
         layoutStyle: isScalpers ? "profile-rows" : "grid-cards",
         // Include detailed influencer pool data from AI
         influencerPool: content.influencerPool || null,
+        // Chart data for bar chart visualization
+        chartData: chartData,
+        average: industryAverage,
+        insight: avgEngagement > industryAverage 
+          ? `Our selected influencers exceed industry average by ${(avgEngagement - industryAverage).toFixed(1)}%`
+          : `Selected influencers are ${(industryAverage - avgEngagement).toFixed(1)}% below industry average but offer better value`,
       },
     },
     design: createDesign({
@@ -525,6 +549,32 @@ const createRecommendedScenarioSlide = (
   const totalImpressions = influencers.reduce((sum, inf) => sum + inf.estimatedReach, 0);
   const calculatedCpm = ((totalCost / totalImpressions) * 1000).toFixed(2);
 
+  // Calculate budget breakdown for donut chart
+  const influencerCost = totalCost * 0.7; // 70% goes to influencers
+  const productionCost = totalCost * 0.2; // 20% to production
+  const platformCost = totalCost * 0.1; // 10% to platform/promotion
+
+  const budgetBreakdown = [
+    {
+      name: "Influencer Fees",
+      value: influencerCost,
+      color: template.colorPalette.accent,
+      fill: template.colorPalette.accent,
+    },
+    {
+      name: "Content Production",
+      value: productionCost,
+      color: template.colorPalette.secondary || "#6366F1",
+      fill: template.colorPalette.secondary || "#6366F1",
+    },
+    {
+      name: "Platform Promotion",
+      value: platformCost,
+      color: template.colorPalette.text + "80",
+      fill: template.colorPalette.text + "80",
+    },
+  ];
+
   return {
     id: generateId(),
     type: "brief-summary" as SlideType,
@@ -533,6 +583,7 @@ const createRecommendedScenarioSlide = (
     content: {
       title: "Escenario recomendado",
       subtitle: "Recommended Influencer Mix & Content Plan",
+      body: `A strategic mix of ${influencers.length} influencers delivering maximum impact across key demographics.`,
       customData: {
         recommendedScenario: content.recommendedScenario || {
           influencerMix: {
@@ -548,6 +599,9 @@ const createRecommendedScenarioSlide = (
           budget: `€${totalCost.toLocaleString()}`,
           cpm: `€${calculatedCpm}`,
         },
+        // Budget breakdown for donut chart
+        budgetBreakdown: budgetBreakdown,
+        totalBudget: totalCost,
       },
     },
     design: createDesign({
