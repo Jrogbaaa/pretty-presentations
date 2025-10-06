@@ -781,6 +781,26 @@ npm start
 3. **localStorage limits**: Migrate to Firestore for large data
 4. **No real influencer data**: Mock data provided until LAYAI integration
 
+### Strategic Framework (v1.6.0)
+
+**Presentation Excellence Guide** (`PRESENTATION_EXCELLENCE_GUIDE.md`):
+- 52-page comprehensive framework based on 10 peer-reviewed studies
+- **Core Research Findings**:
+  - Interactive elements increase engagement (p = 0.00)
+  - Passion accounts for 40% of commercial success (R² = 0.399)
+  - Storytelling with analogies improves comprehension
+  - Visual data design enhances memory (p = 0.002)
+
+**Key Components**:
+1. **Template Selection Strategy**: Decision trees for optimal template choice based on audience, campaign type, and brand
+2. **Visual Design Principles**: Typography, color psychology, F/Z patterns, white space guidelines
+3. **Data Visualization Strategy**: Chart type selection logic, storytelling with data, progressive disclosure
+4. **Storytelling Framework**: Narrative arc, emotional beats, analogies library by industry
+5. **Step-by-Step AI Process**: Complete workflow for automated presentation generation
+6. **Quality Checklist**: Research-backed criteria for presentation excellence
+
+This guide serves as the strategic "brain" informing all AI decisions about template selection, content generation, and design choices.
+
 ### Dependencies
 
 **Core**:
@@ -791,6 +811,8 @@ npm start
 
 **UI & Animations**:
 - framer-motion: ^11.x (animations)
+- @react-spring/web: ^9.x (smooth animations)
+- recharts: ^2.x (data visualization)
 - lucide-react: ^0.x (icons)
 - clsx: ^2.x (class utilities)
 - tailwind-merge: ^2.x (class merging)

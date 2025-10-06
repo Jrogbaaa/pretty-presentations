@@ -33,6 +33,18 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 - **Bundle Efficient**: Only ~133KB added (Recharts + React Spring)
 - **Demo Page**: `/charts-demo` showcases all components in action
 
+### 📚 Research-Backed Design (v1.6.0)
+- **Presentation Excellence Guide**: 52-page comprehensive strategic guide
+  - Based on 10 peer-reviewed studies on presentation effectiveness
+  - **Key Finding**: Presentation design accounts for 40% of commercial success
+  - Template selection decision trees
+  - Data visualization strategy (when to use each chart type)
+  - Storytelling framework with industry-specific analogies
+  - Step-by-step AI generation process
+  - Quality assurance checklist
+- **Strategic Intelligence**: Guide serves as the "brain" of the AI system
+- **See**: `PRESENTATION_EXCELLENCE_GUIDE.md` for complete framework
+
 ### 🍌 AI-Generated Images (v1.5.0)
 - **Automatic Image Generation**: Every presentation gets 11 stunning, contextual images powered by Google's Nano Banana (Gemini 2.5 Flash Image)
 - **Smart Prompts**: Context-aware image generation tailored to each slide type (cover, objective, strategy, etc.)

@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.6.0] - 2025-10-06
 
-### 📊 Professional Data Visualizations - COMPLETE!
+### 📊 Professional Data Visualizations & Strategic Framework - COMPLETE!
 
-**Major Feature**: Presentations now include professional, animated data visualizations with 7 new chart components!
+**Major Features**: 
+1. **Data Visualizations**: 7 new professional chart components with automated data population
+2. **Strategic Guide**: Comprehensive 52-page research-backed presentation design framework
 
 #### Added
 - **Recharts Library** (~93KB gzipped)
@@ -37,6 +39,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Live examples with real data
   - Beautiful gradient design
   - Accessible at `localhost:3000/charts-demo`
+
+- **Presentation Excellence Guide** (`PRESENTATION_EXCELLENCE_GUIDE.md`)
+  - 52-page comprehensive strategic framework
+  - Based on 10 peer-reviewed research studies
+  - **Research Finding**: Design accounts for 40% of commercial success (R² = 0.399)
+  - Template selection decision trees
+  - Data visualization strategy (when to use each chart type)
+  - Storytelling framework with industry-specific analogies
+  - Step-by-step AI generation workflow
+  - Quality assurance checklist
+  - Serves as the strategic "brain" of the AI system
 
 #### Modified
 - **TalentStrategySlide** - Now includes:
