@@ -31,9 +31,9 @@ export const ClientBriefSchema = z.object({
     .max(10, 'Maximum 10 campaign goals allowed'),
   
   budget: z.number()
-    .positive('Budget must be positive')
-    .max(10000000, 'Budget must be less than 10 million')
-    .int('Budget must be a whole number'),
+    .int('Budget must be a whole number')
+    .min(0, 'Budget cannot be negative')
+    .max(10000000, 'Budget must be less than 10 million'),
   
   targetDemographics: TargetDemographicsSchema,
   

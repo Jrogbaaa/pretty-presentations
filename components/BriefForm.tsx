@@ -7,11 +7,12 @@ import { TEMPLATES } from "@/types/templates";
 
 interface BriefFormProps {
   onSubmit: (brief: ClientBrief) => void;
+  onGenerateTextResponse?: (brief: ClientBrief) => void;
   isProcessing: boolean;
   initialData?: ClientBrief;
 }
 
-const BriefForm = ({ onSubmit, isProcessing, initialData }: BriefFormProps) => {
+const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData }: BriefFormProps) => {
   const [formData, setFormData] = useState<Partial<ClientBrief>>(
     initialData || {
       clientName: "",
@@ -197,6 +198,22 @@ const BriefForm = ({ onSubmit, isProcessing, initialData }: BriefFormProps) => {
         <label htmlFor="budget" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Budget (€) *
         </label>
+        
+        {/* Budget Warning Banner */}
+        {(formData.budget === 0 || !formData.budget) && (
+          <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-300 dark:border-amber-700 rounded-lg">
+            <div className="flex items-start gap-3">
+              <span className="text-amber-600 dark:text-amber-400 text-xl flex-shrink-0">⚠️</span>
+              <div>
+                <h4 className="font-semibold text-amber-900 dark:text-amber-300">Budget Required</h4>
+                <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                  No budget was found in your brief. Please enter a campaign budget below to generate influencer recommendations.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <input
           type="number"
           id="budget"
@@ -580,8 +597,8 @@ const BriefForm = ({ onSubmit, isProcessing, initialData }: BriefFormProps) => {
         )}
       </div>
 
-      {/* Submit Button */}
-      <div className="flex justify-end gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+      {/* Submit Buttons */}
+      <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
         <button
           type="button"
           onClick={() => window.location.reload()}
@@ -589,6 +606,22 @@ const BriefForm = ({ onSubmit, isProcessing, initialData }: BriefFormProps) => {
         >
           Reset
         </button>
+        
+        {onGenerateTextResponse && (
+          <button
+            type="button"
+            onClick={() => {
+              if (formData.clientName && formData.budget) {
+                onGenerateTextResponse(formData as ClientBrief);
+              }
+            }}
+            disabled={isProcessing}
+            className="px-6 py-3 border-2 border-purple-600 dark:border-purple-400 text-purple-600 dark:text-purple-400 bg-white dark:bg-gray-800 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isProcessing ? "Generating..." : "Generate Text Response"}
+          </button>
+        )}
+        
         <button
           type="submit"
           disabled={isProcessing}

@@ -17,7 +17,7 @@ export const matchInfluencers = async (
           platforms: brief.platformPreferences,
           locations: brief.targetDemographics.location,
           contentCategories: brief.contentThemes, // Match content themes to influencer categories
-          maxBudget: brief.budget,
+          maxBudget: brief.budget > 0 ? brief.budget : undefined, // Don't filter by budget if 0
         }, 200);
       } catch (error) {
         console.error('⚠️  Firestore query failed, retrying...', error);
@@ -28,7 +28,7 @@ export const matchInfluencers = async (
             platforms: brief.platformPreferences,
             locations: brief.targetDemographics.location,
             contentCategories: brief.contentThemes,
-            maxBudget: brief.budget,
+            maxBudget: brief.budget > 0 ? brief.budget : undefined, // Don't filter by budget if 0
           }, 200);
           console.log('✅ Retry successful, fetched influencers from database');
         } catch (retryError) {

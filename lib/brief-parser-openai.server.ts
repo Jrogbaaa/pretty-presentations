@@ -81,7 +81,7 @@ Extract and return JSON with this exact structure:
 {
   "clientName": "string (brand or company name)",
   "campaignGoals": ["goal1", "goal2", ...] (specific objectives),
-  "budget": number (in euros, extract number only),
+  "budget": number (in euros, extract number only. If no budget mentioned, use 0),
   "targetDemographics": {
     "ageRange": "string (e.g., 25-65+, 18-35)",
     "gender": "string (e.g., All genders, 60% Female, Men and Women)",
@@ -99,6 +99,7 @@ Extract and return JSON with this exact structure:
 Key instructions:
 - Extract ALL relevant information, even if implicit
 - For Spanish briefs: "Presupuesto" = budget, "Territorio" = content themes, "Target" = demographics
+- If budget is not mentioned in the brief, set budget to 0 (user will be prompted to enter it later)
 - Infer platform preferences from target age if not specified
 - Capture urgency/timeline information
 - Note any special requirements (confidentiality, guarantees, etc.)

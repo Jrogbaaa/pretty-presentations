@@ -50,6 +50,12 @@ const HomePage = () => {
   };
 
   const handleSubmit = async (brief: ClientBrief) => {
+    // Check budget is provided
+    if (!brief.budget || brief.budget === 0) {
+      setError('Please enter a campaign budget before generating your presentation.');
+      return;
+    }
+    
     // Check online status
     if (!isOnline) {
       setError('You are offline. Please check your internet connection and try again.');
@@ -117,6 +123,61 @@ const HomePage = () => {
       router.push(`/editor/${result.presentation.id}`);
     } catch (err) {
       console.error("Error processing brief:", err);
+      const friendlyError = getUserFriendlyError(err);
+      setError(friendlyError);
+      setIsProcessing(false);
+    }
+  };
+
+  const handleGenerateTextResponse = async (brief: ClientBrief) => {
+    // Check budget is provided
+    if (!brief.budget || brief.budget === 0) {
+      setError('Please enter a campaign budget before generating influencer recommendations.');
+      return;
+    }
+    
+    // Check online status
+    if (!isOnline) {
+      setError('You are offline. Please check your internet connection and try again.');
+      return;
+    }
+    
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      // Generate markdown response with influencer matching
+      const { generateMarkdownResponse } = await import("@/lib/markdown-response-generator.server");
+      const response = await generateMarkdownResponse(brief);
+
+      // Save response to Firestore
+      try {
+        await fetch("/api/responses", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(response),
+        });
+      } catch (saveError) {
+        console.error("Error saving response:", saveError);
+        // Continue anyway - response is in memory
+      }
+
+      // Store response in sessionStorage for immediate display
+      try {
+        sessionStorage.setItem(
+          `response-${response.id}`,
+          JSON.stringify(response)
+        );
+      } catch (storageError) {
+        console.warn("Could not store response in sessionStorage:", storageError);
+      }
+
+      // Navigate to response page
+      router.push(`/response/${response.id}`);
+    } catch (err) {
+      console.error("Error generating text response:", err);
       const friendlyError = getUserFriendlyError(err);
       setError(friendlyError);
       setIsProcessing(false);
@@ -346,7 +407,8 @@ const HomePage = () => {
 
           {/* Brief Form */}
           <BriefForm 
-            onSubmit={handleSubmit} 
+            onSubmit={handleSubmit}
+            onGenerateTextResponse={handleGenerateTextResponse}
             isProcessing={isProcessing}
             initialData={parsedBrief || undefined}
           />

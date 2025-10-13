@@ -5,6 +5,136 @@ All notable changes to the Look After You AI Presentation Generator will be docu
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2025-10-13
+
+### 📝 Flexible Brief Parsing & Text Response Generation
+
+**Focus:** Handle incomplete briefs gracefully + Generate markdown influencer recommendations
+
+#### Added
+
+- **Flexible Budget Validation**
+  - Budget field now accepts 0 as valid value (represents "not specified")
+  - AI parser automatically sets budget to 0 when not mentioned in brief
+  - Amber warning banner appears in BriefForm when budget is missing
+  - Pre-generation validation ensures budget > 0 before processing
+  - Influencer matcher handles budget=0 gracefully (skips budget filtering)
+  - Users can paste any brief format (Spanish, English, incomplete) without errors
+
+- **Text Response Generation** 🆕
+  - New "Generate Text Response" button alongside "Generate Presentation"
+  - Comprehensive markdown document with influencer recommendations
+  - Uses GPT-4o for high-quality long-form content generation
+  - Includes: Executive Summary, Brief Analysis, Influencer Profiles, Creative Strategy, Performance Projections, Campaign Execution Plan, Strategic Recommendations
+  - Professional formatted response page with beautiful typography
+  - GitHub Flavored Markdown support with table rendering
+  - Copy to clipboard and download as .md file functionality
+  - Responses saved to Firestore for future access
+  - Session storage for immediate display
+
+- **Beautiful Response Page** (`/response/[id]`)
+  - Professional markdown rendering with custom prose styling
+  - Influencer data displayed in clean, scannable tables
+  - Purple accent theme matching brand colors
+  - Proper word wrapping (no overflow issues)
+  - Clear visual hierarchy with bordered headers
+  - Dark mode support
+  - Responsive design
+
+#### Changed
+
+- **Validation Schema** (`lib/validation.ts`)
+  - Budget validation changed from `.positive()` to `.min(0)`
+  - Allows 0 as placeholder for unspecified budget
+  - Maintains validation for negative values
+
+- **AI Brief Parser** (`lib/brief-parser-openai.server.ts`)
+  - Updated prompt to set budget to 0 when not mentioned
+  - Added instruction: "If budget is not mentioned in the brief, set budget to 0"
+  - Parser handles multilingual briefs (Spanish, English, mixed)
+
+- **BriefForm Component** (`components/BriefForm.tsx`)
+  - Added amber warning banner for missing budget
+  - Clear messaging: "No budget was found in your brief"
+  - Optional `onGenerateTextResponse` prop for text generation
+  - Dual action buttons (Presentation + Text Response)
+  - Responsive button layout (stacks on mobile)
+
+- **Homepage** (`app/page.tsx`)
+  - Added `handleGenerateTextResponse` handler
+  - Budget validation before both presentation and text generation
+  - Passes both handlers to BriefForm component
+
+- **Influencer Matcher** (`lib/influencer-matcher.ts`)
+  - Conditional budget filtering: `maxBudget: brief.budget > 0 ? brief.budget : undefined`
+  - Shows all influencers when budget unspecified
+  - Focuses on brand fit and audience alignment
+
+- **Firestore Security Rules** (`firestore.rules`)
+  - Opened `influencers` collection for unauthenticated read (development)
+  - Added `responses` collection with public read/write (development)
+  - TODO comments for production authentication
+  - Deployed rules successfully to Firebase
+
+#### Fixed
+
+- Budget validation errors when parsing briefs without budget information
+- Permission denied errors for unauthenticated influencer queries
+- Text overflow issues in markdown response display
+- Monospace font rendering in response page
+- Missing table styling for influencer data
+
+#### Technical Details
+
+- **New Files**
+  - `lib/markdown-response-generator.server.ts` - GPT-4o markdown generation
+  - `app/api/responses/route.ts` - Firestore CRUD for responses
+  - `app/response/[id]/page.tsx` - Response display page
+  - `types/index.ts` - Added `BriefResponse` interface
+
+- **New Dependencies**
+  - `react-markdown` (^10.1.0) - Markdown rendering
+  - `remark-gfm` (^4.0.1) - GitHub Flavored Markdown tables
+
+- **Files Modified**
+  - `lib/validation.ts` - Budget validation schema
+  - `lib/brief-parser-openai.server.ts` - Parser prompt updates
+  - `components/BriefForm.tsx` - Dual action buttons + warning
+  - `app/page.tsx` - Text response handler
+  - `lib/influencer-matcher.ts` - Conditional budget filtering
+  - `firestore.rules` - Security rules updates
+  - `types/index.ts` - BriefResponse type
+
+- **Firestore Collections**
+  - `responses` - Stores text-based brief responses
+  - Updated permissions for development access
+
+#### User Experience
+
+**Before**: Parsing fails with validation error if budget missing in brief
+**After**: Parser succeeds, user sees warning, fills budget, generates presentation or text response
+
+**Workflow:**
+1. User pastes incomplete brief (e.g., Spanish Calzedonia email)
+2. AI parsing succeeds, sets budget to 0
+3. BriefForm shows amber warning about missing budget
+4. User enters budget amount
+5. User chooses:
+   - "Generate Presentation" → Full PowerPoint presentation
+   - "Generate Text Response" → Markdown document with influencer matches
+6. Results displayed with professional formatting
+
+#### Why These Changes?
+
+Real-world briefs often arrive in various formats (emails, documents, conversations) and may be incomplete. The rigid budget requirement was blocking legitimate use cases. This update makes the system more flexible and user-friendly while maintaining data quality through UI validation rather than failing early.
+
+Text response generation provides a faster alternative to full presentations, perfect for:
+- Quick proposals and pitches
+- Internal strategy documents
+- Client email responses
+- Preliminary influencer recommendations
+- Situations where full presentation isn't needed
+
 ## [2.2.0] - 2025-10-06
 
 ### 📤 Streamlined PowerPoint Export

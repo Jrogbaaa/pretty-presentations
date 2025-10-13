@@ -13,6 +13,18 @@ export interface Presentation {
   templateId: TemplateId;
 }
 
+// Brief Response (Text-based output)
+export interface BriefResponse {
+  id: string;
+  clientName: string;
+  campaignName: string;
+  createdAt: Date;
+  brief: ClientBrief;
+  markdownContent: string;
+  influencers: SelectedInfluencer[];
+  status: "draft" | "delivered";
+}
+
 export interface ClientBrief {
   clientName: string;
   campaignGoals: string[];
