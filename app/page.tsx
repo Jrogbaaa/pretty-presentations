@@ -13,6 +13,7 @@ import { getUserFriendlyError } from "@/types/errors";
 
 const HomePage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingMode, setProcessingMode] = useState<"presentation" | "text">("presentation");
   const [error, setError] = useState<string | null>(null);
   const [parsedBrief, setParsedBrief] = useState<ClientBrief | null>(null);
   const [showUpload, setShowUpload] = useState(true);
@@ -62,6 +63,7 @@ const HomePage = () => {
       return;
     }
     
+    setProcessingMode("presentation");
     setIsProcessing(true);
     setError(null);
 
@@ -427,17 +429,27 @@ const HomePage = () => {
 
           {/* Processing Overlay */}
           {isProcessing && (
-            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+            <div 
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="processing-title"
+              aria-describedby="processing-description"
+            >
               <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-md text-center shadow-2xl border border-gray-200 dark:border-gray-800">
                 <div className="relative">
                   <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 dark:border-purple-900 border-t-purple-600 dark:border-t-purple-400 mx-auto mb-6" />
                   <Sparkles className="w-6 h-6 text-purple-600 dark:text-purple-400 absolute top-5 left-1/2 -translate-x-1/2 animate-pulse" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                  Generating Your Presentation
+                <h3 id="processing-title" className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                  {processingMode === "text" 
+                    ? "Generating Influencer Recommendations" 
+                    : "Generating Your Presentation"}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Our AI is analyzing your brief, matching influencers, and creating your slides...
+                <p id="processing-description" className="text-gray-600 dark:text-gray-400 mb-6">
+                  {processingMode === "text"
+                    ? "Our AI is analyzing your brief, matching influencers, and creating comprehensive recommendations..."
+                    : "Our AI is analyzing your brief, matching influencers, and creating your slides..."}
                 </p>
                 <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
                   <div className="flex items-center gap-3 justify-center">
@@ -450,11 +462,11 @@ const HomePage = () => {
                   </div>
                   <div className="flex items-center gap-3 justify-center">
                     <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    <p>Generating slide content with AI</p>
+                    <p>Generating {processingMode === "text" ? "recommendations" : "slide content"} with AI</p>
                   </div>
                   <div className="flex items-center gap-3 justify-center animate-pulse">
                     <Presentation className="w-4 h-4 text-pink-600 dark:text-pink-400" />
-                    <p>Creating professional presentation...</p>
+                    <p>Creating professional {processingMode === "text" ? "report" : "presentation"}...</p>
                   </div>
                 </div>
               </div>

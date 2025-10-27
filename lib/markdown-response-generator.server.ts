@@ -462,23 +462,32 @@ Return ONLY the markdown content, no additional commentary or wrapper text.`;
   } catch (error) {
     logError(error, { function: 'generateMarkdownContent' });
     
+    // Don't leak internal error details to client
     if (error instanceof Error) {
-      if (error.message.includes("API key")) {
+      // Only log sensitive details internally, return safe error to client
+      if (error.message.includes("API key") || error.message.includes("401")) {
         throw new OpenAIError(
-          "Invalid OpenAI API key",
+          "AI service configuration error. Please contact support.",
           "invalid_api_key"
         );
       }
-      if (error.message.includes("quota")) {
+      if (error.message.includes("quota") || error.message.includes("429")) {
         throw new OpenAIError(
-          "OpenAI API quota exceeded",
+          "Service temporarily unavailable. Please try again later.",
           "insufficient_quota"
+        );
+      }
+      if (error.message.includes("timeout")) {
+        throw new OpenAIError(
+          "Request timed out. Please try again.",
+          "timeout"
         );
       }
     }
     
+    // Generic error message that doesn't leak implementation details
     throw new OpenAIError(
-      "Failed to generate markdown response",
+      "Unable to generate recommendations at this time. Please try again.",
       "generation_failed"
     );
   }

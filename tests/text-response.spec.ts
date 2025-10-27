@@ -186,6 +186,54 @@ test.describe('Text Response Generation', () => {
       if (!hasHeading || !hasText) {
         console.warn('⚠️ Response page is missing expected content');
       }
+      
+      // Verify table rendering (critical fix from this PR)
+      console.log('🔍 Checking table rendering...');
+      const tableElements = page.locator('table');
+      const tableCount = await tableElements.count();
+      console.log(`- Found ${tableCount} table(s)`);
+      
+      if (tableCount > 0) {
+        // Ensure tables are rendered as HTML, not raw text
+        const firstTable = tableElements.first();
+        await expect(firstTable).toBeVisible({ timeout: 2000 });
+        
+        // Check that we have actual table structure (th/td elements)
+        const hasTableCells = await page.locator('table td, table th').count() > 0;
+        console.log(`- Table has cells: ${hasTableCells}`);
+        expect(hasTableCells).toBe(true);
+        
+        // Ensure no raw HTML tags showing as text
+        const bodyText = await page.locator('.prose').textContent();
+        const hasRawTableTags = bodyText?.includes('<table>') || bodyText?.includes('<tr>') || bodyText?.includes('<td>');
+        console.log(`- Contains raw HTML tags: ${hasRawTableTags}`);
+        expect(hasRawTableTags).toBe(false);
+        
+        console.log('✅ Tables rendered correctly');
+      } else {
+        console.warn('⚠️ No tables found in response (may be expected for some briefs)');
+      }
+      
+      // Verify content quality
+      console.log('🔍 Checking content quality...');
+      const contentText = await markdownContent.textContent();
+      const contentLength = contentText?.length || 0;
+      console.log(`- Content length: ${contentLength} characters`);
+      expect(contentLength).toBeGreaterThan(500); // Should have substantial content
+      
+      // Check for key sections that should be present
+      const hasInfluencerSection = contentText?.toLowerCase().includes('influencer');
+      const hasBudgetSection = contentText?.toLowerCase().includes('budget');
+      const hasRecommendation = contentText?.toLowerCase().includes('recommend');
+      
+      console.log(`- Has influencer section: ${hasInfluencerSection}`);
+      console.log(`- Has budget section: ${hasBudgetSection}`);
+      console.log(`- Has recommendations: ${hasRecommendation}`);
+      
+      if (!hasInfluencerSection || !hasBudgetSection || !hasRecommendation) {
+        console.warn('⚠️ Response may be missing expected sections');
+      }
+      
     } else {
       console.error('❌ No markdown content found on response page');
       await page.screenshot({ 

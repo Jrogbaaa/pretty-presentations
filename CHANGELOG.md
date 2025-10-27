@@ -2,6 +2,52 @@
 
 All notable changes to Pretty Presentations will be documented in this file.
 
+## [2.4.1] - 2025-10-27
+
+### 🔒 Security & Quality Improvements
+
+#### Input Sanitization
+- **ADDED:** Comprehensive input sanitization for API routes
+- Protection against XSS attacks (removes dangerous characters: `<`, `>`, `{`, `}`, `\`)
+- Length limits on all text fields (prevents DoS)
+- Array size limits (prevents memory attacks)
+- Budget validation (0-10M range)
+- Platform whitelist validation
+- Type checking for all inputs
+
+#### Error Message Security
+- **IMPROVED:** Error messages no longer leak internal details
+- Safe, user-friendly error messages for all failure cases
+- API keys and internal paths never exposed
+- Stack traces not sent to client
+- Specific error types logged internally only
+
+#### Accessibility Enhancements
+- **ADDED:** ARIA labels to processing overlay modal
+- Added `role="dialog"` and `aria-modal="true"`
+- Added `aria-labelledby` and `aria-describedby` for screen readers
+- Dynamic content based on processing mode (presentation vs text)
+- Better keyboard navigation support
+
+#### Bug Fixes
+- **FIXED:** Missing `processingMode` state variable causing runtime error
+- Processing overlay now correctly shows different messages for text vs presentation mode
+- State management properly initialized in both handlers
+
+#### Test Coverage Improvements
+- **ENHANCED:** Playwright tests now verify table rendering
+- Tests check for raw HTML tags vs rendered tables
+- Content quality validation (length, required sections)
+- Better error detection and debugging screenshots
+- Comprehensive assertions for all critical features
+
+### 📚 Documentation
+- **ADDED:** `CODE_REVIEW_FIXES.md` - Complete summary of all security and quality improvements
+- Updated inline comments and JSDoc annotations
+- Enhanced error message documentation
+
+---
+
 ## [2.4.0] - 2025-10-27
 
 ### ✨ Major Features Added

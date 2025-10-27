@@ -1,0 +1,261 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e7]:
+      - heading "AI-Powered Presentations" [level=1] [ref=e8]:
+        - text: AI-Powered Presentations
+        - img [ref=e9]
+      - heading "Transform briefs into stunning presentations" [level=2] [ref=e11]
+      - paragraph [ref=e12]: Our intelligent platform matches influencers to brands and generates professional, client-ready presentations in minutes using advanced AI technology.
+      - link "Create Presentation" [ref=e17] [cursor=pointer]:
+        - /url: "#brief-section"
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]: Powered by AI
+        - heading "Influencer matching made simple" [level=3] [ref=e22]
+        - paragraph [ref=e23]: Our AI analyzes thousands of influencers to find the perfect matches for your brand. Create presentations that showcase your campaign strategy with precision and style.
+        - button "Explore Features" [ref=e24]
+      - generic [ref=e25]:
+        - img "Creative influencer photo shoot" [ref=e27]
+        - img "Social media influencer lifestyle photography" [ref=e29]
+        - img "Influencer content creator in urban setting" [ref=e31]
+        - img "Brand ambassador content creation" [ref=e33]
+        - img "Social media content creator workspace" [ref=e35]
+        - img "Influencer marketing campaign photography" [ref=e37]
+        - img "Influencer team collaboration workspace" [ref=e39]
+        - img "Social media influencer portrait" [ref=e41]
+        - img "Lifestyle content creator behind the scenes" [ref=e43]
+        - img "Creative content for social media campaigns" [ref=e45]
+        - img "Fashion influencer photography session" [ref=e47]
+        - img "Lifestyle influencer outdoor content" [ref=e49]
+        - img "Influencer marketing collaboration" [ref=e51]
+        - img "Brand collaboration influencer marketing" [ref=e53]
+        - img "Professional influencer photography" [ref=e55]
+        - img "Digital influencer recording video content" [ref=e57]
+    - generic [ref=e59]:
+      - generic [ref=e60]:
+        - heading "Why Choose Pretty Presentations?" [level=2] [ref=e61]
+        - paragraph [ref=e62]: Everything you need to create professional presentations with AI
+      - generic [ref=e63]:
+        - generic [ref=e64]:
+          - img [ref=e66]
+          - heading "Smart Matching" [level=3] [ref=e70]
+          - paragraph [ref=e71]: AI analyzes thousands of influencers to find the perfect fit for your campaign goals and target audience
+        - generic [ref=e72]:
+          - img [ref=e74]
+          - heading "Lightning Fast" [level=3] [ref=e76]
+          - paragraph [ref=e77]: Generate complete, client-ready presentations in minutes instead of spending hours on manual work
+        - generic [ref=e78]:
+          - img [ref=e80]
+          - heading "Professional Quality" [level=3] [ref=e83]
+          - paragraph [ref=e84]: Agency-standard presentations with beautiful designs that impress clients every single time
+    - generic [ref=e86]:
+      - generic [ref=e87]:
+        - heading "How It Works" [level=2] [ref=e88]
+        - paragraph [ref=e89]: Three simple steps to create your perfect presentation
+      - generic [ref=e90]:
+        - generic [ref=e91]:
+          - img [ref=e93]
+          - heading "1. Upload Brief" [level=3] [ref=e96]
+          - paragraph [ref=e97]: Upload your client brief or fill out our simple form with campaign details
+        - generic [ref=e98]:
+          - img [ref=e100]
+          - heading "2. AI Processing" [level=3] [ref=e104]
+          - paragraph [ref=e105]: Our AI analyzes your brief and matches the perfect influencers automatically
+        - generic [ref=e106]:
+          - img [ref=e108]
+          - heading "3. Get Presentation" [level=3] [ref=e111]
+          - paragraph [ref=e112]: Receive your professional presentation ready to present or customize further
+    - generic [ref=e114]:
+      - generic [ref=e115]:
+        - heading "Start Creating Now" [level=2] [ref=e116]
+        - paragraph [ref=e117]: Upload your brief or fill out the form below to generate your presentation
+      - generic [ref=e119]:
+        - img [ref=e121]
+        - generic [ref=e125]:
+          - heading "Brief Parsed Successfully!" [level=3] [ref=e126]
+          - paragraph [ref=e127]: We've extracted all the information from your brief and pre-filled the form below. Review the details and make any adjustments before generating your presentation.
+          - generic [ref=e128]:
+            - generic [ref=e129]:
+              - generic [ref=e130]: ✓
+              - generic [ref=e131]: "Client: Napapijri"
+            - generic [ref=e132]:
+              - generic [ref=e133]: ✓
+              - generic [ref=e134]: "Budget: €15,000"
+            - generic [ref=e135]:
+              - generic [ref=e136]: ✓
+              - generic [ref=e137]: "Goals: 4"
+            - generic [ref=e138]:
+              - generic [ref=e139]: ✓
+              - generic [ref=e140]: "Platforms: 3"
+          - button "Upload a different brief" [ref=e141]
+      - generic [ref=e142]:
+        - generic [ref=e143]:
+          - heading "Client Brief" [level=2] [ref=e144]
+          - paragraph [ref=e145]: Fill in the campaign details to generate your presentation
+        - generic [ref=e146]:
+          - generic [ref=e147]: Client Name *
+          - textbox "Client Name *" [ref=e148]:
+            - /placeholder: e.g., Starbucks, Nike, Red Bull
+            - text: Napapijri
+        - generic [ref=e149]:
+          - generic [ref=e150]: Campaign Goals *
+          - generic [ref=e151]:
+            - textbox "e.g., Increase brand awareness, Drive product sales" [ref=e152]
+            - button "Add" [ref=e153]
+          - generic [ref=e154]:
+            - generic [ref=e155]:
+              - text: Generar awareness sobre el lanzamiento de la nueva colección
+              - button "Remove goal" [ref=e156]: ×
+            - generic [ref=e157]:
+              - text: Generar tráfico cualificado a la web de e-commerce
+              - button "Remove goal" [ref=e158]: ×
+            - generic [ref=e159]:
+              - text: Alcanzar 2M de impresiones en redes sociales
+              - button "Remove goal" [ref=e160]: ×
+            - generic [ref=e161]:
+              - text: Posicionar la marca como referente en moda sostenible
+              - button "Remove goal" [ref=e162]: ×
+        - generic [ref=e163]:
+          - generic [ref=e164]: Budget (€) *
+          - spinbutton "Budget (€) *" [ref=e165]: "15000"
+        - generic [ref=e166]:
+          - heading "Target Demographics *" [level=3] [ref=e167]
+          - generic [ref=e168]:
+            - generic [ref=e169]:
+              - generic [ref=e170]: Age Range
+              - textbox "Age Range" [ref=e171]:
+                - /placeholder: e.g., 18-35
+                - text: 18-50
+            - generic [ref=e172]:
+              - generic [ref=e173]: Gender
+              - textbox "Gender" [ref=e174]:
+                - /placeholder: e.g., All genders, 60% Female
+                - text: All genders
+          - generic [ref=e175]:
+            - generic [ref=e176]: Locations
+            - generic [ref=e177]:
+              - textbox "e.g., Spain, Madrid, Barcelona" [ref=e178]
+              - button "Add" [ref=e179]
+            - generic [ref=e181]:
+              - text: España
+              - button "Remove location" [ref=e182]: ×
+          - generic [ref=e183]:
+            - generic [ref=e184]: Interests
+            - generic [ref=e185]:
+              - textbox "e.g., Fashion, Technology, Sports" [ref=e186]
+              - button "Add" [ref=e187]
+            - generic [ref=e188]:
+              - generic [ref=e189]:
+                - text: technical style
+                - button "Remove interest" [ref=e190]: ×
+              - generic [ref=e191]:
+                - text: colorful designs
+                - button "Remove interest" [ref=e192]: ×
+        - generic [ref=e193]:
+          - generic [ref=e194]: Platform Preferences *
+          - generic [ref=e195]:
+            - button "Instagram" [ref=e196]
+            - button "TikTok" [ref=e197]
+            - button "YouTube" [ref=e198]
+            - button "Twitter" [ref=e199]
+            - button "Facebook" [ref=e200]
+            - button "LinkedIn" [ref=e201]
+            - button "Twitch" [ref=e202]
+        - generic [ref=e203]:
+          - generic [ref=e204]: Brand Requirements
+          - generic [ref=e205]:
+            - textbox "e.g., No alcohol mention, Family-friendly content" [ref=e206]
+            - button "Add" [ref=e207]
+          - generic [ref=e208]:
+            - generic [ref=e209]:
+              - text: Contenido auténtico y natural
+              - button "Remove requirement" [ref=e210]: ×
+            - generic [ref=e211]:
+              - text: Mencionar beneficios clave del producto
+              - button "Remove requirement" [ref=e212]: ×
+            - generic [ref=e213]:
+              - text: Link a la web en stories y bio
+              - button "Remove requirement" [ref=e214]: ×
+            - generic [ref=e215]:
+              - text: "Uso del hashtag #FashionStyle"
+              - button "Remove requirement" [ref=e216]: ×
+            - generic [ref=e217]:
+              - text: Tag @napapijri en publicaciones
+              - button "Remove requirement" [ref=e218]: ×
+        - generic [ref=e219]:
+          - generic [ref=e220]: Content Themes
+          - generic [ref=e221]:
+            - textbox "e.g., Authenticity, Sustainability, Innovation" [ref=e222]
+            - button "Add" [ref=e223]
+          - generic [ref=e224]:
+            - generic [ref=e225]:
+              - text: Styling para diferentes ocasiones
+              - button "Remove theme" [ref=e226]: ×
+            - generic [ref=e227]:
+              - text: Outfits del día y combinaciones versátiles
+              - button "Remove theme" [ref=e228]: ×
+            - generic [ref=e229]:
+              - text: Behind the scenes del proceso de diseño
+              - button "Remove theme" [ref=e230]: ×
+            - generic [ref=e231]:
+              - text: Unboxing y haul de la nueva colección
+              - button "Remove theme" [ref=e232]: ×
+        - generic [ref=e233]:
+          - generic [ref=e234]: Timeline
+          - textbox "Timeline" [ref=e235]:
+            - /placeholder: e.g., Q1 2025, March-May 2025, 8 weeks
+            - text: Inicio inmediato, duración 4 semanas
+        - generic [ref=e236]:
+          - generic [ref=e237]: Additional Notes
+          - textbox "Additional Notes" [ref=e238]:
+            - /placeholder: Any additional information or special requirements...
+            - text: Buscamos influencers que conecten con los valores de marca; Preferencia por contenido de alta calidad visual; Look After You gestionará la coordinación y envío de productos
+        - generic [ref=e239]:
+          - heading "🎨 Presentation Template" [level=3] [ref=e240]
+          - paragraph [ref=e241]: Choose a template that matches your campaign style. We'll auto-recommend based on your brief.
+          - generic [ref=e242]:
+            - 'button "Look After You Standard Clean, professional presentation with balanced layouts and universal appeal Professional #3B82F6 #8B5CF6 #10B981 #FFFFFF" [ref=e243]':
+              - heading "Look After You Standard" [level=4] [ref=e245]
+              - paragraph [ref=e246]: Clean, professional presentation with balanced layouts and universal appeal
+              - generic [ref=e248]: Professional
+              - generic [ref=e249]:
+                - generic "#3B82F6" [ref=e250]
+                - generic "#8B5CF6" [ref=e251]
+                - generic "#10B981" [ref=e252]
+                - generic "#FFFFFF" [ref=e253]
+            - 'button "Red Bull Event Experiential Energetic, action-heavy event storytelling with bold visuals and dynamic layouts Energetic #001489 #8A8D8F #FFC906 #0A0E27" [ref=e254]':
+              - heading "Red Bull Event Experiential" [level=4] [ref=e256]
+              - paragraph [ref=e257]: Energetic, action-heavy event storytelling with bold visuals and dynamic layouts
+              - generic [ref=e259]: Energetic
+              - generic [ref=e260]:
+                - generic "#001489" [ref=e261]
+                - generic "#8A8D8F" [ref=e262]
+                - generic "#FFC906" [ref=e263]
+                - generic "#0A0E27" [ref=e264]
+            - 'button "Scalpers Lifestyle Product Launch Premium, fashion-forward with editorial minimalism and influencer focus Premium #000000 #4A3728 #A78BFA #1A1A1A" [ref=e265]':
+              - heading "Scalpers Lifestyle Product Launch" [level=4] [ref=e267]
+              - paragraph [ref=e268]: Premium, fashion-forward with editorial minimalism and influencer focus
+              - generic [ref=e270]: Premium
+              - generic [ref=e271]:
+                - generic "#000000" [ref=e272]
+                - generic "#4A3728" [ref=e273]
+                - generic "#A78BFA" [ref=e274]
+                - generic "#1A1A1A" [ref=e275]
+        - generic [ref=e276]:
+          - button "Reset" [ref=e277]
+          - button "Generate Text Response" [active] [ref=e278]
+          - button "Generate Presentation" [ref=e279]
+    - contentinfo [ref=e280]:
+      - generic [ref=e282]:
+        - heading "Look After You" [level=3] [ref=e283]
+        - paragraph [ref=e284]: AI-powered influencer talent agency
+        - paragraph [ref=e285]: Powered by Firebase Vertex AI & Gemini
+        - button "My Presentations" [ref=e287]
+        - paragraph [ref=e288]: © 2025 Pretty Presentations. All rights reserved.
+  - button "Open Next.js Dev Tools" [ref=e294] [cursor=pointer]:
+    - img [ref=e295]
+  - alert [ref=e298]
+```
