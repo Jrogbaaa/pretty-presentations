@@ -142,13 +142,25 @@ const HomePage = () => {
       return;
     }
     
+    setProcessingMode("text");
     setIsProcessing(true);
     setError(null);
 
     try {
-      // Generate markdown response with influencer matching
-      const { generateMarkdownResponse } = await import("@/lib/markdown-response-generator.server");
-      const response = await generateMarkdownResponse(brief);
+      // Call API route to generate markdown response
+      const res = await fetch("/api/generate-text-response", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(brief),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to generate response");
+      }
+
+      const response = data.response;
 
       // Save response to Firestore
       try {

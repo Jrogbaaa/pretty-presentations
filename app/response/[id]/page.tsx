@@ -6,6 +6,7 @@ import { Download, Copy, ArrowLeft, Check, FileText } from "lucide-react";
 import type { BriefResponse } from "@/types";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 const ResponsePage = () => {
   const params = useParams();
@@ -53,18 +54,44 @@ const ResponsePage = () => {
     loadResponse();
   }, [params.id]);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!response) return;
 
-    const blob = new Blob([response.markdownContent], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${response.clientName.replace(/\s+/g, "-")}-influencer-recommendations.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const element = document.getElementById("markdown-content");
+      
+      if (!element) return;
+
+      // Create PDF
+      const pdf = new jsPDF({
+        format: 'a4',
+        unit: 'px',
+      });
+
+      // Use html2canvas via jsPDF's html method
+      await pdf.html(element, {
+        callback: (doc) => {
+          doc.save(`${response.clientName.replace(/\s+/g, "-")}-influencer-recommendations.pdf`);
+        },
+        x: 15,
+        y: 15,
+        width: 400,
+        windowWidth: 900
+      });
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      // Fallback to markdown download
+      const blob = new Blob([response.markdownContent], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${response.clientName.replace(/\s+/g, "-")}-influencer-recommendations.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
   };
 
   const handleCopy = async () => {
@@ -166,7 +193,7 @@ const ResponsePage = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
               >
                 <Download className="w-4 h-4" />
-                Download MD
+                Export PDF
               </button>
             </div>
           </div>
@@ -176,7 +203,9 @@ const ResponsePage = () => {
       {/* Content */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 md:p-12">
-          <div className="prose prose-lg dark:prose-invert max-w-none
+          <div 
+            id="markdown-content"
+            className="prose prose-lg dark:prose-invert max-w-none
             prose-headings:font-bold prose-headings:tracking-tight
             prose-h1:text-4xl prose-h1:mb-8 prose-h1:text-gray-900 dark:prose-h1:text-white prose-h1:border-b prose-h1:border-gray-200 dark:prose-h1:border-gray-700 prose-h1:pb-4
             prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:text-gray-900 dark:prose-h2:text-white prose-h2:border-b prose-h2:border-gray-200 dark:prose-h2:border-gray-700 prose-h2:pb-3
@@ -189,15 +218,25 @@ const ResponsePage = () => {
             prose-a:text-purple-600 dark:prose-a:text-purple-400 prose-a:no-underline hover:prose-a:underline
             prose-code:text-purple-600 dark:prose-code:text-purple-400 prose-code:bg-purple-50 dark:prose-code:bg-purple-900/20 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-normal prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
             prose-pre:bg-gray-100 dark:prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700
-            prose-blockquote:border-l-4 prose-blockquote:border-purple-500 prose-blockquote:bg-purple-50 dark:prose-blockquote:bg-purple-900/10 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:my-4
+            prose-blockquote:border-l-4 prose-blockquote:border-purple-500 prose-blockquote:bg-purple-50 dark:prose-blockquote:bg-purple-900/10 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:my-4 prose-blockquote:text-gray-800 dark:prose-blockquote:text-gray-200 prose-blockquote:font-medium
             prose-hr:border-gray-300 dark:prose-hr:border-gray-600 prose-hr:my-8
-            prose-table:w-full prose-table:border-collapse prose-table:my-6
+            prose-table:w-full prose-table:border-collapse prose-table:my-6 prose-table:bg-white dark:prose-table:bg-gray-800
+            prose-thead:bg-purple-100 dark:prose-thead:bg-purple-900/30
             prose-th:bg-purple-100 dark:prose-th:bg-purple-900/30 prose-th:px-4 prose-th:py-3 prose-th:text-left prose-th:font-semibold prose-th:text-gray-900 dark:prose-th:text-white prose-th:border prose-th:border-gray-300 dark:prose-th:border-gray-600
-            prose-td:px-4 prose-td:py-3 prose-td:border prose-td:border-gray-300 dark:prose-td:border-gray-600 prose-td:text-gray-700 dark:prose-td:text-gray-300
+            prose-td:px-4 prose-td:py-3 prose-td:border prose-td:border-gray-300 dark:prose-td:border-gray-600 prose-td:text-gray-700 dark:prose-td:text-gray-300 prose-td:bg-white dark:prose-td:bg-gray-800
             prose-tr:border-b prose-tr:border-gray-200 dark:prose-tr:border-gray-700
             [&_*]:break-words
           ">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+              components={{
+                // Force proper HTML rendering
+                table: ({node, ...props}) => <table style={{borderCollapse: 'collapse', width: '100%'}} {...props} />,
+                th: ({node, ...props}) => <th style={{border: '1px solid #d1d5db', padding: '0.75rem'}} {...props} />,
+                td: ({node, ...props}) => <td style={{border: '1px solid #d1d5db', padding: '0.75rem'}} {...props} />,
+              }}
+            >
               {response.markdownContent}
             </ReactMarkdown>
           </div>

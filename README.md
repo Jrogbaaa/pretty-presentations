@@ -2,11 +2,13 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 2.4.0 | **Database**: 3,001 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + Markdown 📤
+**Status**: 🟢 **Production-Ready** | **Version**: 2.4.0 | **Database**: 3,001 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤 | **Next.js**: 16.0.0 ⚡
 
-**Latest**: v2.4.0 **BRAND INTELLIGENCE SYSTEM!** 🧠 Comprehensive brand database with 218 Spanish & international brands across 15+ industries. Automatic brand lookup enriches briefs with target demographics, interests, and content themes. AI-powered brand-to-influencer matching ensures optimal recommendations. NEW: Random Sample Brief Generator creates diverse test scenarios from brand database. Enhanced progress overlay shows real-time processing steps. Beautiful formatted responses with large titles, tables, and visual hierarchy. Optional demographics with helpful suggestions (no validation errors). Production-ready! 🎯✨
+**Latest**: v2.4.0 **TEXT RESPONSE PDF EXPORT & HTML RENDERING FIXES!** 📄✨ Complete overhaul of text response rendering with proper HTML table support, enhanced text visibility, and professional PDF export functionality. NEW: Export text responses as beautifully formatted PDFs with preserved styling, tables, and typography. FIXED: HTML tables now render properly (not as raw text) with custom ReactMarkdown components and rehype-raw plugin. FIXED: Blockquote text visibility issues (light on light). Updated to Next.js 16.0.0 and React 19.2.0. Proper API route architecture with client/server separation. Production-ready! 🎯✨
 
 **Previous**: v2.3.0 **FLEXIBLE BRIEF PARSING & TEXT RESPONSE GENERATION!** 📝 System now handles incomplete briefs gracefully. Text Response option generates comprehensive markdown documents with influencer recommendations, strategy, and performance projections. Beautiful formatted response page with copy/download functionality. Perfect for quick proposals! 🎯✨
+
+**Earlier**: v2.2.0 **BRAND INTELLIGENCE SYSTEM!** 🧠 Comprehensive brand database with 218 Spanish & international brands across 15+ industries. Automatic brand lookup enriches briefs with target demographics, interests, and content themes. AI-powered brand-to-influencer matching ensures optimal recommendations. Random Sample Brief Generator creates diverse test scenarios. Production-ready! 🎯✨
 
 **Previous**: v2.2.0 **STREAMLINED POWERPOINT EXPORT!** 📤 Simplified export to focus on PowerPoint (PPTX) format only - fully compatible with Google Slides, PowerPoint, and Canva! Upload PPTX files directly to Google Slides for full editing capability. Removed PDF export (not supported by Google Slides). All text is 100% editable, includes server-side image proxy to bypass CORS, and Firebase Storage CORS configured for seamless loading. Export speed: ~12-15 seconds. Clean, single-button interface. Production-tested! 🎉✨
 
@@ -92,7 +94,30 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
   - PPTX is the universal editable format supported by all platforms
   - Simplified user experience with one clear export path
 
-### 📝 Enhanced Response Formatting (v2.4.0) ⚡ NEW
+### 📄 Text Response PDF Export (v2.4.0) ⚡ NEW
+- **Professional PDF Generation**:
+  - One-click export of text responses as formatted PDFs
+  - Preserves all styling, tables, and typography
+  - Uses jsPDF for client-side PDF generation
+  - Replaces basic markdown download
+  - Generates professional documents ready for clients
+  - File naming: `ClientName-influencer-recommendations.pdf`
+- **HTML Table Rendering Fixed**:
+  - Custom ReactMarkdown components with inline styles
+  - rehype-raw plugin for proper HTML parsing
+  - Tables display with borders and proper formatting
+  - No more raw `<table>`, `<tr>`, `<td>` text
+- **Enhanced Text Visibility**:
+  - Fixed blockquote text contrast (light on light issue)
+  - Darker text colors for better readability
+  - Font-medium weight for emphasis
+  - All text elements now properly visible
+- **Proper Architecture**:
+  - Created `/api/generate-text-response` API route
+  - Fixed client/server boundary violations
+  - Proper Next.js 16 patterns
+
+### 📝 Enhanced Response Formatting (v2.3.0)
 - **Large, Beautiful Typography**:
   - H1: 56px (3.5rem) with purple underline - massive hero titles
   - H2: 40px (2.5rem) with gray underline - large section headers
