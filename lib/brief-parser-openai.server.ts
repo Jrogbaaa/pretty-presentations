@@ -147,6 +147,22 @@ Return ONLY valid JSON, no markdown formatting.`;
     const sanitized = sanitizeBriefData(rawParsed);
     const parsed = validateClientBrief(sanitized);
 
+    // Add helpful suggestions if demographics are missing
+    const suggestions: string[] = [];
+    if (!parsed.targetDemographics.interests || parsed.targetDemographics.interests.length === 0) {
+      suggestions.push('💡 TIP: Add target audience interests for more accurate influencer matching and better results.');
+    }
+    if (parsed.targetDemographics.ageRange === '18-65') {
+      suggestions.push('💡 TIP: Specify a narrower age range (e.g., 25-45) for more targeted influencer recommendations.');
+    }
+    
+    // Append suggestions to additional notes
+    if (suggestions.length > 0) {
+      const suggestionText = '\n\n' + suggestions.join('\n');
+      parsed.additionalNotes = (parsed.additionalNotes || '') + suggestionText;
+      console.log('ℹ️  Demographics suggestions added to brief');
+    }
+
     // Cache the result
     briefCache.set(cacheKey, parsed);
     

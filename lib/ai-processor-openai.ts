@@ -83,13 +83,17 @@ export const processBrief = async (
     }
 
     // Step 2: Match influencers using AI (uses Vertex AI for ranking)
+    // NOTE: matchInfluencers now automatically includes brand intelligence!
+    // It looks up the brand in the database (218+ brands) and enhances the brief
+    // For unknown brands, AI finds similar brands and uses their profile
     timer.lap('matching-start');
     const matchedInfluencers = await matchInfluencers(brief, influencerPool);
     timer.lap('matching-complete');
     
     logInfo('Influencer matching complete', {
       matchedCount: matchedInfluencers.length,
-      totalBudget: matchedInfluencers.reduce((sum, inf) => sum + (inf.costEstimate || 0), 0)
+      totalBudget: matchedInfluencers.reduce((sum, inf) => sum + (inf.costEstimate || 0), 0),
+      brandIntelligenceUsed: brief.additionalNotes?.includes('Brand Profile:') || false
     });
 
     // Step 3: Determine or recommend template
@@ -270,6 +274,13 @@ const generatePresentationContent = async (
   
   const openai = getOpenAI();
   
+  // Extract brand intelligence if available
+  const hasBrandIntelligence = brief.additionalNotes?.includes('Brand Profile:');
+  const brandContext = hasBrandIntelligence ? `\n\n**BRAND INTELLIGENCE:**
+${brief.additionalNotes}
+
+This brand intelligence was automatically retrieved from our database of 218+ Spanish brands and should inform your creative strategy and influencer selection rationale.` : '';
+  
   const prompt = `You are a senior creative strategist at Dentsu Story Lab / Look After You, an elite influencer talent agency known for crafting premium, insight-driven campaign presentations.
 
 Create a comprehensive, highly sophisticated campaign presentation based on this brief:
@@ -282,7 +293,7 @@ Target Audience: ${JSON.stringify(brief.targetDemographics)}
 Brand Requirements: ${brief.brandRequirements.join(", ")}
 Timeline: ${brief.timeline}
 Platforms: ${brief.platformPreferences.join(", ")}
-Content Themes: ${brief.contentThemes?.join(", ") || "Lifestyle, Authenticity, Aspiration"}
+Content Themes: ${brief.contentThemes?.join(", ") || "Lifestyle, Authenticity, Aspiration"}${brandContext}
 
 **MATCHED INFLUENCERS:**
 ${influencers.map(i => `- ${i.name} (@${i.handle}): ${i.followers.toLocaleString()} followers, ${i.engagement}% ER, Cost: €${i.costEstimate?.toLocaleString()}`).join("\n")}
@@ -322,6 +333,7 @@ Generate sophisticated, agency-quality presentation content following this struc
 - Use Spanish where culturally appropriate (titles, hashtags, claims)
 - Be specific, not generic (avoid "engaging content", use "Instagram Reels featuring first concert stories")
 - Think like a premium agency: strategic, creative, data-informed
+- ${hasBrandIntelligence ? 'IMPORTANT: Leverage the brand intelligence provided above to create highly relevant, brand-aligned creative concepts and justify influencer selections based on brand identity and target audience' : 'Use available brief information to create relevant creative concepts'}
 
 **RETURN AS JSON:**
 {

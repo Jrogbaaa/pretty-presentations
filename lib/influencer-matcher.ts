@@ -1,5 +1,6 @@
 import { model } from "./firebase";
 import { searchInfluencers } from "./influencer-service";
+import { matchBrandToInfluencers, getBrandIntelligenceSummary } from "./brand-matcher";
 import type { ClientBrief, Influencer, SelectedInfluencer } from "@/types";
 
 export const matchInfluencers = async (
@@ -7,6 +8,52 @@ export const matchInfluencers = async (
   influencerPool?: Influencer[]
 ): Promise<SelectedInfluencer[]> => {
   try {
+    // ========================================
+    // BRAND INTELLIGENCE INTEGRATION
+    // ========================================
+    // Enhance brief with brand profile data if clientName is provided
+    let enhancedBrief = brief;
+    let brandSuggestions: string[] = [];
+    
+    if (brief.clientName && brief.clientName.trim()) {
+      console.log(`🔍 Looking up brand intelligence for: ${brief.clientName}`);
+      
+      try {
+        const brandIntelligence = await getBrandIntelligenceSummary(
+          brief.clientName,
+          brief
+        );
+        
+        if (brandIntelligence.brandFound && brandIntelligence.brandProfile) {
+          console.log(`✅ Brand found: ${brandIntelligence.brandProfile.name} (${brandIntelligence.matchQuality} match)`);
+          
+          // Enhance brief with brand data
+          const brandMatch = await matchBrandToInfluencers(
+            brief.clientName,
+            brief,
+            [] // We'll use the influencers after fetching
+          );
+          
+          enhancedBrief = brandMatch.enhancedBrief;
+          brandSuggestions = brandMatch.suggestions;
+          
+          console.log(`📊 Enhanced brief with brand profile:`);
+          console.log(`  - Industry: ${brandIntelligence.brandProfile.industry}`);
+          console.log(`  - Target Interests: ${brandIntelligence.brandProfile.targetInterests.join(', ')}`);
+          console.log(`  - Content Themes: ${brandIntelligence.brandProfile.contentThemes.slice(0, 3).join(', ')}`);
+        } else {
+          console.log(`⚠️  Brand "${brief.clientName}" not in database. Using brief details only.`);
+          brandSuggestions = brandIntelligence.recommendations;
+        }
+      } catch (brandError) {
+        console.warn('⚠️  Brand intelligence lookup failed:', brandError);
+        console.log('Continuing with original brief...');
+      }
+    }
+    
+    // Use enhanced brief for rest of matching process
+    brief = enhancedBrief;
+    
     // Use provided pool or fetch from Firestore
     let pool = influencerPool;
     

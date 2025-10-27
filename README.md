@@ -2,9 +2,11 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 2.3.0 | **Database**: 3,001 Spanish Influencers (VERIFIED ✅) | **Matching**: LAYAI Algorithm ⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini + GPT-4o 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + Markdown 📤
+**Status**: 🟢 **Production-Ready** | **Version**: 2.4.0 | **Database**: 3,001 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + Markdown 📤
 
-**Latest**: v2.3.0 **FLEXIBLE BRIEF PARSING & TEXT RESPONSE GENERATION!** 📝 System now handles incomplete briefs gracefully - budget field accepts 0, displays amber warning, and prompts user to fill it in before generating. NEW: Text Response option generates comprehensive markdown documents with influencer recommendations, strategy, and performance projections using GPT-4o. Beautiful formatted response page with tables, copy/download functionality. Both presentation and text response options available side-by-side! Perfect for quick proposals and client presentations. Firestore rules updated for development. 🎯✨
+**Latest**: v2.4.0 **BRAND INTELLIGENCE SYSTEM!** 🧠 Comprehensive brand database with 218 Spanish & international brands across 15+ industries. Automatic brand lookup enriches briefs with target demographics, interests, and content themes. AI-powered brand-to-influencer matching ensures optimal recommendations. NEW: Random Sample Brief Generator creates diverse test scenarios from brand database. Enhanced progress overlay shows real-time processing steps. Beautiful formatted responses with large titles, tables, and visual hierarchy. Optional demographics with helpful suggestions (no validation errors). Production-ready! 🎯✨
+
+**Previous**: v2.3.0 **FLEXIBLE BRIEF PARSING & TEXT RESPONSE GENERATION!** 📝 System now handles incomplete briefs gracefully. Text Response option generates comprehensive markdown documents with influencer recommendations, strategy, and performance projections. Beautiful formatted response page with copy/download functionality. Perfect for quick proposals! 🎯✨
 
 **Previous**: v2.2.0 **STREAMLINED POWERPOINT EXPORT!** 📤 Simplified export to focus on PowerPoint (PPTX) format only - fully compatible with Google Slides, PowerPoint, and Canva! Upload PPTX files directly to Google Slides for full editing capability. Removed PDF export (not supported by Google Slides). All text is 100% editable, includes server-side image proxy to bypass CORS, and Firebase Storage CORS configured for seamless loading. Export speed: ~12-15 seconds. Clean, single-button interface. Production-tested! 🎉✨
 
@@ -28,7 +30,44 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 
 ## 🚀 Features
 
-### 📤 PowerPoint Export (v2.2.0) ⚡ NEW
+### 🧠 Brand Intelligence System (v2.4.0) ⚡ NEW
+- **218-Brand Database**: Comprehensive CSV database covering Spanish & international brands across 15+ industries
+  - Fashion & Retail, Sports & Fitness, Food & Beverage, Beauty & Cosmetics
+  - Technology, Home & Decor, Automotive, Entertainment, Travel, Banking
+  - Healthcare, Education, Luxury, Sustainability, and more
+- **Automatic Brand Lookup**: System automatically searches brand database on brief submission
+- **Smart Brief Enrichment**: Enhances briefs with:
+  - Target demographics (age, gender, location)
+  - Interest categories and psychographics
+  - Content themes and brand identity
+  - Similar brands for alternative recommendations
+- **AI-Powered Brand Matching**: 
+  - Exact name matching for known brands
+  - ~~Gemini-powered similarity detection for unknown brands~~ (removed)
+  - Contextual influencer selection based on brand profile
+- **Brand-Aware Influencer Matching**: LAYAI algorithm enhanced with brand intelligence
+  - Filters influencers by brand-relevant interests
+  - Prioritizes content categories matching brand identity
+  - Adjusts scoring weights based on brand demographics
+- **Real-time Intelligence Logging**: Console logs show brand lookup process
+  ```
+  🔍 Looking up brand intelligence for: Nike
+  ✅ Brand found: Nike (exact match)
+  📊 Enhanced brief with brand profile:
+    - Industry: Sports & Fitness
+    - Target Interests: Sports, Running, Fitness
+    - Content Themes: Athletic performance, Motivation
+  🎯 Using LAYAI scoring algorithm for influencer ranking...
+  ```
+- **Random Sample Brief Generator**:
+  - One-click generation of diverse test briefs from brand database
+  - Industry-specific campaign templates (Fashion, Sports, Food, Beauty, Tech, etc.)
+  - Smart defaults for budgets, timelines, objectives
+  - Accelerates testing by 10x
+  - New "Random Sample" button replaces static sample
+- **Documentation**: See `BRANDS_DATABASE_GUIDE.md`, `BRAND_INTELLIGENCE_INTEGRATION.md`
+
+### 📤 PowerPoint Export (v2.2.0)
 - **PowerPoint (PPTX) Export**: 
   - Fully editable presentations compatible with PowerPoint, **Google Slides**, and Canva
   - **Google Slides Integration**: Upload PPTX files directly to Google Slides (File → Open → Upload)
@@ -52,6 +91,49 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
   - Google Slides **does not support** PDF imports (read-only format)
   - PPTX is the universal editable format supported by all platforms
   - Simplified user experience with one clear export path
+
+### 📝 Enhanced Response Formatting (v2.4.0) ⚡ NEW
+- **Large, Beautiful Typography**:
+  - H1: 56px (3.5rem) with purple underline - massive hero titles
+  - H2: 40px (2.5rem) with gray underline - large section headers
+  - H3: 32px (2rem) in purple - medium subsections
+  - H4: 24px (1.5rem) - detail headers
+  - Body: 18px (1.125rem) - highly readable text
+- **Visual Enhancements**:
+  - Purple gradient table headers with hover effects
+  - Gradient blockquotes (purple → pink) with border accents
+  - Enhanced spacing and padding throughout
+  - Professional shadows on tables and cards
+  - Dark mode support with intelligent color adaptation
+- **Dedicated CSS Styling**: `/app/response/[id]/response-styles.css` with `!important` overrides
+- **Better Markdown Structure**: Enhanced templates with clear sections, emojis, and visual hierarchy
+- **Copy & Download**: One-click copy to clipboard or download as markdown file
+
+### ⚡ Smart Validation (v2.4.0) ⚡ NEW
+- **Optional Demographics**: All demographic fields now optional with smart defaults
+  - Default age range: 18-65
+  - Default gender: "All genders"
+  - Default location: ["Spain"]
+  - Optional interests (no validation errors)
+- **Helpful Suggestions**: Instead of errors, system provides tips
+  ```
+  💡 TIP: Add target audience interests for more accurate influencer matching
+  💡 TIP: Specify a narrower age range (e.g., 25-45) for better targeting
+  ```
+- **Zero Validation Errors**: Smooth workflow without blocking submissions
+- **Better UX**: Encourages best practices without forcing requirements
+
+### ⏳ Progress Tracking Overlay (v2.4.0) ⚡ NEW
+- **Animated Progress Bar**: Visual 0-95% progress indicator
+- **Real-time Step Tracking**: Shows current processing step
+  1. Processing brief requirements (3s)
+  2. Looking up brand intelligence (2s)
+  3. Matching influencers to target audience (5s)
+  4. Generating content with AI (15s)
+  5. Finalizing presentation/response (5s)
+- **Visual Indicators**: Checkmarks for completed, spinners for current, icons for pending
+- **Mode-Aware**: Different steps for presentation vs. text response
+- **Better User Confidence**: Transparent process reduces perceived wait time
 
 ### 🎨 Stripe-Inspired Design System (v2.0.1)
 - **Complete UI Redesign**: Clean, minimal interface with generous whitespace and subtle shadows
@@ -240,19 +322,18 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js 15 with App Router
+- **Framework**: Next.js 15.5.4 with Turbopack
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4
 - **UI Components**: Shadcn UI, Lucide React Icons
 - **Animations**: Framer Motion
-- **Backend**: Firebase (Firestore, Storage, Vertex AI, Authentication)
-- **Database**: Firestore with offline persistence
-- **Influencer Data**: LAYAI Database (2,996 validated profiles)
-- **AI Text Processing**: OpenAI GPT-4o-mini for reliable brief parsing, validation, and content generation
-- **AI Influencer Ranking**: Google Gemini 1.5 Flash via Firebase Vertex AI
-- **AI Image Generation**: Google Gemini 2.0 Flash Exp via Firebase Vertex AI
-- **Export**: pptxgenjs
-- **Data Sources**: StarNgage, Apify, Serply (via LAYAI)
+- **Backend**: Firebase (Firestore, Storage, Authentication)
+- **Database**: Firestore with offline persistence + CSV brand database (218 brands)
+- **Influencer Data**: LAYAI Database (3,001 verified Spanish profiles)
+- **AI Processing**: OpenAI GPT-4o-mini for brief parsing, validation, and content generation (~$0.02/response)
+- **AI Image Generation**: Google Nano Banana (Gemini 2.5 Flash Image) via Replicate
+- **Export**: pptxgenjs (PowerPoint), ReactMarkdown (formatted text responses)
+- **Data Sources**: StarNgage, Apify, Serply (via LAYAI), Manual brand research
 
 ## 📦 Installation
 
@@ -299,15 +380,15 @@ FIREBASE_ADMIN_PROJECT_ID=your_project_id
 FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk@your_project.iam.gserviceaccount.com
 FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 
-# Vertex AI Configuration
-NEXT_PUBLIC_VERTEX_AI_LOCATION=us-central1
-NEXT_PUBLIC_VERTEX_AI_MODEL=gemini-1.5-flash
-NEXT_PUBLIC_VERTEX_AI_IMAGE_MODEL=gemini-2.0-flash-exp
-NEXT_PUBLIC_ENABLE_IMAGE_GENERATION=true
-
-# OpenAI Configuration (for brief parsing)
+# OpenAI Configuration (Required for brief parsing & content generation)
 OPENAI_API_KEY=sk-proj-your-key-here
+
+# Image Generation (Optional - for Nano Banana via Replicate)
+REPLICATE_API_TOKEN=your_replicate_token
+NEXT_PUBLIC_ENABLE_IMAGE_GENERATION=true
 ```
+
+**Note**: Gemini/Vertex AI configuration removed in v2.4.0. System now uses OpenAI exclusively for all AI processing.
 
 **See `env.example` for template**
 
@@ -400,26 +481,30 @@ pretty-presentations/
 
 ## 🤖 AI Features
 
-### Hybrid AI System (OpenAI + Google)
+### OpenAI-Powered System (GPT-4o-mini)
 
-**OpenAI GPT-4o-mini (Text Processing)**:
+**Core AI Processing**:
 - **Brief Document Parsing**: Extracts structured data from unstructured brief text (English, Spanish, mixed)
-- **Brief Validation**: Checks brief completeness and flags missing information with guaranteed JSON output
-- **Content Generation**: Creates persuasive, professional copy for all slides
+- **Brief Validation**: Checks brief completeness with helpful suggestions (no blocking errors)
+- **Brand Intelligence Lookup**: Automatic brand database search and enrichment
+- **Content Generation**: Creates persuasive, professional copy for presentations and markdown responses
 - **Template Auto-Recommendation**: Analyzes brief to suggest best presentation style
+- **Cost-Efficient**: ~$0.02 per response with intelligent caching
 
-**Google Vertex AI (Visual & Ranking)**:
-- **Influencer Ranking**: AI analyzes profiles, engagement rates, and audience demographics
-- **Smart Matching**: Selects optimal mix of macro/micro/nano influencers
-- **Rationale Generation**: Explains why each influencer was selected
-- **Budget Optimization**: Distributes budget across influencer tiers
+**Intelligent Matching**:
+- **LAYAI Scoring Algorithm**: 9-factor scoring system for influencer selection
+- **Brand-Aware Filtering**: Uses brand profile to prioritize relevant influencers
+- **Smart Budget Allocation**: Optimal mix of macro/mid-tier/micro influencers
+- **Rationale Generation**: AI-powered explanations for each influencer selection
+- **Performance Projections**: Estimated reach, engagement, and ROI calculations
 
-### Image Generation (Gemini 2.0 Flash Exp)
+### Image Generation (Nano Banana via Replicate)
 - **Custom Slide Backgrounds**: Generate branded backgrounds matching campaign theme
-- **Image Editing**: Add, remove, or modify elements in existing images
-- **Brand Graphics**: Auto-generate logos, icons, and visual elements
-- **Style Transfer**: Apply specific visual styles to images
+- **Contextual Images**: AI creates images tailored to slide content
+- **Hero Images**: Full-screen cover slide visuals
+- **Content Backgrounds**: Subtle 15-20% opacity backgrounds for readability
 - **Auto-Save to Firebase Storage**: Generated images automatically saved
+- **Fast & Affordable**: ~60-120 seconds for 11 images, $0.06-0.12 per presentation
 
 ## 🎨 Customization
 
@@ -493,14 +578,30 @@ Proprietary - Look After You Talent Agency
 
 ## 📖 Documentation
 
+### Getting Started
 - **Getting Started**: `GETTING_STARTED.md`
 - **Firebase Setup**: `FIREBASE_SETUP_CHECKLIST.md`
-- **Vertex AI Setup**: `VERTEX_AI_SETUP_FIX.md`
 - **Database Setup**: `DATABASE_SETUP.md`
+- **Quick Reference**: `QUICK_REFERENCE.md`
+
+### Brand Intelligence (v2.4.0 NEW)
+- **Brand Database Guide**: `BRANDS_DATABASE_GUIDE.md` - How to use the brand database
+- **Implementation Details**: `BRANDS_DATABASE_IMPLEMENTATION.md` - Technical implementation
+- **Integration Guide**: `BRAND_INTELLIGENCE_INTEGRATION.md` - How brand intelligence works
+- **Random Sample Feature**: `RANDOM_SAMPLE_FEATURE.md` - Random brief generator guide
+- **Testing Guide**: `TESTING_BRAND_INTELLIGENCE.md` - How to test brand features
+- **October 2025 Updates**: `UPDATES_OCT_27_2025.md` - Comprehensive update summary
+
+### Features & Systems
 - **LAYAI Integration**: `LAYAI_INTEGRATION.md`
 - **Template System**: `TEMPLATES.md`
 - **Brief Parsing**: `BRIEF_PARSING.md`
+- **Design System**: `DESIGN_SYSTEM.md`
+- **Presentation Excellence**: `PRESENTATION_EXCELLENCE_GUIDE.md`
+
+### History
 - **Changelog**: `CHANGELOG.md`
+- **Previous Exports**: `REMOVED_UPLOAD_AND_FIXED_EXPORT.md`
 
 ## 🙏 Acknowledgments
 

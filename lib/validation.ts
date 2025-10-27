@@ -8,12 +8,14 @@ import { ValidationError } from '@/types/errors';
 
 /**
  * Target demographics schema
+ * NOTE: All fields are now optional with smart defaults for better UX
+ * The system will suggest adding demographics for best results
  */
 export const TargetDemographicsSchema = z.object({
-  ageRange: z.string().min(1, 'Age range is required'),
-  gender: z.string().min(1, 'Gender is required'),
-  location: z.array(z.string()).min(1, 'At least one location is required'),
-  interests: z.array(z.string()).min(1, 'At least one interest is required'),
+  ageRange: z.string().default('18-65'),
+  gender: z.string().default('All genders'),
+  location: z.array(z.string()).min(1).default(['Spain']),
+  interests: z.array(z.string()).default([]), // Optional - will suggest adding for best results
   psychographics: z.string().optional(),
 });
 

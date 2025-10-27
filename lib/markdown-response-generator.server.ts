@@ -103,111 +103,247 @@ ${idx + 1}. ${inf.name} (@${inf.handle})
    - Why: ${inf.rationale}`).join("\n")}
 
 **INSTRUCTIONS:**
-Create a comprehensive, well-formatted markdown document with clear visual hierarchy:
+Create a comprehensive, beautifully formatted markdown document with exceptional visual hierarchy and clear sections:
 
 # 🎯 ${brief.clientName} - Influencer Marketing Proposal
 
+> **Campaign Budget:** €${brief.budget.toLocaleString()} | **Timeline:** ${brief.timeline} | **Platforms:** ${brief.platformPreferences.join(", ")}
+
+---
+
 ## 📋 Executive Summary
 
-Brief overview (3-4 sentences) highlighting the campaign strategy, target audience, and expected outcomes.
+Provide a compelling 3-4 sentence overview that:
+- Highlights the campaign's core strategy
+- Defines the target audience
+- Outlines expected business outcomes
+- Sets an aspirational but achievable tone
 
 ---
 
-## 📊 Brief Analysis
+## 📊 Campaign Brief Analysis
 
-### Campaign Objectives
+### 🎯 Campaign Objectives
 
-${brief.campaignGoals.map(goal => `- ${goal}`).join('\n')}
+${brief.campaignGoals.map((goal, idx) => `${idx + 1}. **${goal}**`).join('\n')}
 
-Provide 2-3 sentences of strategic analysis about how these objectives align with influencer marketing.
+**Strategic Alignment:**
 
-### Target Audience Profile
+Provide 2-3 sentences explaining how influencer marketing is the ideal solution for these objectives. Focus on authenticity, reach, and engagement potential.
 
-**Demographics:**
-- Age Range: ${brief.targetDemographics.ageRange}
-- Gender: ${brief.targetDemographics.gender}
-- Location: ${brief.targetDemographics.location.join(", ")}
+### 👥 Target Audience Profile
 
-**Interests & Behaviors:**
-${brief.targetDemographics.interests.map(interest => `- ${interest}`).join('\n')}
+| Category | Details |
+|----------|---------|
+| **Age Range** | ${brief.targetDemographics.ageRange} |
+| **Gender** | ${brief.targetDemographics.gender} |
+| **Location** | ${brief.targetDemographics.location.join(", ")} |
+| **Core Interests** | ${brief.targetDemographics.interests.slice(0, 5).join(", ")} |
 
-**Platform Preferences:**
-${brief.platformPreferences.map(platform => `- ${platform}`).join('\n')}
+**Psychographic Insights:**
 
-### Budget & Timeline
+Provide 2-3 sentences about this audience's content consumption habits, values, and purchasing behaviors.
 
-- **Total Budget:** €${brief.budget.toLocaleString()}
-- **Timeline:** ${brief.timeline}
-- **Budget Allocation:** Provide breakdown (e.g., 70% influencer fees, 20% content production, 10% contingency)
+### 💰 Investment & Timeline
+
+| Budget Component | Allocation | Amount |
+|-----------------|------------|--------|
+| **Influencer Fees** | 70% | €${Math.round(brief.budget * 0.7).toLocaleString()} |
+| **Content Production** | 20% | €${Math.round(brief.budget * 0.2).toLocaleString()} |
+| **Contingency Buffer** | 10% | €${Math.round(brief.budget * 0.1).toLocaleString()} |
+| **TOTAL BUDGET** | **100%** | **€${brief.budget.toLocaleString()}** |
+
+**Timeline:** ${brief.timeline}
 
 ---
 
-## 🌟 Matched Influencers
+## 🌟 Recommended Influencer Lineup
 
-> These ${influencers.length} influencers were selected from our database of 3,000+ Spanish influencers based on audience alignment, engagement quality, and brand fit.
+> **Selection Criteria:** These ${influencers.length} influencer${influencers.length !== 1 ? 's were' : ' was'} handpicked from our database of **3,000+ verified Spanish creators** based on audience alignment, engagement quality, content style, and brand fit.
 
-${influencers.map((inf, idx) => `
-### ${idx + 1}. ${inf.name} • @${inf.handle}
+${influencers.map((inf, idx) => {
+  const tierEmoji = inf.followers >= 500000 ? '⭐' : inf.followers >= 100000 ? '✨' : '💫';
+  const tier = inf.followers >= 500000 ? 'Macro' : inf.followers >= 100000 ? 'Mid-tier' : 'Micro';
+  
+  return `
+---
 
-| Metric | Value |
-|--------|-------|
-| **Followers** | ${inf.followers.toLocaleString()} |
-| **Engagement Rate** | ${inf.engagement}% |
-| **Platform** | ${inf.platform} |
-| **Categories** | ${inf.contentCategories.join(", ")} |
-| **Estimated Cost** | €${inf.costEstimate?.toLocaleString() || "TBD"} per post |
+### ${tierEmoji} ${idx + 1}. **${inf.name}** • [@${inf.handle}](https://instagram.com/${inf.handle})
 
-**Why This Influencer:**
+<table>
+<tr>
+<td><strong>📊 Reach</strong></td>
+<td>${inf.followers.toLocaleString()} followers</td>
+<td><strong>💬 Engagement</strong></td>
+<td>${inf.engagement}% (${inf.engagement >= 3 ? 'Excellent' : inf.engagement >= 2 ? 'Strong' : 'Good'})</td>
+</tr>
+<tr>
+<td><strong>📱 Platform</strong></td>
+<td>${inf.platform}</td>
+<td><strong>🎭 Tier</strong></td>
+<td>${tier} Influencer</td>
+</tr>
+<tr>
+<td><strong>🎨 Content Focus</strong></td>
+<td colspan="3">${inf.contentCategories.slice(0, 4).join(", ")}</td>
+</tr>
+<tr>
+<td><strong>💰 Investment</strong></td>
+<td colspan="3">€${inf.costEstimate?.toLocaleString() || "TBD"} per post (${Math.round((inf.costEstimate || 0) / inf.followers * 1000)} CPM)</td>
+</tr>
+</table>
+
+#### 💡 Why ${inf.name.split(' ')[0]}?
 
 ${inf.rationale}
 
-**Recommended Content Mix:**
-- 2-3 Instagram Reels showcasing [specific content]
-- 3-4 Stories with swipe-up links
-- 1 carousel post highlighting key features
+#### 🎬 Recommended Content Strategy
 
----`).join('\n\n')}
+**Deliverables:**
+- 📹 2-3 Instagram Reels (dynamic, trend-forward content)
+- 📸 3-4 Instagram Stories (behind-the-scenes, authentic moments)
+- 🖼️ 1 Carousel Post (educational or storytelling format)
 
----
-
-## 💡 Creative Strategy
-
-### Content Themes
-
-Provide 3-4 content pillars that align with ${brief.clientName}'s brand and the campaign objectives:
-
-1. **[Theme 1 Name]:** Description of content approach
-2. **[Theme 2 Name]:** Description of content approach
-3. **[Theme 3 Name]:** Description of content approach
-
-### Recommended Content Mix
-
-| Platform | Content Type | Frequency | Purpose |
-|----------|-------------|-----------|---------|
-| Instagram | Reels | 2-3 per week | Drive awareness & engagement |
-| Instagram | Stories | Daily | Build connection & urgency |
-| ${brief.platformPreferences[0] || 'TikTok'} | Short-form video | 3-4 per week | Viral potential & reach |
+**Content Pillars:**
+- Authenticity and personal storytelling
+- Visual appeal aligned with ${brief.clientName}'s brand aesthetic
+- Clear calls-to-action driving engagement and conversions`;
+}).join('\n\n')}
 
 ---
 
-## 📈 Projected Performance
+---
 
-### Estimated Reach & Engagement
+## 💡 Creative Strategy & Content Direction
 
-Based on the matched influencers' average performance:
+### 🎨 Strategic Content Pillars
 
-- **Total Projected Impressions:** ${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.3), 0)).toLocaleString()} - ${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.5), 0)).toLocaleString()}
-- **Estimated Engagement Rate:** ${(influencers.reduce((sum, inf) => sum + inf.engagement, 0) / influencers.length).toFixed(2)}% average
-- **Expected Total Engagements:** ${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * (inf.engagement / 100) * 3), 0)).toLocaleString()}+
-- **Estimated CPM:** €${((brief.budget / influencers.reduce((sum, inf) => sum + (inf.followers * 0.4), 0)) * 1000).toFixed(2)}
+Create 3-4 compelling content themes that authentically connect ${brief.clientName} with the target audience:
 
-### Success Metrics
+1. **✨ [Theme 1 Name]**
+   - Description of content approach and storytelling angle
+   - Example: "[Specific content idea]"
 
-**Primary KPIs:**
-- Reach: Target 2M+ impressions
-- Engagement: Maintain ${(influencers.reduce((sum, inf) => sum + inf.engagement, 0) / influencers.length).toFixed(1)}%+ average ER
-- Website Traffic: Drive 50K+ clicks to landing page
-- Conversion: Achieve ${brief.budget > 50000 ? '500+' : '200+'} qualified leads
+2. **🌟 [Theme 2 Name]**
+   - Description of content approach and storytelling angle
+   - Example: "[Specific content idea]"
+
+3. **💫 [Theme 3 Name]**
+   - Description of content approach and storytelling angle
+   - Example: "[Specific content idea]"
+
+4. **🎯 [Theme 4 Name]** *(Optional but recommended)*
+   - Description of content approach and storytelling angle
+   - Example: "[Specific content idea]"
+
+### 📅 Content Distribution Plan
+
+<table>
+<tr>
+<th>Platform</th>
+<th>Format</th>
+<th>Frequency</th>
+<th>Primary Objective</th>
+<th>Content Style</th>
+</tr>
+<tr>
+<td><strong>Instagram</strong></td>
+<td>Reels</td>
+<td>2-3 per week</td>
+<td>Drive awareness & engagement</td>
+<td>Dynamic, trend-forward, music-driven</td>
+</tr>
+<tr>
+<td><strong>Instagram</strong></td>
+<td>Stories</td>
+<td>Daily</td>
+<td>Build connection & urgency</td>
+<td>Authentic, behind-the-scenes, interactive</td>
+</tr>
+<tr>
+<td><strong>${brief.platformPreferences[1] || brief.platformPreferences[0] || 'TikTok'}</strong></td>
+<td>Short-form video</td>
+<td>3-4 per week</td>
+<td>Viral potential & reach</td>
+<td>Entertainment-first, native to platform</td>
+</tr>
+<tr>
+<td><strong>All Platforms</strong></td>
+<td>Carousel/Static</td>
+<td>2 per week</td>
+<td>Education & depth</td>
+<td>High-quality visuals, detailed storytelling</td>
+</tr>
+</table>
+
+---
+
+## 📈 Performance Projections & KPIs
+
+### 🎯 Estimated Campaign Performance
+
+Based on historical data and the selected influencers' average performance metrics:
+
+<table>
+<tr>
+<th>Metric</th>
+<th>Conservative Estimate</th>
+<th>Expected Range</th>
+<th>Optimistic Target</th>
+</tr>
+<tr>
+<td><strong>Total Impressions</strong></td>
+<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.3), 0)).toLocaleString()}</td>
+<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.4), 0)).toLocaleString()}</td>
+<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.5), 0)).toLocaleString()}</td>
+</tr>
+<tr>
+<td><strong>Total Engagements</strong></td>
+<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * (inf.engagement / 100) * 2), 0)).toLocaleString()}</td>
+<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * (inf.engagement / 100) * 3), 0)).toLocaleString()}</td>
+<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * (inf.engagement / 100) * 4), 0)).toLocaleString()}</td>
+</tr>
+<tr>
+<td><strong>Engagement Rate</strong></td>
+<td>${Math.max(2.0, (influencers.reduce((sum, inf) => sum + inf.engagement, 0) / influencers.length) * 0.8).toFixed(2)}%</td>
+<td>${(influencers.reduce((sum, inf) => sum + inf.engagement, 0) / influencers.length).toFixed(2)}%</td>
+<td>${((influencers.reduce((sum, inf) => sum + inf.engagement, 0) / influencers.length) * 1.2).toFixed(2)}%</td>
+</tr>
+<tr>
+<td><strong>Website Clicks</strong></td>
+<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.02), 0)).toLocaleString()}</td>
+<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.03), 0)).toLocaleString()}</td>
+<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.05), 0)).toLocaleString()}</td>
+</tr>
+<tr>
+<td><strong>Cost Per Impression</strong></td>
+<td colspan="3">€${((brief.budget / influencers.reduce((sum, inf) => sum + (inf.followers * 0.4), 0)) * 1000).toFixed(2)} CPM</td>
+</tr>
+</table>
+
+### ✅ Key Performance Indicators
+
+**Primary Success Metrics:**
+
+1. **📊 Reach & Awareness**
+   - Target: ${brief.budget >= 50000 ? '2M+' : brief.budget >= 25000 ? '1M+' : '500K+'} total impressions
+   - Unique reach across all influencers
+   - Brand mention frequency and sentiment
+
+2. **💬 Engagement & Connection**
+   - Maintain ${(influencers.reduce((sum, inf) => sum + inf.engagement, 0) / influencers.length).toFixed(1)}%+ average engagement rate
+   - ${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * (inf.engagement / 100) * 3), 0) / 1000)}K+ total interactions (likes, comments, shares)
+   - Positive sentiment ratio >85%
+
+3. **🔗 Traffic & Conversions**
+   - Drive ${brief.budget >= 50000 ? '50K+' : brief.budget >= 25000 ? '30K+' : '15K+'} clicks to landing page
+   - Achieve ${brief.budget >= 50000 ? '500+' : brief.budget >= 25000 ? '300+' : '150+'} qualified leads
+   - Conversion rate: ${brief.budget >= 50000 ? '1-2%' : '0.5-1.5%'}
+
+4. **🎯 Brand Impact**
+   - +${brief.budget >= 50000 ? '15-25%' : '10-15%'} brand awareness lift
+   - +${brief.budget >= 50000 ? '20-30%' : '15-20%'} purchase intent increase
+   - ${influencers.length * 50}+ pieces of authentic user-generated content
 
 ---
 

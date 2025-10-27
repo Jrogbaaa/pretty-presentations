@@ -182,6 +182,23 @@ export interface AIProcessingResponse {
   confidence: number;
 }
 
+// Brand Types
+export interface Brand {
+  name: string;
+  industry: string;
+  description: string;
+  targetAge: string;
+  targetGender: string;
+  targetInterests: string[];
+  contentThemes: string[];
+}
+
+export interface BrandProfile extends Brand {
+  similarBrands?: string[];
+  matchScore?: number;
+  matchReason?: string;
+}
+
 // Export Types
 export type ExportFormat = "pdf" | "pptx" | "google-slides" | "png" | "json";
 
