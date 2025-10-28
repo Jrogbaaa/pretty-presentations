@@ -46,9 +46,9 @@ const DonutChart = ({
             outerRadius={outerRadius}
             paddingAngle={5}
             dataKey="value"
-            label={({ name, percent }) => 
+            label={({ name, percent }: any) => 
               showPercentage 
-                ? `${name}: ${(percent * 100).toFixed(0)}%` 
+                ? `${name}: ${((percent as number) * 100).toFixed(0)}%` 
                 : name
             }
             labelLine={{ stroke: '#6B7280', strokeWidth: 1 }}
