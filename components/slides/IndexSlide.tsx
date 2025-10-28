@@ -6,8 +6,8 @@ interface IndexSlideProps {
 }
 
 const IndexSlide = ({ slide, onEdit }: IndexSlideProps) => {
-  const campaignSummary = slide.content.customData?.campaignSummary;
-  const keyNumbers = slide.content.customData?.keyNumbers;
+  const campaignSummary = slide.content.customData?.campaignSummary as Record<string, string | number> | undefined;
+  const keyNumbers = slide.content.customData?.keyNumbers as Record<string, string | number> | undefined;
   const hasCampaignSummary = campaignSummary || keyNumbers;
 
   return (
@@ -76,8 +76,7 @@ const IndexSlide = ({ slide, onEdit }: IndexSlideProps) => {
         </div>
       )}
 
-      {/* Traditional Index (if bullets provided) */}
-      {slide.content.bullets && slide.content.bullets.length > 0 && (
+      {slide.content.bullets && Array.isArray(slide.content.bullets) && slide.content.bullets.length > 0 ? (
         <div className="flex-1 flex items-center">
           <ol className="space-y-4 text-2xl">
             {slide.content.bullets.map((item, index) => (
@@ -88,19 +87,19 @@ const IndexSlide = ({ slide, onEdit }: IndexSlideProps) => {
                 >
                   {index + 1}
                 </span>
-                <span>{item}</span>
+                <span>{String(item)}</span>
               </li>
             ))}
           </ol>
         </div>
-      )}
+      ) : null}
 
-      {slide.content.customData?.estimatedReadTime && (
+      {slide.content.customData?.estimatedReadTime ? (
         <div className="text-lg opacity-70 mt-4">
           <span className="font-medium">Estimated reading time:</span>{" "}
-          {slide.content.customData.estimatedReadTime}
+          {String(slide.content.customData.estimatedReadTime)}
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

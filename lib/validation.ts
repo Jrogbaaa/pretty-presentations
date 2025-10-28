@@ -54,7 +54,7 @@ export const ClientBriefSchema = z.object({
   
   additionalNotes: z.string().max(2000, 'Additional notes must be less than 2000 characters').optional(),
   
-  templateId: z.enum(['look-after-you', 'red-bull', 'scalpers']).optional(),
+  templateId: z.enum(['default', 'red-bull-event', 'scalpers-lifestyle']).optional(),
 });
 
 /**

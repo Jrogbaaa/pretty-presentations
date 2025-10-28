@@ -19,7 +19,7 @@ const GenericSlide = ({ slide, onEdit }: GenericSlideProps) => {
       }}
     >
       {/* Background Image (subtle, if available) */}
-      {hasImage && (
+      {hasImage && slide.content.images && (
         <>
           <div 
             className="absolute inset-0 z-0"

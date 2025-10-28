@@ -23,7 +23,7 @@ const CoverSlide = ({ slide, onEdit }: CoverSlideProps) => {
       }}
     >
       {/* Background Image with Overlay */}
-      {hasBackgroundImage && (
+      {hasBackgroundImage && slide.content.images && (
         <>
           <div 
             className="absolute inset-0 z-0"
@@ -88,9 +88,9 @@ const CoverSlide = ({ slide, onEdit }: CoverSlideProps) => {
           </div>
           <div className="text-lg opacity-70 mt-2">Influencer Talent Agency</div>
         </div>
-        {slide.content.date && (
+        {slide.content.customData && typeof slide.content.customData === 'object' && 'date' in slide.content.customData && (
           <div className="text-lg opacity-70">
-            {slide.content.date}
+            {String(slide.content.customData.date)}
           </div>
         )}
       </div>

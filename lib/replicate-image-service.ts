@@ -29,7 +29,7 @@ export interface SlideImageOptions {
     body?: string;
     bullets?: string[];
   };
-  brief: ImageGenerationBrief;
+  brief: ImageGenerationBrief | any;
   aspectRatio?: "1:1" | "16:9" | "9:16" | "3:2" | "4:3";
 }
 
@@ -234,7 +234,7 @@ export const generateImagesForSlides = async (
 const createPromptForSlide = (
   slideType: string,
   content: SlideImageOptions["slideContent"],
-  brief: ImageGenerationBrief,
+  brief: ImageGenerationBrief | any,
   aspectRatio: string
 ): string => {
   const brandName = brief.clientName;
@@ -266,8 +266,8 @@ Important: No text. Clean, minimal, suitable for corporate presentation.`;
 
     case "target-strategy":
       return `Create an image representing diverse target audience and demographics.
-Audience profile: ${brief.targetDemographics.ageRange}, ${brief.targetDemographics.gender}
-Interests: ${brief.targetDemographics.interests.join(", ")}
+Audience profile: ${brief.targetDemographics?.ageRange || 'diverse ages'}, ${brief.targetDemographics?.gender || 'all genders'}
+Interests: ${brief.targetDemographics?.interests?.join(", ") || 'varied interests'}
 Style: Inclusive, diverse, modern, professional lifestyle
 Mood: Authentic, relatable, aspirational
 Visual elements: Diverse people, community, connection, modern lifestyle, authentic moments
@@ -312,7 +312,7 @@ Important: Show digital connectivity and media ecosystem. No logos or branded el
     case "brief-summary":
       return `Create a professional image representing campaign brief and strategic planning.
 Brand: ${brandName}
-Budget: €${brief.budget.toLocaleString()}
+Budget: ${brief.budget ? (typeof brief.budget === 'number' ? `€${brief.budget.toLocaleString()}` : brief.budget) : 'TBD'}
 Style: Organized, professional, strategic, corporate
 Mood: Clear, focused, strategic
 Visual elements: Planning, organization, strategy documents, business planning, structured thinking

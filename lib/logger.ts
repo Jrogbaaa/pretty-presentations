@@ -92,7 +92,9 @@ const logToAnalytics = async (
     const { analytics } = await import('./firebase');
     const { logEvent } = await import('firebase/analytics');
     
-    logEvent(analytics, eventName, params);
+    if (analytics) {
+      logEvent(analytics, eventName, params);
+    }
   } catch (error) {
     // Silently fail if analytics is not available
     console.debug('Analytics not available:', error);
@@ -171,7 +173,7 @@ export const logError = (
   });
   
   if (error instanceof Error) {
-    logToErrorTracking(error, context);
+    logToErrorTracking(error);
   }
   
   if (config.enableAnalytics) {

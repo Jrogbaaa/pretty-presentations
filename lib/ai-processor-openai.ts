@@ -137,14 +137,14 @@ export const processBrief = async (
     // Step 6: Create presentation object
     const presentation: Presentation = {
       id: Date.now().toString(),
-      title: `${brief.clientName} - Influencer Campaign`,
       campaignName: brief.campaignGoals?.[0] || "Influencer Campaign",
       clientName: brief.clientName,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       slides,
       brief,
-      selectedInfluencers: matchedInfluencers,
+      status: "draft",
+      templateId: brief.templateId || "default",
     };
 
     const totalDuration = timer.stop({

@@ -17,7 +17,7 @@ const ObjectiveSlide = ({ slide }: ObjectiveSlideProps) => {
       }}
     >
       {/* Background Image with Overlay */}
-      {hasImage && (
+      {hasImage && slide.content.images && (
         <>
           <div 
             className="absolute inset-0 z-0"

@@ -7,7 +7,7 @@ interface RecommendedScenarioSlideProps {
 }
 
 const RecommendedScenarioSlide = ({ slide, onEdit }: RecommendedScenarioSlideProps) => {
-  const recommendedScenario = slide.content.customData?.recommendedScenario;
+  const recommendedScenario = slide.content.customData?.recommendedScenario as Record<string, unknown> | undefined;
 
   return (
     <div
@@ -61,10 +61,10 @@ const RecommendedScenarioSlide = ({ slide, onEdit }: RecommendedScenarioSlidePro
 
         {/* Right Column - Metrics */}
         <div className="space-y-6">
-          {/* Key Numbers */}
-          {recommendedScenario && typeof recommendedScenario === 'object' && (
+          {(recommendedScenario && typeof recommendedScenario === 'object') ? (
+            /* Key Numbers */
             <>
-              {'impressions' in recommendedScenario && (
+              {('impressions' in recommendedScenario) ? (
                 <div className="p-8 rounded-2xl" style={{ backgroundColor: slide.design.accentColor + "20" }}>
                   <div className="text-5xl font-black mb-2" style={{ color: slide.design.accentColor }}>
                     <AnimatedNumber 
@@ -78,45 +78,48 @@ const RecommendedScenarioSlide = ({ slide, onEdit }: RecommendedScenarioSlidePro
                   </div>
                   <div className="text-xl opacity-70">Total Impressions</div>
                 </div>
-              )}
+              ) : null}
 
-              {'budget' in recommendedScenario && (
+              {('budget' in recommendedScenario) ? (
                 <div className="p-8 rounded-2xl" style={{ backgroundColor: slide.design.accentColor + "20" }}>
                   <div className="text-5xl font-black mb-2" style={{ color: slide.design.accentColor }}>
                     {String(recommendedScenario.budget)}
                   </div>
                   <div className="text-xl opacity-70">Budget</div>
                 </div>
-              )}
+              ) : null}
 
-              {'cpm' in recommendedScenario && (
+              {('cpm' in recommendedScenario) ? (
                 <div className="p-8 rounded-2xl" style={{ backgroundColor: slide.design.accentColor + "20" }}>
                   <div className="text-5xl font-black mb-2" style={{ color: slide.design.accentColor }}>
                     {String(recommendedScenario.cpm)}
                   </div>
                   <div className="text-xl opacity-70">CPM</div>
                 </div>
-              )}
+              ) : null}
             </>
-          )}
+          ) : null}
 
           {/* Budget Breakdown Donut Chart */}
-          {slide.content.customData?.budgetBreakdown && slide.content.customData.budgetBreakdown.length > 0 && (
+          {slide.content.customData?.budgetBreakdown && 
+           Array.isArray(slide.content.customData.budgetBreakdown) && 
+           slide.content.customData.budgetBreakdown.length > 0 ? (
             <div className="mt-6">
               <h4 className="text-2xl font-bold mb-4">Budget Allocation</h4>
               <DonutChart
-                data={slide.content.customData.budgetBreakdown}
+                data={slide.content.customData.budgetBreakdown as any[]}
                 height={300}
                 innerRadius={60}
                 outerRadius={100}
                 centerLabel="Total"
-                centerValue={slide.content.customData.totalBudget 
-                  ? `€${(slide.content.customData.totalBudget / 1000).toFixed(0)}K`
-                  : undefined
+                centerValue={
+                  slide.content.customData.totalBudget && typeof slide.content.customData.totalBudget === 'number'
+                    ? `€${(slide.content.customData.totalBudget / 1000).toFixed(0)}K`
+                    : undefined
                 }
               />
             </div>
-          )}
+          ) : null}
 
           {/* Content Plan */}
           {recommendedScenario && typeof recommendedScenario === 'object' && 'contentPlan' in recommendedScenario && (

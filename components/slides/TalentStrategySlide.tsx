@@ -30,21 +30,27 @@ const TalentStrategySlide = ({ slide }: TalentStrategySlideProps) => {
       )}
 
       {/* Metrics Overview - Now with Bar Chart Visualization */}
-      {slide.content.customData?.chartData && slide.content.customData.chartData.length > 0 ? (
+      {slide.content.customData?.chartData && 
+       Array.isArray(slide.content.customData.chartData) && 
+       slide.content.customData.chartData.length > 0 ? (
         <div className="mb-6">
           <h3 className="text-xl font-bold mb-3">Engagement Rate Comparison</h3>
           <BarChartComparison
-            data={slide.content.customData.chartData}
+            data={slide.content.customData.chartData as any[]}
             metric="%"
-            averageLine={slide.content.customData.average || undefined}
+            averageLine={
+              slide.content.customData.average && typeof slide.content.customData.average === 'number'
+                ? slide.content.customData.average
+                : undefined
+            }
             averageLabel="Industry Average"
             height={180}
           />
-          {slide.content.customData.insight && (
+          {(slide.content.customData.insight && typeof slide.content.customData.insight === 'string') ? (
             <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: slide.design.accentColor + "15" }}>
-              <p className="text-sm italic">💡 <strong>Insight:</strong> {slide.content.customData.insight}</p>
+              <p className="text-sm italic">💡 <strong>Insight:</strong> {String(slide.content.customData.insight)}</p>
             </div>
-          )}
+          ) : null}
         </div>
       ) : slide.content.metrics && slide.content.metrics.length > 0 ? (
         <div className="grid grid-cols-4 gap-4 mb-6">

@@ -295,7 +295,7 @@ export const getBriefCacheKey = (briefText: string): string => {
 export const getContentCacheKey = (brief: Record<string, unknown>): string => {
   const normalized = {
     clientName: brief.clientName,
-    campaignGoals: brief.campaignGoals?.sort(),
+    campaignGoals: Array.isArray(brief.campaignGoals) ? brief.campaignGoals.sort() : brief.campaignGoals,
     budget: brief.budget,
     targetDemographics: brief.targetDemographics
   };

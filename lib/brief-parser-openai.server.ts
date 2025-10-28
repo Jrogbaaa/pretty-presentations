@@ -62,7 +62,7 @@ export const parseBriefDocument = async (
       cacheKey: cacheKey.substring(0, 8),
       briefLength: briefText.length
     });
-    return cached;
+    return cached as unknown as ClientBrief;
   }
   
   logBriefProcessingStart(briefText);
