@@ -6,6 +6,7 @@
   margin-bottom: 2rem !important;
   padding-bottom: 1rem !important;
   border-bottom: 4px solid rgb(168 85 247) !important;
+  color: #000000 !important;
 }
 
 .response-content h2 {
@@ -16,6 +17,7 @@
   margin-bottom: 1.5rem !important;
   padding-bottom: 0.75rem !important;
   border-bottom: 2px solid rgb(209 213 219) !important;
+  color: #000000 !important;
 }
 
 .response-content h3 {
@@ -24,7 +26,7 @@
   font-weight: 700 !important;
   margin-top: 2rem !important;
   margin-bottom: 1rem !important;
-  color: rgb(126 34 206) !important;
+  color: #6B21A8 !important;
 }
 
 .response-content h4 {
@@ -33,27 +35,28 @@
   font-weight: 700 !important;
   margin-top: 1.5rem !important;
   margin-bottom: 0.75rem !important;
+  color: #000000 !important;
 }
 
 .response-content p {
   font-size: 1.125rem !important;
   line-height: 1.75 !important;
   margin-bottom: 1rem !important;
-  color: rgb(31 41 55) !important;
+  color: #000000 !important;
 }
 
 .response-content li {
   font-size: 1.125rem !important;
   line-height: 1.75 !important;
   margin-bottom: 0.5rem !important;
-  color: rgb(31 41 55) !important;
+  color: #000000 !important;
 }
 
 .response-content h1,
 .response-content h2,
 .response-content h3,
 .response-content h4 {
-  color: rgb(17 24 39) !important;
+  color: #000000 !important;
 }
 
 .response-content ul {
@@ -68,6 +71,7 @@
 
 .response-content strong {
   font-weight: 700 !important;
+  color: #000000 !important;
 }
 
 .response-content table {
@@ -83,12 +87,14 @@
   font-weight: 700 !important;
   font-size: 1rem !important;
   text-align: left !important;
+  color: #000000 !important;
 }
 
 .response-content td {
   padding: 1rem 1.5rem !important;
   font-size: 1rem !important;
   border: 1px solid rgb(229 231 235) !important;
+  color: #000000 !important;
 }
 
 .response-content tr:hover {
@@ -103,6 +109,7 @@
   border-radius: 0 0.75rem 0.75rem 0 !important;
   font-size: 1rem !important;
   font-weight: 500 !important;
+  color: #000000 !important;
 }
 
 .response-content hr {
@@ -112,12 +119,12 @@
 
 /* Dark mode overrides */
 .dark .response-content h1 {
-  color: white !important;
+  color: #FFFFFF !important;
   border-bottom-color: rgb(192 132 252) !important;
 }
 
 .dark .response-content h2 {
-  color: white !important;
+  color: #FFFFFF !important;
   border-bottom-color: rgb(75 85 99) !important;
 }
 
@@ -125,22 +132,26 @@
   color: rgb(192 132 252) !important;
 }
 
+.dark .response-content h4 {
+  color: #FFFFFF !important;
+}
+
 .dark .response-content p,
 .dark .response-content li {
-  color: rgb(243 244 246) !important;
+  color: #FFFFFF !important;
 }
 
 .dark .response-content strong {
-  color: white !important;
+  color: #FFFFFF !important;
 }
 
 .dark .response-content th {
   background: linear-gradient(to bottom right, rgb(88 28 135 / 0.4), rgb(107 33 168 / 0.4)) !important;
-  color: white !important;
+  color: #FFFFFF !important;
 }
 
 .dark .response-content td {
-  color: rgb(209 213 219) !important;
+  color: #FFFFFF !important;
   border-color: rgb(75 85 99) !important;
 }
 
@@ -150,7 +161,7 @@
 
 .dark .response-content blockquote {
   background: linear-gradient(to right, rgb(88 28 135 / 0.2), rgb(157 23 77 / 0.2)) !important;
-  color: rgb(243 244 246) !important;
+  color: #FFFFFF !important;
 }
 
 .response-content blockquote p {
@@ -158,7 +169,7 @@
 }
 
 .dark .response-content blockquote p {
-  color: rgb(243 244 246) !important;
+  color: #FFFFFF !important;
 }
 
 .dark .response-content hr {
