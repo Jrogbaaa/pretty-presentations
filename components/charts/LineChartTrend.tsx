@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 interface TrendDataItem {
   label: string;
-  value: number;
+  value?: number;
   projected?: number;
 }
 

@@ -2,6 +2,23 @@
 
 All notable changes to Pretty Presentations will be documented in this file.
 
+## [2.4.4] - 2025-10-28
+
+### 🐛 TypeScript Build Fix
+
+#### Fixed Vercel Deployment Error
+- **FIXED:** TypeScript type error in `CHART_EXAMPLES.tsx`
+  - Made `value` field optional in `TrendDataItem` interface
+  - Updated interface: `value?: number` (was `value: number`)
+  - Removed explicit `undefined` values from growth data examples
+  - Chart component now properly handles optional values for projected-only data points
+- **FILES CHANGED:**
+  - `components/charts/LineChartTrend.tsx` - Updated interface
+  - `CHART_EXAMPLES.tsx` - Cleaned up data structure
+- **RESULT:** Successful TypeScript compilation and Vercel deployment
+
+---
+
 ## [2.4.3] - 2025-10-28
 
 ### 🎨 Text Visibility & PDF Export Complete

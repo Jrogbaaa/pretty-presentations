@@ -273,12 +273,12 @@ export const ProgressBarsExample = () => (
 // ============================================
 export const GrowthTrendChart = ({ accentColor }: { accentColor: string }) => {
   const growthData = [
-    { label: "Month 1", value: 500000, projected: undefined },
-    { label: "Month 2", value: 850000, projected: undefined },
+    { label: "Month 1", value: 500000 },
+    { label: "Month 2", value: 850000 },
     { label: "Month 3", value: 1200000, projected: 1500000 },
-    { label: "Month 4", value: undefined, projected: 2000000 },
-    { label: "Month 5", value: undefined, projected: 2800000 },
-    { label: "Month 6", value: undefined, projected: 3500000 }
+    { label: "Month 4", projected: 2000000 },
+    { label: "Month 5", projected: 2800000 },
+    { label: "Month 6", projected: 3500000 }
   ];
 
   return (
