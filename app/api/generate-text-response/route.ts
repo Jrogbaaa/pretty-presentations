@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateMarkdownResponse } from "@/lib/markdown-response-generator.server";
-import type { ClientBrief } from "@/types";
+import type { ClientBrief, Platform } from "@/types";
 
 /**
  * Sanitize string input to prevent injection attacks
@@ -49,9 +49,9 @@ const sanitizeBrief = (input: any): ClientBrief => {
   }
   
   // Sanitize platform preferences
-  const validPlatforms = ["Instagram", "TikTok", "YouTube", "Twitter", "Facebook", "LinkedIn", "Twitch"];
+  const validPlatforms: Platform[] = ["Instagram", "TikTok", "YouTube", "Twitter", "Facebook", "LinkedIn", "Twitch"];
   const platformPreferences = sanitizeArray(input.platformPreferences)
-    .filter((platform) => validPlatforms.includes(platform));
+    .filter((platform): platform is Platform => validPlatforms.includes(platform));
   
   // Sanitize demographics
   const targetDemographics = {
