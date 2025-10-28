@@ -452,11 +452,16 @@ Return ONLY the markdown content, no additional commentary or wrapper text.`;
       RetryPresets.STANDARD
     );
 
-    const markdown = response.choices[0]?.message?.content || "";
+    let markdown = response.choices[0]?.message?.content || "";
     
     if (!markdown) {
       throw new OpenAIError("No content generated", "empty_response");
     }
+
+    // Remove any code block wrappers that OpenAI might add
+    markdown = markdown.replace(/^```markdown\n?/g, '').replace(/\n?```$/g, '');
+    markdown = markdown.replace(/^```\n?/g, '').replace(/\n?```$/g, '');
+    markdown = markdown.trim();
 
     return markdown;
   } catch (error) {
