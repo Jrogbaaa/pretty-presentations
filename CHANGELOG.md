@@ -2,6 +2,56 @@
 
 All notable changes to Pretty Presentations will be documented in this file.
 
+## [2.4.2] - 2025-10-28
+
+### 🎨 Project Consolidation & Formatting Improvements
+
+#### Project Structure Cleanup
+- **MERGED:** Consolidated duplicate `pretty-presentations` subdirectory into main project
+- **REMOVED:** Deleted redundant subdirectory to eliminate confusion
+- **UNIFIED:** Single codebase structure for easier maintenance
+- All files synced and merged properly (app/, components/, lib/, types/)
+- No functionality lost in the merge
+
+#### Text Response Formatting Fixes
+- **FIXED:** White background box on response pages (now transparent)
+- **FIXED:** HTML tables now render properly instead of showing raw markup
+  - Added `rehype-raw` plugin to ReactMarkdown
+  - Tables display with proper borders, styling, and colors
+- **IMPROVED:** Text contrast in both light and dark modes
+  - Light mode: Darker text (rgb(17 24 39)) for better readability
+  - Dark mode: Lighter text (rgb(243 244 246)) for better visibility
+- **ADDED:** Custom CSS typography system (`response-styles.css`)
+  - Large, readable font sizes
+  - Proper heading hierarchy
+  - Beautiful table styling with hover effects
+  - Gradient headers for visual appeal
+
+#### Export Changes
+- **CHANGED:** Text response export from PDF to Markdown download
+  - Simpler, faster download
+  - "Download MD" button instead of "Export PDF"
+  - Better compatibility across platforms
+
+#### Documentation
+- **ADDED:** `TEXT_RESPONSE_FORMATTING_FIXES.md` - Complete formatting fix documentation
+- **ADDED:** `PROJECT_MERGE_COMPLETE.md` - Merge process documentation
+- **ADDED:** `CLEANUP_COMPLETE.md` - Project cleanup summary
+
+#### Files Changed
+- `app/response/[id]/page.tsx` - Updated with rehypeRaw, transparent background, custom CSS
+- `app/response/[id]/response-styles.css` - New custom typography system
+- `app/page.tsx` - Updated to use proper API route for text generation
+- `app/api/generate-text-response/route.ts` - Proper server-side generation
+- `components/BriefUpload.tsx` - Latest version synced
+- `components/ProcessingOverlay.tsx` - Added to main project
+
+### 🐛 Bug Fixes
+- Fixed markdown rendering showing raw syntax (**, ##, etc.)
+- Fixed emojis not displaying properly in responses
+- Fixed blockquote text visibility issues
+- Fixed client/server boundary violations in text generation
+
 ## [2.4.1] - 2025-10-27
 
 ### 🔒 Security & Quality Improvements

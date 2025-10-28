@@ -1,0 +1,160 @@
+/* Force large font sizes for markdown response */
+.response-content h1 {
+  font-size: 3.5rem !important;
+  line-height: 1.1 !important;
+  font-weight: 800 !important;
+  margin-bottom: 2rem !important;
+  padding-bottom: 1rem !important;
+  border-bottom: 4px solid rgb(168 85 247) !important;
+}
+
+.response-content h2 {
+  font-size: 2.5rem !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+  margin-top: 3rem !important;
+  margin-bottom: 1.5rem !important;
+  padding-bottom: 0.75rem !important;
+  border-bottom: 2px solid rgb(209 213 219) !important;
+}
+
+.response-content h3 {
+  font-size: 2rem !important;
+  line-height: 1.3 !important;
+  font-weight: 700 !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+  color: rgb(126 34 206) !important;
+}
+
+.response-content h4 {
+  font-size: 1.5rem !important;
+  line-height: 1.4 !important;
+  font-weight: 700 !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.response-content p {
+  font-size: 1.125rem !important;
+  line-height: 1.75 !important;
+  margin-bottom: 1rem !important;
+  color: rgb(17 24 39) !important;
+}
+
+.response-content li {
+  font-size: 1.125rem !important;
+  line-height: 1.75 !important;
+  margin-bottom: 0.5rem !important;
+  color: rgb(17 24 39) !important;
+}
+
+.response-content ul {
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.response-content ol {
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.response-content strong {
+  font-weight: 700 !important;
+}
+
+.response-content table {
+  margin: 2rem 0 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 0.75rem !important;
+  overflow: hidden !important;
+}
+
+.response-content th {
+  background: linear-gradient(to bottom right, rgb(243 232 255), rgb(233 213 255)) !important;
+  padding: 1rem 1.5rem !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  text-align: left !important;
+}
+
+.response-content td {
+  padding: 1rem 1.5rem !important;
+  font-size: 1rem !important;
+  border: 1px solid rgb(229 231 235) !important;
+}
+
+.response-content tr:hover {
+  background-color: rgb(249 250 251) !important;
+}
+
+.response-content blockquote {
+  border-left: 4px solid rgb(168 85 247) !important;
+  background: linear-gradient(to right, rgb(250 245 255), rgb(252 231 243)) !important;
+  padding: 1rem 1.5rem !important;
+  margin: 2rem 0 !important;
+  border-radius: 0 0.75rem 0.75rem 0 !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+}
+
+.response-content hr {
+  margin: 3rem 0 !important;
+  border-top: 2px solid rgb(209 213 219) !important;
+}
+
+/* Dark mode overrides */
+.dark .response-content h1 {
+  color: white !important;
+  border-bottom-color: rgb(192 132 252) !important;
+}
+
+.dark .response-content h2 {
+  color: white !important;
+  border-bottom-color: rgb(75 85 99) !important;
+}
+
+.dark .response-content h3 {
+  color: rgb(192 132 252) !important;
+}
+
+.dark .response-content p,
+.dark .response-content li {
+  color: rgb(243 244 246) !important;
+}
+
+.dark .response-content strong {
+  color: white !important;
+}
+
+.dark .response-content th {
+  background: linear-gradient(to bottom right, rgb(88 28 135 / 0.4), rgb(107 33 168 / 0.4)) !important;
+  color: white !important;
+}
+
+.dark .response-content td {
+  color: rgb(209 213 219) !important;
+  border-color: rgb(75 85 99) !important;
+}
+
+.dark .response-content tr:hover {
+  background-color: rgb(31 41 55 / 0.5) !important;
+}
+
+.dark .response-content blockquote {
+  background: linear-gradient(to right, rgb(88 28 135 / 0.2), rgb(157 23 77 / 0.2)) !important;
+  color: rgb(243 244 246) !important;
+}
+
+.response-content blockquote p {
+  color: inherit !important;
+}
+
+.dark .response-content blockquote p {
+  color: rgb(243 244 246) !important;
+}
+
+.dark .response-content hr {
+  border-top-color: rgb(75 85 99) !important;
+}
+

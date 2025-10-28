@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { parseBriefDocument } from "@/lib/brief-parser-openai.server";
-import { extractBriefSummary, SAMPLE_BRIEF } from "@/lib/brief-parser";
-import { Upload, FileText, Sparkles } from "lucide-react";
+import { extractBriefSummary } from "@/lib/brief-parser";
+import { generateRandomSampleBrief } from "@/lib/sample-brief-generator";
+import { Upload, FileText, Sparkles, Shuffle } from "lucide-react";
 import type { ClientBrief } from "@/types";
 
 interface BriefUploadProps {
@@ -55,20 +56,25 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
   };
 
   const handleLoadSample = async () => {
-    setBriefText(SAMPLE_BRIEF);
-    const briefSummary = extractBriefSummary(SAMPLE_BRIEF);
-    setSummary(briefSummary);
-    
-    // Automatically parse the sample brief
     setIsParsing(true);
     setError(null);
     
     try {
-      const parsed = await parseBriefDocument(SAMPLE_BRIEF);
+      // Generate a random sample brief from our brands database
+      console.log('🎲 Generating random sample brief from brand database...');
+      const randomBrief = await generateRandomSampleBrief();
+      
+      setBriefText(randomBrief);
+      const briefSummary = extractBriefSummary(randomBrief);
+      setSummary(briefSummary);
+      
+      // Automatically parse the sample brief
+      const parsed = await parseBriefDocument(randomBrief);
+      console.log('✅ Random sample brief generated and parsed:', parsed.clientName);
       onParsed(parsed);
     } catch (err) {
-      console.error("Parse error:", err);
-      setError(err instanceof Error ? err.message : "Failed to parse sample brief");
+      console.error("Error generating/parsing sample brief:", err);
+      setError(err instanceof Error ? err.message : "Failed to generate sample brief");
     } finally {
       setIsParsing(false);
     }
@@ -181,10 +187,12 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
 
         <button
           onClick={handleLoadSample}
-          className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium flex items-center justify-center gap-2"
+          disabled={isParsing}
+          className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg transition-all font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Generate a random sample brief from our 218-brand database"
         >
-          <FileText className="w-5 h-5" />
-          Load Sample
+          <Shuffle className="w-5 h-5" />
+          {isParsing ? "Generating..." : "Random Sample"}
         </button>
 
         {briefText && (
@@ -204,9 +212,12 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
 
       {/* Help Text */}
       <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 rounded-xl border border-blue-200 dark:border-blue-900">
-        <p className="text-sm text-gray-700 dark:text-gray-300">
+        <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
           <strong className="text-blue-600 dark:text-blue-400">💡 Tip:</strong> Our AI can parse briefs in any format. Just paste the text, and we&apos;ll extract:
-          client name, budget, target demographics, campaign goals, timeline, and more. After generating your presentation, use NanoBanana AI in the editor to add and customize images!
+          client name, budget, target demographics, campaign goals, timeline, and more.
+        </p>
+        <p className="text-sm text-gray-700 dark:text-gray-300">
+          <strong className="text-purple-600 dark:text-purple-400">🎲 Random Sample:</strong> Each click generates a unique brief from our database of 218 Spanish &amp; international brands across 15+ industries!
         </p>
       </div>
     </div>
