@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     const imageUrl = await generateSlideImage({
       slideType,
       slideContent,
-      brief: brief as ClientBrief,
+      brief,
       aspectRatio: aspectRatio || "16:9",
     });
 

@@ -16,7 +16,7 @@ export interface SlideImageOptions {
     body?: string;
     bullets?: string[];
   };
-  brief: ClientBrief;
+  brief: Partial<ClientBrief> & { clientName: string };
   aspectRatio?: "1:1" | "16:9" | "9:16" | "3:2" | "4:3";
 }
 
@@ -221,12 +221,12 @@ export const generateImagesForSlides = async (
 const createPromptForSlide = (
   slideType: string,
   content: SlideImageOptions["slideContent"],
-  brief: ClientBrief,
+  brief: Partial<ClientBrief> & { clientName: string },
   aspectRatio: string
 ): string => {
   const brandName = brief.clientName;
-  const themes = brief.contentThemes.join(", ");
-  const platforms = brief.platformPreferences.join(", ");
+  const themes = brief.contentThemes?.join(", ") || "modern business";
+  const platforms = brief.platformPreferences?.join(", ") || "digital media";
 
   switch (slideType) {
     case "cover":
