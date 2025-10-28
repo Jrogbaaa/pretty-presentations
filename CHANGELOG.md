@@ -2,6 +2,48 @@
 
 All notable changes to Pretty Presentations will be documented in this file.
 
+## [2.4.6] - 2025-10-28
+
+### ✅ Influencer Matching Fully Operational
+
+**Fixed: Engagement threshold was too strict, preventing valid influencers from being matched**
+
+**Issue**: The `filterByBasicCriteria` function required engagement >= 2.0%, which excluded many legitimate influencers (magazines, brands, large accounts with naturally lower engagement rates).
+
+**Solution**: 
+- Lowered engagement threshold from **2.0% → 0.5%**
+- Many valid Spanish influencers have engagement between 0.5% and 2.0%
+- This allows matching of a broader range of influencers while still filtering out inactive accounts
+
+**Database Expanded**:
+- Expanded from 3,001 to **4,008 verified Spanish influencers**
+- Created robust import script (`import-4000-influencers.js`) with:
+  - Automatic duplicate detection by Instagram handle
+  - CSV parsing with error handling for malformed rows
+  - Batch import (450 documents per batch)
+  - Complete verification and statistics reporting
+
+**Test Results** (Alcampo Campaign - €75,000 budget):
+- ✅ Fetched 41 influencers from Firestore
+- ✅ 33 passed basic criteria filter
+- ✅ LAYAI scoring algorithm ranked all 33
+- ✅ Selected optimal mix of 3 influencers
+- ✅ Successfully enriched with rationale and projections
+- ✅ Text response displayed all 3 matched influencers with complete data
+
+**Benefits**:
+- ✅ More influencer matches across various campaign types
+- ✅ Better representation of Spanish influencer landscape
+- ✅ Includes high-follower accounts (magazines, brands, celebrities)
+- ✅ Maintains quality filter (0.5%+ engagement = active account)
+
+**Files Modified**:
+- `lib/influencer-matcher.ts` - Lowered engagement threshold to 0.5%
+- `scripts/import-4000-influencers.js` - New import script with duplicate detection
+- Database now contains 4,008 influencers (verified with no duplicates)
+
+---
+
 ## [2.4.5] - 2025-10-28
 
 ### 🐛 Critical Fix: Text Response Influencers

@@ -22,7 +22,7 @@ export const generateMarkdownResponse = async (
       budget: brief.budget
     });
 
-    // Step 1: Match influencers
+    // Step 1: Match influencers (client SDK works in Next.js API routes)
     const matchedInfluencers = await matchInfluencers(brief, []);
     
     logInfo('Influencer matching complete for markdown response', {

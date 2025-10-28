@@ -59,6 +59,13 @@ export const matchInfluencers = async (
     
     if (!pool || pool.length === 0) {
       try {
+        console.log('🔍 Searching Firestore with filters:', {
+          platforms: brief.platformPreferences,
+          locations: brief.targetDemographics.location,
+          contentCategories: brief.contentThemes,
+          maxBudget: brief.budget
+        });
+        
         // Try to fetch from Firestore with comprehensive filters
         pool = await searchInfluencers({
           platforms: brief.platformPreferences,
@@ -66,6 +73,8 @@ export const matchInfluencers = async (
           contentCategories: brief.contentThemes, // Match content themes to influencer categories
           maxBudget: brief.budget > 0 ? brief.budget : undefined, // Don't filter by budget if 0
         }, 200);
+        
+        console.log(`✅ Fetched ${pool.length} influencers from Firestore`);
       } catch (error) {
         console.error('⚠️  Firestore query failed, retrying...', error);
         // Retry once before failing
@@ -87,15 +96,19 @@ export const matchInfluencers = async (
     
     // Step 1: Filter influencers by basic criteria
     const filtered = filterByBasicCriteria(brief, pool);
+    console.log(`📝 After basic criteria filter: ${filtered.length} influencers`);
 
     // Step 2: Use LAYAI scoring algorithm to rank best matches
     const ranked = rankInfluencersWithLAYAI(brief, filtered);
+    console.log(`📊 After LAYAI ranking: ${ranked.length} influencers`);
 
     // Step 3: Select optimal mix (macro/micro/nano)
     const selected = selectOptimalMix(ranked, brief.budget);
+    console.log(`🎯 After optimal mix selection: ${selected.length} influencers`);
 
     // Step 4: Generate rationale and projections for each
     const enriched = await enrichSelectedInfluencers(selected, brief);
+    console.log(`✨ After enrichment: ${enriched.length} influencers`);
 
     return enriched;
   } catch (error) {
@@ -121,8 +134,9 @@ const filterByBasicCriteria = (
     const estimatedCost = influencer.rateCard.post * 3;
     const budgetMatch = estimatedCost <= brief.budget / 3; // Assuming at least 3 influencers
     
-    // Engagement rate threshold
-    const engagementMatch = influencer.engagement >= 2.0;
+    // Engagement rate threshold - MORE LENIENT (was 2.0, now 0.5)
+    // Many legitimate influencers have engagement < 2% (magazines, brands, large accounts)
+    const engagementMatch = influencer.engagement >= 0.5;
 
     return platformMatch && locationMatch && budgetMatch && engagementMatch;
   });
