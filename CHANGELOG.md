@@ -2,6 +2,69 @@
 
 All notable changes to Pretty Presentations will be documented in this file.
 
+## [2.4.3] - 2025-10-28
+
+### 🎨 Text Visibility & PDF Export Complete
+
+#### Pure Black/White Text Colors
+- **FIXED:** Maximum contrast text visibility in all modes
+  - **Light Mode**: Pure black (#000000) text on white background
+  - **Dark Mode**: Pure white (#FFFFFF) text on dark background
+- **APPLIED TO:** All text elements for consistency
+  - Headings (h1, h2, h3, h4): Pure black/white
+  - Paragraphs: Pure black/white
+  - Lists: Pure black/white
+  - Tables: Pure black/white text
+  - Strong/Bold: Pure black/white
+  - Blockquotes: Pure black/white
+- **RESULT:** Perfect visibility in both browser and PDF exports
+- **NO MORE:** Faded or low-contrast text (rgb(31 41 55))
+
+#### PDF Export Restored
+- **RESTORED:** Professional PDF export functionality
+  - One-click "Export PDF" button (was "Download MD")
+  - Uses jsPDF + html2canvas for high-quality rendering
+  - White background (#ffffff) ensures text shows in PDFs
+  - Multi-page support for long responses
+  - File naming: `ClientName-influencer-recommendations.pdf`
+- **FALLBACK:** Graceful markdown download if PDF generation fails
+
+#### Markdown Rendering Fixed
+- **FIXED:** OpenAI markdown wrappers stripped properly
+  - Removes ` ```markdown ` and ` ``` ` code block wrappers
+  - No more raw markdown syntax (##, **, etc.) showing in UI
+  - Clean content passed to ReactMarkdown
+- **IMPROVED:** Content cleaning in `markdown-response-generator.server.ts`
+
+#### Random Sample Brief Generator Fixed
+- **FIXED:** Generates new brand briefs every time
+  - Moved `brands.csv` from `data/` to `public/data/brands.csv`
+  - Force-added to Git (was being ignored)
+  - CSV now accessible to client-side fetch requests
+  - 218 brands available for diverse test scenarios
+- **VERIFIED:** Console logs show successful brand loading
+
+#### Files Changed
+- `app/response/[id]/response-styles.css` - Pure black/white colors with !important
+- `app/response/[id]/page.tsx` - PDF export restored, white background for print
+- `lib/markdown-response-generator.server.ts` - Strip markdown code block wrappers
+- `public/data/brands.csv` - Moved from data/ and force-added to Git
+- `components/BriefUpload.tsx` - Uses generateRandomSampleBrief correctly
+
+### 🐛 Bug Fixes
+- Fixed text visibility in both light and dark modes
+- Fixed PDF export showing invisible text
+- Fixed random sample always showing "The Band" brief
+- Fixed markdown syntax appearing in rendered output
+- Fixed brands.csv 404 error in browser console
+
+### 📚 Documentation
+- **ADDED:** `API_USAGE_EXPLAINED.md` - Clarifies OpenAI vs database usage
+- **UPDATED:** README.md - Version 2.4.3 with text visibility fixes
+- **UPDATED:** CHANGELOG.md - Complete fix history
+
+---
+
 ## [2.4.2] - 2025-10-28
 
 ### 🎨 Project Consolidation & Formatting Improvements
