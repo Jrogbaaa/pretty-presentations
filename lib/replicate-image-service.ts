@@ -8,6 +8,19 @@ import Replicate from "replicate";
 import type { Slide, ClientBrief } from "@/types";
 import { logInfo, logError } from "./logger";
 
+// Simplified brief interface for image generation
+export interface ImageGenerationBrief {
+  clientName: string;
+  brandName?: string;
+  campaignName?: string;
+  objective?: string;
+  targetAudience?: string;
+  budget?: string;
+  timeline?: string;
+  contentThemes?: string[];
+  platformPreferences?: string[];
+}
+
 export interface SlideImageOptions {
   slideType: string;
   slideContent: {
@@ -16,7 +29,7 @@ export interface SlideImageOptions {
     body?: string;
     bullets?: string[];
   };
-  brief: Partial<ClientBrief> & { clientName: string };
+  brief: ImageGenerationBrief;
   aspectRatio?: "1:1" | "16:9" | "9:16" | "3:2" | "4:3";
 }
 
@@ -221,7 +234,7 @@ export const generateImagesForSlides = async (
 const createPromptForSlide = (
   slideType: string,
   content: SlideImageOptions["slideContent"],
-  brief: Partial<ClientBrief> & { clientName: string },
+  brief: ImageGenerationBrief,
   aspectRatio: string
 ): string => {
   const brandName = brief.clientName;
