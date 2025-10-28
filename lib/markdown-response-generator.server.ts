@@ -62,6 +62,78 @@ export const generateMarkdownResponse = async (
 };
 
 /**
+ * Build the influencer section with REAL matched influencer data
+ * This ensures the actual matched influencers always appear in the response
+ */
+const buildInfluencerSection = (
+  influencers: SelectedInfluencer[],
+  brief: ClientBrief
+): string => {
+  if (influencers.length === 0) {
+    return `## 🌟 Recommended Influencer Lineup
+
+> **Note:** No influencers were matched for this brief. Please adjust your criteria (budget, platforms, content themes, or location) and try again.`;
+  }
+
+  const influencerCards = influencers.map((inf, idx) => {
+    const tierEmoji = inf.followers >= 500000 ? '⭐' : inf.followers >= 100000 ? '✨' : '💫';
+    const tier = inf.followers >= 500000 ? 'Macro' : inf.followers >= 100000 ? 'Mid-tier' : 'Micro';
+    const engagementQuality = inf.engagement >= 3 ? 'Excellent' : inf.engagement >= 2 ? 'Strong' : 'Good';
+    const cpm = inf.costEstimate && inf.followers > 0 ? Math.round((inf.costEstimate / inf.followers) * 1000) : 0;
+    const firstName = inf.name.split(' ')[0];
+    
+    return `
+---
+
+### ${tierEmoji} ${idx + 1}. **${inf.name}** • [@${inf.handle}](https://instagram.com/${inf.handle})
+
+<table>
+<tr>
+<td><strong>📊 Reach</strong></td>
+<td>${inf.followers.toLocaleString()} followers</td>
+<td><strong>💬 Engagement</strong></td>
+<td>${inf.engagement}% (${engagementQuality})</td>
+</tr>
+<tr>
+<td><strong>📱 Platform</strong></td>
+<td>${inf.platform}</td>
+<td><strong>🎭 Tier</strong></td>
+<td>${tier} Influencer</td>
+</tr>
+<tr>
+<td><strong>🎨 Content Focus</strong></td>
+<td colspan="3">${inf.contentCategories.slice(0, 4).join(", ")}</td>
+</tr>
+<tr>
+<td><strong>💰 Investment</strong></td>
+<td colspan="3">€${inf.costEstimate?.toLocaleString() || "TBD"}${cpm > 0 ? ` (€${cpm} CPM)` : ''}</td>
+</tr>
+</table>
+
+#### 💡 Why ${firstName}?
+
+${inf.rationale || `${firstName} is an excellent fit based on audience alignment, engagement quality, and content style that matches ${brief.clientName}'s brand values.`}
+
+#### 🎬 Recommended Content Strategy
+
+**Deliverables:**
+${inf.proposedContent?.map(content => `- 📹 ${content}`).join('\n') || '- 📹 2-3 Instagram Reels (dynamic, trend-forward content)\n- 📸 3-4 Instagram Stories (behind-the-scenes, authentic moments)\n- 🖼️ 1 Carousel Post (educational or storytelling format)'}
+
+**Content Pillars:**
+- Authenticity and personal storytelling
+- Visual appeal aligned with ${brief.clientName}'s brand aesthetic
+- Clear calls-to-action driving engagement and conversions`;
+  }).join('\n');
+
+  return `## 🌟 Recommended Influencer Lineup
+
+> **Selection Criteria:** These ${influencers.length} influencer${influencers.length !== 1 ? 's were' : ' was'} handpicked from our database of **3,000+ verified Spanish creators** based on audience alignment, engagement quality, content style, and brand fit.
+${influencerCards}
+
+---`;
+};
+
+/**
  * Generate markdown content using OpenAI
  */
 const generateMarkdownContent = async (
@@ -79,7 +151,10 @@ const generateMarkdownContent = async (
 
   const openai = new OpenAI({ apiKey });
 
-  const prompt = `You are a senior strategist at an elite influencer marketing agency. Generate a comprehensive, professional markdown document analyzing this brief and providing influencer recommendations.
+  // Build the actual influencer section with REAL DATA first
+  const influencerSection = buildInfluencerSection(influencers, brief);
+
+  const prompt = `You are a senior strategist at an elite influencer marketing agency. Generate a comprehensive, professional markdown document analyzing this brief and providing strategy recommendations.
 
 **CLIENT BRIEF:**
 Client: ${brief.clientName}
@@ -92,15 +167,11 @@ Platforms: ${brief.platformPreferences.join(", ")}
 Content Themes: ${brief.contentThemes?.join(", ") || "General"}
 ${brief.additionalNotes ? `Additional Notes: ${brief.additionalNotes}` : ""}
 
-**MATCHED INFLUENCERS (${influencers.length} total):**
-${influencers.map((inf, idx) => `
-${idx + 1}. ${inf.name} (@${inf.handle})
-   - Followers: ${inf.followers.toLocaleString()}
-   - Engagement: ${inf.engagement}%
-   - Platform: ${inf.platform}
-   - Categories: ${inf.contentCategories.join(", ")}
-   - Estimated Cost: €${inf.costEstimate?.toLocaleString() || "TBD"}
-   - Why: ${inf.rationale}`).join("\n")}
+**IMPORTANT NOTES:**
+- ${influencers.length} influencers have been matched from our database of 3,000+ Spanish creators
+- The influencer lineup section will be automatically inserted - DO NOT generate influencer profiles
+- Use the [INFLUENCER_SECTION_PLACEHOLDER] marker where the influencer lineup should appear
+- Focus on generating the strategy, creative ideas, and recommendations based on the brief
 
 **INSTRUCTIONS:**
 Create a comprehensive, beautifully formatted markdown document with exceptional visual hierarchy and clear sections:
@@ -157,60 +228,7 @@ Provide 2-3 sentences about this audience's content consumption habits, values, 
 
 ---
 
-## 🌟 Recommended Influencer Lineup
-
-> **Selection Criteria:** These ${influencers.length} influencer${influencers.length !== 1 ? 's were' : ' was'} handpicked from our database of **3,000+ verified Spanish creators** based on audience alignment, engagement quality, content style, and brand fit.
-
-${influencers.map((inf, idx) => {
-  const tierEmoji = inf.followers >= 500000 ? '⭐' : inf.followers >= 100000 ? '✨' : '💫';
-  const tier = inf.followers >= 500000 ? 'Macro' : inf.followers >= 100000 ? 'Mid-tier' : 'Micro';
-  
-  return `
----
-
-### ${tierEmoji} ${idx + 1}. **${inf.name}** • [@${inf.handle}](https://instagram.com/${inf.handle})
-
-<table>
-<tr>
-<td><strong>📊 Reach</strong></td>
-<td>${inf.followers.toLocaleString()} followers</td>
-<td><strong>💬 Engagement</strong></td>
-<td>${inf.engagement}% (${inf.engagement >= 3 ? 'Excellent' : inf.engagement >= 2 ? 'Strong' : 'Good'})</td>
-</tr>
-<tr>
-<td><strong>📱 Platform</strong></td>
-<td>${inf.platform}</td>
-<td><strong>🎭 Tier</strong></td>
-<td>${tier} Influencer</td>
-</tr>
-<tr>
-<td><strong>🎨 Content Focus</strong></td>
-<td colspan="3">${inf.contentCategories.slice(0, 4).join(", ")}</td>
-</tr>
-<tr>
-<td><strong>💰 Investment</strong></td>
-<td colspan="3">€${inf.costEstimate?.toLocaleString() || "TBD"} per post (${Math.round((inf.costEstimate || 0) / inf.followers * 1000)} CPM)</td>
-</tr>
-</table>
-
-#### 💡 Why ${inf.name.split(' ')[0]}?
-
-${inf.rationale}
-
-#### 🎬 Recommended Content Strategy
-
-**Deliverables:**
-- 📹 2-3 Instagram Reels (dynamic, trend-forward content)
-- 📸 3-4 Instagram Stories (behind-the-scenes, authentic moments)
-- 🖼️ 1 Carousel Post (educational or storytelling format)
-
-**Content Pillars:**
-- Authenticity and personal storytelling
-- Visual appeal aligned with ${brief.clientName}'s brand aesthetic
-- Clear calls-to-action driving engagement and conversions`;
-}).join('\n\n')}
-
----
+[INFLUENCER_SECTION_PLACEHOLDER]
 
 ---
 
@@ -462,6 +480,9 @@ Return ONLY the markdown content, no additional commentary or wrapper text.`;
     markdown = markdown.replace(/^```markdown\n?/g, '').replace(/\n?```$/g, '');
     markdown = markdown.replace(/^```\n?/g, '').replace(/\n?```$/g, '');
     markdown = markdown.trim();
+
+    // Inject the REAL influencer section with actual matched data
+    markdown = markdown.replace('[INFLUENCER_SECTION_PLACEHOLDER]', influencerSection);
 
     return markdown;
   } catch (error) {

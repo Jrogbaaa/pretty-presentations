@@ -2,6 +2,37 @@
 
 All notable changes to Pretty Presentations will be documented in this file.
 
+## [2.4.5] - 2025-10-28
+
+### 🐛 Critical Fix: Text Response Influencers
+
+**Fixed: Matched influencers now appear in text responses**
+
+**Issue**: When generating text-based markdown responses, matched influencers from the database were not appearing in the final output.
+
+**Root Cause**: The system was asking OpenAI to regenerate the influencer section instead of using the actual matched data from the database. This caused OpenAI to either ignore, hallucinate, or omit influencer profiles entirely.
+
+**Solution**: 
+- Created `buildInfluencerSection()` helper function that directly builds influencer cards with real matched data
+- Replaced OpenAI-generated influencer section with pre-built section containing actual database results
+- Added `[INFLUENCER_SECTION_PLACEHOLDER]` in prompt that gets replaced with real data
+- Instructed OpenAI to NOT generate influencer profiles (focus on strategy/recommendations only)
+
+**Benefits**:
+- ✅ Matched influencers are **guaranteed** to appear in every text response
+- ✅ No risk of AI hallucinating fake influencers
+- ✅ Real data from matching algorithm (followers, engagement, costs, rationale)
+- ✅ Better performance (reduced token usage, faster generation)
+- ✅ More reliable and consistent output
+
+**Files Modified**:
+- `lib/markdown-response-generator.server.ts` - Added `buildInfluencerSection()`, updated prompt, added injection logic
+
+**Documentation**:
+- `TEXT_RESPONSE_INFLUENCER_FIX.md` - Complete technical explanation and testing guide
+
+---
+
 ## [2.4.4] - 2025-10-28
 
 ### 🐛 TypeScript Build Fixes
