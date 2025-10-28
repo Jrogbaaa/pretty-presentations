@@ -55,18 +55,63 @@ const ResponsePage = () => {
     loadResponse();
   }, [params.id]);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!response) return;
 
-    const blob = new Blob([response.markdownContent], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${response.clientName.replace(/\s+/g, "-")}-influencer-recommendations.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      // Dynamically import jsPDF and html2canvas
+      const { jsPDF } = await import("jspdf");
+      const html2canvas = (await import("html2canvas")).default;
+      
+      const element = document.getElementById("response-content");
+      if (!element) return;
+
+      // Create canvas from the content
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff"
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
+      });
+
+      const imgWidth = 210; // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Add first page
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= 297; // A4 height in mm
+
+      // Add additional pages if needed
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= 297;
+      }
+
+      pdf.save(`${response.clientName.replace(/\s+/g, "-")}-influencer-recommendations.pdf`);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      // Fallback to markdown download if PDF fails
+      const blob = new Blob([response.markdownContent], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${response.clientName.replace(/\s+/g, "-")}-influencer-recommendations.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
   };
 
   const handleCopy = async () => {
@@ -168,7 +213,7 @@ const ResponsePage = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
               >
                 <Download className="w-4 h-4" />
-                Download MD
+                Export PDF
               </button>
             </div>
           </div>
@@ -177,7 +222,10 @@ const ResponsePage = () => {
 
       {/* Content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-transparent rounded-3xl p-10 md:p-16">
+        <div 
+          id="response-content"
+          className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-10 md:p-16"
+        >
           <div className="response-content prose prose-xl dark:prose-invert max-w-none">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}

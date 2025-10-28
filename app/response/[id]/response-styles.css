@@ -39,13 +39,20 @@
   font-size: 1.125rem !important;
   line-height: 1.75 !important;
   margin-bottom: 1rem !important;
-  color: rgb(17 24 39) !important;
+  color: rgb(31 41 55) !important;
 }
 
 .response-content li {
   font-size: 1.125rem !important;
   line-height: 1.75 !important;
   margin-bottom: 0.5rem !important;
+  color: rgb(31 41 55) !important;
+}
+
+.response-content h1,
+.response-content h2,
+.response-content h3,
+.response-content h4 {
   color: rgb(17 24 39) !important;
 }
 
