@@ -51,7 +51,7 @@ const sanitizeBrief = (input: any): ClientBrief => {
   // Sanitize platform preferences
   const validPlatforms: Platform[] = ["Instagram", "TikTok", "YouTube", "Twitter", "Facebook", "LinkedIn", "Twitch"];
   const platformPreferences = sanitizeArray(input.platformPreferences)
-    .filter((platform): platform is Platform => validPlatforms.includes(platform));
+    .filter((platform): platform is Platform => (validPlatforms as readonly string[]).includes(platform));
   
   // Sanitize demographics
   const targetDemographics = {
