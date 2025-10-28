@@ -6,7 +6,7 @@ All notable changes to Pretty Presentations will be documented in this file.
 
 ### 🐛 TypeScript Build Fixes
 
-#### Fixed Vercel Deployment Errors (6 Total)
+#### Fixed Vercel Deployment Errors (7 Total)
 
 **Fix #1: Chart Examples Type Error**
 - **FIXED:** TypeScript type error in `CHART_EXAMPLES.tsx`
@@ -40,8 +40,16 @@ All notable changes to Pretty Presentations will be documented in this file.
   - Ensures PowerPoint export works with both numeric and string metric values
   - Maintains backward compatibility with existing data
 
+**Fix #5: DonutChart Index Signature Error**
+- **FIXED:** TypeScript type error in `components/charts/DonutChart.tsx`
+  - Added `[key: string]: any` index signature to `DonutChartDataItem` interface
+  - Recharts library expects `ChartDataInput` type with index signature
+  - Allows Recharts to add internal properties to data items
+  - DonutChart component now compatible with Recharts type requirements
+
 - **FILES CHANGED:**
   - `components/charts/LineChartTrend.tsx` - Updated interface
+  - `components/charts/DonutChart.tsx` - Added index signature
   - `CHART_EXAMPLES.tsx` - Cleaned up data structure
   - `app/api/generate-text-response/route.ts` - Fixed platform type assertion
   - `lib/replicate-image-service.ts` - Created ImageGenerationBrief interface
