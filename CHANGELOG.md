@@ -25,11 +25,13 @@ All notable changes to Pretty Presentations will be documented in this file.
 
 **Fix #3: ClientBrief Type Error in Image Generation**
 - **FIXED:** TypeScript type error in `app/api/images/generate/route.ts`
-  - Changed `SlideImageOptions.brief` to `Partial<ClientBrief> & { clientName: string }`
+  - Created separate `ImageGenerationBrief` interface for image generation
+  - Separates concerns: validation schema uses `budget: string`, ClientBrief uses `budget: number`
+  - Updated `SlideImageOptions.brief` to use `ImageGenerationBrief`
   - Updated `createPromptForSlide` to handle optional fields
   - Added fallback values: `contentThemes` → "modern business", `platformPreferences` → "digital media"
   - Removed invalid type cast in route handler
-  - Image generation now works with simplified brief schema
+  - Image generation now works with simplified, correctly-typed brief schema
 
 - **FILES CHANGED:**
   - `components/charts/LineChartTrend.tsx` - Updated interface
