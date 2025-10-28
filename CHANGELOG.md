@@ -20,6 +20,7 @@ All notable changes to Pretty Presentations will be documented in this file.
   - Imported `Platform` type from `@/types`
   - Added type predicate to filter function: `platform is Platform`
   - Changed `validPlatforms` to `Platform[]` type
+  - Cast `validPlatforms` to `readonly string[]` in `includes()` check
   - Now correctly returns `Platform[]` instead of `string[]`
 
 - **FILES CHANGED:**
