@@ -9,6 +9,7 @@ interface AnimatedNumberProps {
   suffix?: string;
   className?: string;
   delay?: number;
+  style?: React.CSSProperties;
 }
 
 const AnimatedNumber = ({
@@ -18,7 +19,8 @@ const AnimatedNumber = ({
   prefix = '',
   suffix = '',
   className = '',
-  delay = 0
+  delay = 0,
+  style
 }: AnimatedNumberProps) => {
   const { number } = useSpring({
     from: { number: 0 },
@@ -28,7 +30,7 @@ const AnimatedNumber = ({
   });
 
   return (
-    <animated.span className={className}>
+    <animated.span className={className} style={style}>
       {number.to(n => `${prefix}${n.toFixed(decimals)}${suffix}`)}
     </animated.span>
   );
