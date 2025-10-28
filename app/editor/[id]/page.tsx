@@ -221,7 +221,7 @@ const EditorPage = () => {
         slide.content.metrics.forEach((metric, idx) => {
           pptxSlide.addText([
             { text: metric.label + ': ', options: { fontSize: 16, bold: false } },
-            { text: metric.value, options: { fontSize: 24, bold: true, color: slide.design.accentColor.replace('#', '') } }
+            { text: String(metric.value), options: { fontSize: 24, bold: true, color: slide.design.accentColor.replace('#', '') } }
           ], {
             x: 0.5 + (idx % 2) * 5,
             y: yPos + Math.floor(idx / 2) * 1.2,
