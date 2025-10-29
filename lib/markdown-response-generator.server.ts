@@ -2,7 +2,7 @@
 
 import OpenAI from "openai";
 import type { ClientBrief, SelectedInfluencer, BriefResponse } from "@/types";
-import { matchInfluencers } from "./influencer-matcher";
+import { matchInfluencersServer } from "./influencer-matcher.server";
 import { withRetry, RetryPresets } from "./retry";
 import { logInfo, logError, startTimer } from "./logger";
 import { OpenAIError } from "@/types/errors";
@@ -22,8 +22,8 @@ export const generateMarkdownResponse = async (
       budget: brief.budget
     });
 
-    // Step 1: Match influencers (client SDK works in Next.js API routes)
-    const matchedInfluencers = await matchInfluencers(brief, []);
+    // Step 1: Match influencers (using SERVER SDK for API routes)
+    const matchedInfluencers = await matchInfluencersServer(brief);
     
     logInfo('Influencer matching complete for markdown response', {
       matchedCount: matchedInfluencers.length
