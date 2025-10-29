@@ -50,6 +50,32 @@ export const searchInfluencersServer = async (
     // Apply ALL filters client-side
     influencers = applyClientSideFilters(influencers, filters);
     
+    // FALLBACK 1: If we got 0 results, try again without content category filter
+    if (influencers.length === 0 && filters.contentCategories && filters.contentCategories.length > 0) {
+      console.log('⚠️  [SERVER] 0 influencers with content category filter. Retrying without categories...');
+      const relaxedFilters = { ...filters, contentCategories: undefined };
+      influencers = applyClientSideFilters(
+        querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Influencer[],
+        relaxedFilters
+      );
+      console.log(`✅ [SERVER] Retry found ${influencers.length} influencers without category filter`);
+    }
+    
+    // FALLBACK 2: If still 0 results and platform filter exists, try expanding platforms
+    if (influencers.length === 0 && filters.platforms && filters.platforms.length > 0) {
+      console.log('⚠️  [SERVER] 0 influencers with platform filter. Retrying with Instagram added...');
+      const expandedFilters = { 
+        ...filters, 
+        platforms: [...filters.platforms, 'Instagram'] as Platform[],
+        contentCategories: undefined // Also remove content categories
+      };
+      influencers = applyClientSideFilters(
+        querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Influencer[],
+        expandedFilters
+      );
+      console.log(`✅ [SERVER] Retry with Instagram found ${influencers.length} influencers`);
+    }
+    
     // Sort by engagement (client-side)
     influencers.sort((a, b) => b.engagement - a.engagement);
     
