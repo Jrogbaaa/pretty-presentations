@@ -2,6 +2,41 @@
 
 All notable changes to Pretty Presentations will be documented in this file.
 
+## [2.4.7-hotfix] - 2025-10-29
+
+### 🚨 CRITICAL FIX: Text Responses Now Show Influencers
+
+**This was blocking the core feature of the entire application.**
+
+**Root Cause:**
+- `markdown-response-generator.server.ts` was using CLIENT SDK (`matchInfluencers`)
+- Client SDK uses Firebase Client Auth (doesn't work in server-side API routes)
+- Result: **0 influencers matched** for all text responses
+
+**Solution:**
+- Changed to use SERVER SDK (`matchInfluencersServer` from `influencer-matcher.server.ts`)
+- Server SDK uses Firebase Admin SDK with proper authentication for API routes
+- Now correctly fetches from 4,008 influencers in Firestore database
+
+**Impact:**
+- ✅ Text responses now display matched influencers
+- ✅ Influencer matching works properly in API routes
+- ✅ Core feature of application is now functional
+
+**Technical Details:**
+```typescript
+// BEFORE (BROKEN):
+import { matchInfluencers } from "./influencer-matcher"; // Client SDK ❌
+
+// AFTER (FIXED):
+import { matchInfluencersServer } from "./influencer-matcher.server"; // Server SDK ✅
+```
+
+**Files Modified:**
+- `lib/markdown-response-generator.server.ts` - Changed to use server-side matcher
+
+---
+
 ## [2.4.7] - 2025-10-29
 
 ### 🧠 Enhanced AI Brief Parser with Real-World Email Training
