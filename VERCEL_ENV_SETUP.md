@@ -47,12 +47,26 @@ FIREBASE_ADMIN_CLIENT_EMAIL=
 FIREBASE_ADMIN_PRIVATE_KEY=
 ```
 
-⚠️ **IMPORTANT:** For `FIREBASE_ADMIN_PRIVATE_KEY`, paste the entire key including:
+⚠️ **CRITICAL:** `FIREBASE_ADMIN_PRIVATE_KEY` must be in **exact format**:
+
 ```
------BEGIN PRIVATE KEY-----
-...your key...
------END PRIVATE KEY-----
+"-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBg...\n-----END PRIVATE KEY-----\n"
 ```
+
+**Must include:**
+- ✅ Opening double quote `"`
+- ✅ Literal `\n` characters (backslash-n, not actual newlines)
+- ✅ All key data with `\n` every ~64 characters
+- ✅ Closing double quote `"`
+- ❌ NO trailing comma
+- ❌ NO actual line breaks (all on one line)
+
+**Example of CORRECT format:**
+```
+"-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDR...\n-----END PRIVATE KEY-----\n"
+```
+
+**See `VERCEL_FIREBASE_TROUBLESHOOTING.md` for complete setup guide.**
 
 #### **Google AI Configuration** (Required)
 ```bash

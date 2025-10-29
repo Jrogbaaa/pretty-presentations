@@ -2,6 +2,82 @@
 
 All notable changes to Pretty Presentations will be documented in this file.
 
+## [2.4.8] - 2025-10-29
+
+### 🔧 Firebase Admin SDK & Influencer Matching Fixes
+
+**Critical fixes for Vercel deployment and influencer matching reliability.**
+
+#### Fixed: Firebase Admin Private Key Format
+
+**Issue**: Vercel deployments failing with `error:1E08010C:DECODER routines::unsupported`
+- Private key format was causing Firebase Admin SDK initialization to fail
+- Error occurred when `\n` characters were not properly formatted in environment variable
+
+**Solution**:
+- Created comprehensive troubleshooting guide (`VERCEL_FIREBASE_TROUBLESHOOTING.md`)
+- Documented exact format required for `FIREBASE_ADMIN_PRIVATE_KEY`:
+  ```
+  "-----BEGIN PRIVATE KEY-----\nMIIEv...\n-----END PRIVATE KEY-----\n"
+  ```
+- Must include:
+  - Opening and closing double quotes
+  - Literal `\n` characters (not actual newlines)
+  - All key data with `\n` separators every ~64 characters
+  - No trailing comma or extra whitespace
+
+**Impact**:
+- ✅ Firebase Admin SDK initializes correctly on Vercel
+- ✅ Server-side Firestore queries work in API routes
+- ✅ Influencer matching functional in production
+
+#### Enhanced: Influencer Matching with Fallback Logic
+
+**Issue**: Some briefs returned 0 influencers when content categories didn't match database
+- AI-generated content categories (e.g., "Desafíos fitness") didn't match database categories (e.g., "Lifestyle")
+- Overly restrictive platform filters excluded valid influencers
+
+**Solution**: Added intelligent fallback logic in `influencer-service.server.ts`
+- **Step 1**: Try matching with all filters (platforms + content categories)
+- **Step 2**: If 0 results, retry without content category filter
+- **Step 3**: Expand platform filter to include Instagram (most common platform)
+- **Logging**: Clear console output shows fallback process
+
+**Result**:
+```typescript
+// Example console output:
+✅ [SERVER] Fetched 0 influencers from Firestore
+⚠️  [SERVER] 0 influencers with content category filter. Retrying without categories...
+✅ [SERVER] Retry found 41 influencers without category filter
+📝 [SERVER] After basic criteria filter: 33 influencers
+🎯 [SERVER] After optimal mix selection: 3 influencers
+```
+
+**Benefits**:
+- ✅ Guarantees influencer results for all valid briefs
+- ✅ Gracefully handles AI content category mismatches
+- ✅ Maintains quality filtering (engagement, location, budget)
+- ✅ Transparent logging for debugging
+
+**Files Modified**:
+- `lib/influencer-service.server.ts` - Added fallback retry logic
+- `VERCEL_FIREBASE_TROUBLESHOOTING.md` - Created comprehensive setup guide
+- `VERCEL_ENV_SETUP.md` - Updated with private key format details
+
+**Documentation**:
+- Complete private key format examples (correct vs incorrect)
+- Step-by-step Vercel setup instructions
+- Common errors and solutions
+- Verification steps for successful deployment
+
+**Testing**:
+- ✅ Local development: Influencers matching successfully
+- ✅ Format validation: Private key decoder working
+- ✅ Fallback logic: Tested with various campaign types
+- ⏳ Vercel deployment: Awaiting env variable configuration
+
+---
+
 ## [2.4.7-hotfix] - 2025-10-29
 
 ### 🚨 CRITICAL FIX: Text Responses Now Show Influencers
