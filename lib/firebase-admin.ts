@@ -15,14 +15,21 @@ const getPrivateKey = (): string | undefined => {
   // Try base64 format first (recommended for Vercel)
   if (process.env.FIREBASE_ADMIN_PRIVATE_KEY_BASE64) {
     try {
-      const decoded = Buffer.from(
+      let decoded = Buffer.from(
         process.env.FIREBASE_ADMIN_PRIVATE_KEY_BASE64,
         'base64'
       ).toString('utf-8');
+      
+      // Remove surrounding quotes if present
+      decoded = decoded.replace(/^"/, '').replace(/"$/, '');
+      
+      // Replace literal \n with actual newlines
+      decoded = decoded.replace(/\\n/g, '\n');
+      
       console.log('✅ Using FIREBASE_ADMIN_PRIVATE_KEY_BASE64');
       return decoded;
     } catch (error) {
-      console.warn('⚠️ Failed to decode base64 private key, trying standard format');
+      console.warn('⚠️ Failed to decode base64 private key, trying standard format', error);
     }
   }
 
