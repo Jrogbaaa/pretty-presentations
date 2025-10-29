@@ -119,6 +119,7 @@ export interface SelectedInfluencer extends Influencer {
   estimatedReach: number;
   estimatedEngagement: number;
   costEstimate: number;
+  matchScore?: number;
 }
 
 export interface RateCard {
