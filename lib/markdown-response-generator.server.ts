@@ -128,9 +128,7 @@ ${inf.rationale || `${firstName} is an excellent fit based on audience alignment
 ${inf.proposedContent?.map(content => `- 📹 ${content}`).join('\n') || '- 📹 2-3 Instagram Reels (dynamic, trend-forward content)\n- 📸 3-4 Instagram Stories (behind-the-scenes, authentic moments)\n- 🖼️ 1 Carousel Post (educational or storytelling format)'}
 
 **Content Pillars:**
-- Authenticity and personal storytelling
-- Visual appeal aligned with ${brief.clientName}'s brand aesthetic
-- Clear calls-to-action driving engagement and conversions`;
+*Generate 2-3 SPECIFIC content pillars tailored to ${inf.name}'s unique content style, audience, and ${brief.clientName}'s brand. Each pillar should be unique to this influencer - avoid generic phrases.*`;
   });
 
   const databaseCount = influencers.filter(inf => inf.id && !inf.id.startsWith('manual-')).length;
@@ -203,9 +201,7 @@ ${inf.rationale || `${firstName} is an excellent fit based on audience alignment
 ${inf.proposedContent?.map(content => `- 📹 ${content}`).join('\n') || '- 📹 2-3 Instagram Reels (dynamic, trend-forward content)\n- 📸 3-4 Instagram Stories (behind-the-scenes, authentic moments)\n- 🖼️ 1 Carousel Post (educational or storytelling format)'}
 
 **Content Pillars:**
-- Authenticity and personal storytelling
-- Visual appeal aligned with ${brief.clientName}'s brand aesthetic
-- Clear calls-to-action driving engagement and conversions`;
+*Generate 2-3 SPECIFIC content pillars tailored to ${inf.name}'s unique content style, audience, and ${brief.clientName}'s brand. Each pillar should be unique to this influencer - avoid generic phrases.*`;
   }).join('\n');
 
   return `## 🌟 Recommended Influencer Lineup
@@ -242,6 +238,11 @@ const getExampleGuidance = (brief: ClientBrief): string => {
   const isFashion = contentThemes.includes('fashion') || contentThemes.includes('style') || 
                     contentThemes.includes('outfit') || contentThemes.includes('wear') ||
                     interests.includes('fashion') || interests.includes('style');
+  const isAutomotive = contentThemes.includes('car') || contentThemes.includes('automotive') || 
+                       contentThemes.includes('vehicle') || contentThemes.includes('luxury') ||
+                       clientName.includes('audi') || clientName.includes('bmw') || 
+                       clientName.includes('mercedes') || goals.includes('concesionario') ||
+                       goals.includes('test drive');
   
   let industryExamples = '';
   
@@ -298,6 +299,23 @@ const getExampleGuidance = (brief: ClientBrief): string => {
    - Example: "Assembly story: the moment furniture becomes your favorite reading nook"
 
 **YOUR TASK:** Generate content pillars that are SPECIFIC and emotionally resonant like the examples above. Connect ${brief.clientName} to life moments and emotional storytelling.`;
+  } else if (isAutomotive) {
+    industryExamples = `
+**EXAMPLE FROM SIMILAR CAMPAIGN (Automotive/Luxury):**
+
+1. **✨ "Tech Meets Luxury"**
+   - Showcase cutting-edge technology features through immersive storytelling
+   - Example: "Interactive journey through smart city showcasing virtual cockpit and driver assistance features"
+
+2. **🌟 "Design Excellence"**
+   - Celebrate progressive design and craftsmanship through visual storytelling
+   - Example: "Gallery-like visual story exploring design elements in artistic settings"
+
+3. **💫 "Experiential Journeys"**
+   - Document real experiences and adventures that showcase performance
+   - Example: "Weekend escape to hidden destinations highlighting adaptability and reliability"
+
+**YOUR TASK:** Generate content pillars that are SPECIFIC and luxury-focused like the examples above. Connect ${brief.clientName} to innovation, design, and experiential storytelling.`;
   } else if (isFashion) {
     industryExamples = `
 **EXAMPLE FROM SIMILAR CAMPAIGN (Fashion):**
@@ -395,7 +413,12 @@ ${brief.additionalNotes ? `Additional Notes: ${brief.additionalNotes}` : ""}
 **IMPORTANT NOTES:**
 - ${influencers.length} influencers have been matched from our database of 3,000+ Spanish creators
 - ${manualInfluencers.length > 0 ? `${manualInfluencers.length} manually requested influencer${manualInfluencers.length !== 1 ? 's' : ''} ${manualInfluencers.length === 1 ? 'has' : 'have'} also been included` : ''}
-- The influencer lineup sections will be automatically inserted - DO NOT generate influencer profiles
+- The influencer lineup sections with stats/tables will be automatically inserted - DO NOT regenerate their follower counts, engagement rates, or table data
+- **CRITICAL:** After each influencer section, you MUST generate SPECIFIC, UNIQUE content pillars tailored to that influencer's profile and ${brief.clientName}'s brand
+- **DO NOT use generic phrases** like "Authenticity and personal storytelling" or "Visual appeal aligned with brand aesthetic" for individual influencers
+- Each influencer should have UNIQUE content pillars (2-3 per influencer) that reflect their specific content style, audience, and brand fit
+- Look at each influencer's Content Focus and Content Categories to generate relevant, specific pillars
+- Example: For a lifestyle influencer, create pillars like "Weekend Adventures" or "Day-in-the-Life Authenticity" - NOT generic "Authenticity and personal storytelling"
 - Use the [INFLUENCER_SECTION_PLACEHOLDER] marker where the algorithm-matched influencer lineup should appear
 - ${manualInfluencers.length > 0 ? 'Use the [MANUAL_INFLUENCER_SECTION_PLACEHOLDER] marker where manually requested influencers should appear (if any). ' : ''}Focus on generating the strategy, creative ideas, and recommendations based on the brief
 
