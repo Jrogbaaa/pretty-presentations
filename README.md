@@ -565,8 +565,9 @@ pretty-presentations/
 │   └── test-firebase.ts        # Firebase connection test
 ├── data/                   # Data files
 │   └── influencers.json    # LAYAI database (import from repo)
-├── examples/               # Example briefs
-│   └── brief-the-band-perfume.md
+├── examples/               # Example briefs and response quality guide
+│   ├── example-response-quality.md  # Training examples for AI response generation
+│   └── brief-*.md          # Real client brief examples
 ├── types/                  # TypeScript type definitions
 ├── firestore.rules         # Firestore security rules
 ├── storage.rules           # Storage security rules
