@@ -30,7 +30,7 @@ export const matchInfluencersServer = async (
       locations: brief.targetDemographics.location,
       contentCategories: brief.contentThemes,
       maxBudget: brief.budget > 0 ? brief.budget : undefined,
-    }, 200);
+    }, 500); // Increased from 200 to 500 to ensure we have enough candidates
     
     console.log(`✅ [SERVER] Fetched ${pool.length} influencers from Firestore`);
     
@@ -61,11 +61,23 @@ const filterByBasicCriteria = (
   brief: ClientBrief,
   pool: Influencer[]
 ): Influencer[] => {
-  return pool.filter(influencer => {
+  // If pool is empty, return empty
+  if (pool.length === 0) {
+    console.log('⚠️  [SERVER] Pool is empty, skipping basic criteria filter');
+    return [];
+  }
+
+  console.log(`🔍 [SERVER] Filtering ${pool.length} influencers with basic criteria...`);
+  
+  const filtered = pool.filter(influencer => {
     // Platform match
     const platformMatch = brief.platformPreferences.includes(influencer.platform);
+    if (!platformMatch) {
+      return false; // Platform is required
+    }
     
     // Location match - bidirectional (location contains filter or vice versa)
+    // If no location specified, skip location filter
     const locationMatch = brief.targetDemographics.location.length === 0 || 
       influencer.demographics.location.some(loc =>
         brief.targetDemographics.location.some(briefLoc =>
@@ -74,15 +86,33 @@ const filterByBasicCriteria = (
         )
       );
     
-    // Budget feasibility - MORE LENIENT (allow influencers up to budget/2 per influencer)
+    // Budget feasibility - VERY LENIENT (allow influencers up to full budget per influencer if needed)
     const estimatedCost = influencer.rateCard.post * 3;
-    const budgetMatch = brief.budget === 0 || estimatedCost <= brief.budget / 2; // More lenient: allow up to half budget per influencer
+    const budgetMatch = brief.budget === 0 || estimatedCost <= brief.budget; // Very lenient: allow up to full budget
     
-    // Engagement rate threshold - MORE LENIENT
-    const engagementMatch = influencer.engagement >= 0.5;
+    // Engagement rate threshold - VERY LENIENT
+    const engagementMatch = influencer.engagement >= 0.3; // Lowered from 0.5 to 0.3
 
     return platformMatch && locationMatch && budgetMatch && engagementMatch;
   });
+
+  console.log(`✅ [SERVER] Basic criteria filter: ${filtered.length} influencers passed (from ${pool.length})`);
+  
+  // If we filtered out too many, relax location filter
+  if (filtered.length < 3 && brief.targetDemographics.location.length > 0) {
+    console.log(`⚠️  [SERVER] Only ${filtered.length} influencers passed strict filters. Relaxing location filter...`);
+    const relaxed = pool.filter(influencer => {
+      const platformMatch = brief.platformPreferences.includes(influencer.platform);
+      const estimatedCost = influencer.rateCard.post * 3;
+      const budgetMatch = brief.budget === 0 || estimatedCost <= brief.budget;
+      const engagementMatch = influencer.engagement >= 0.3;
+      return platformMatch && budgetMatch && engagementMatch; // Remove location requirement
+    });
+    console.log(`✅ [SERVER] Relaxed filter: ${relaxed.length} influencers passed`);
+    return relaxed;
+  }
+
+  return filtered;
 };
 
 const rankInfluencersWithLAYAI = (
@@ -173,43 +203,104 @@ const selectOptimalMix = (
   const midTier = ranked.filter(i => i.followers >= 100000 && i.followers < 500000);
   const micro = ranked.filter(i => i.followers < 100000);
 
-  // Try to select 1 macro (if budget allows)
-  if (macro.length > 0) {
+  // Try to select 1 macro (if budget allows) - but only use 40% max
+  if (macro.length > 0 && selected.length < 3) {
     const macroInfluencer = macro[0];
     const cost = macroInfluencer.rateCard.post * 3;
-    if (cost <= remainingBudget * 0.5) {
+    if (cost <= remainingBudget * 0.4) {
       selected.push(macroInfluencer);
       remainingBudget -= cost;
     }
   }
 
-  // Select 2-3 mid-tier
-  for (let i = 0; i < Math.min(3, midTier.length); i++) {
+  // Select mid-tier influencers - MORE LENIENT (just need to fit in remaining budget)
+  for (let i = 0; i < midTier.length && selected.length < 8; i++) {
     const cost = midTier[i].rateCard.post * 3;
-    if (cost <= remainingBudget / 2) {
+    // More lenient: if we have less than 3, allow up to 100% of remaining budget
+    // If we have 3+, allow up to 50% of remaining budget
+    const maxCost = selected.length < 3 ? remainingBudget : remainingBudget * 0.7;
+    if (cost <= maxCost) {
       selected.push(midTier[i]);
       remainingBudget -= cost;
     }
   }
 
-  // Fill with micro influencers
+  // Fill with micro influencers - MORE LENIENT
   for (let i = 0; i < micro.length && selected.length < 8; i++) {
     const cost = micro[i].rateCard.post * 3;
+    // More lenient: if we have less than 3, allow up to 100% of remaining budget
     if (cost <= remainingBudget) {
       selected.push(micro[i]);
       remainingBudget -= cost;
     }
   }
 
-  // If we got no one, just take top ranked within budget
-  if (selected.length === 0) {
+  // CRITICAL: Ensure we always get at least 3 influencers
+  // If we have fewer than 3, take top ranked within budget (even if less optimal)
+  if (selected.length < 3) {
+    console.log(`⚠️  [SERVER] Only ${selected.length} influencers selected. Ensuring minimum of 3...`);
+    
+    // Calculate what we've already spent
+    const spent = selected.reduce((sum, inf) => sum + (inf.rateCard.post * 3), 0);
+    const remainingFor3 = budget > 0 ? budget - spent : Infinity;
+    const budgetPerRemaining = remainingFor3 > 0 && selected.length < 3
+      ? remainingFor3 / (3 - selected.length)
+      : remainingFor3;
+
+    console.log(`   Budget remaining: €${remainingFor3.toLocaleString()}, Budget per remaining influencer: €${budgetPerRemaining.toLocaleString()}`);
+
+    // Fill remaining slots with top ranked influencers
+    // Try to find influencers that fit within the remaining budget
     for (const influencer of ranked) {
+      if (selected.length >= 3) break;
+      
+      // Skip if already selected
+      if (selected.some(s => s.id === influencer.id)) continue;
+      
       const cost = influencer.rateCard.post * 3;
-      if (cost <= budget && selected.length < 5) {
+      
+      // If we have budget remaining, check if this influencer fits
+      if (budget === 0) {
+        // No budget constraint - just add them
         selected.push(influencer);
+        remainingBudget -= cost;
+        console.log(`   Added ${influencer.name} (€${cost.toLocaleString()}) - no budget constraint`);
+      } else if (cost <= remainingFor3) {
+        // Check if adding this influencer would still leave room for remaining slots
+        const wouldSpend = spent + cost;
+        const remainingAfter = budget - wouldSpend;
+        const slotsRemaining = 3 - selected.length - 1;
+        
+        // If we can fit this influencer and still have budget for remaining slots (or it's the last one)
+        if (slotsRemaining === 0 || remainingAfter >= 0 || cost <= budgetPerRemaining * 2) {
+          selected.push(influencer);
+          remainingBudget -= cost;
+          console.log(`   Added ${influencer.name} (€${cost.toLocaleString()}) - fits in remaining budget`);
+        }
+      } else {
+        // This influencer is too expensive, but if we still need more and budget allows, try anyway
+        // Only if we're desperate (have < 2 influencers and this is our last chance)
+        if (selected.length < 2 && cost <= budget * 1.5) {
+          selected.push(influencer);
+          remainingBudget -= cost;
+          console.log(`   Added ${influencer.name} (€${cost.toLocaleString()}) - slightly over budget but needed for minimum`);
+        }
+      }
+    }
+    
+    // If we STILL don't have 3, be very aggressive - just take top 3 regardless of budget
+    if (selected.length < 3 && ranked.length >= 3) {
+      console.log(`   ⚠️ Still only ${selected.length} influencers. Taking top 3 regardless of budget...`);
+      for (const influencer of ranked) {
+        if (selected.length >= 3) break;
+        if (selected.some(s => s.id === influencer.id)) continue;
+        selected.push(influencer);
+        console.log(`   Added ${influencer.name} (€${(influencer.rateCard.post * 3).toLocaleString()}) - final fallback`);
       }
     }
   }
+
+  console.log(`✅ [SERVER] Selected ${selected.length} influencers (target: min 3)`);
 
   return selected;
 };

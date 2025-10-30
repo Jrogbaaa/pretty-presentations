@@ -3,7 +3,7 @@
  * Uses Firebase Admin SDK for API routes
  */
 
-import { adminDb } from './firebase-admin';
+import { getAdminDb } from './firebase-admin';
 import type { Influencer, Platform } from '@/types';
 
 export interface InfluencerSearchFilters {
@@ -29,7 +29,8 @@ export const searchInfluencersServer = async (
   try {
     console.log('🔍 [SERVER] Starting influencer search with filters:', JSON.stringify(filters, null, 2));
     
-    const influencersRef = adminDb.collection('influencers');
+    const db = getAdminDb();
+    const influencersRef = db.collection('influencers');
     
     // Build query
     let query: FirebaseFirestore.Query = influencersRef;
