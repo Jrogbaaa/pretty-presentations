@@ -81,6 +81,64 @@ This file contains examples of high-quality, specific content that should be gen
 
 ---
 
+### Example 5: Automotive Campaign (Audi)
+
+**GOOD - Luxury & Tech-Focused:**
+
+1. **✨ Tech Meets Luxury**
+   - Showcase cutting-edge technology features through immersive storytelling
+   - Example: "Interactive journey through smart city showcasing virtual cockpit and driver assistance features"
+
+2. **🌟 Design Excellence**
+   - Celebrate progressive design and craftsmanship through visual storytelling
+   - Example: "Gallery-like visual story exploring design elements in artistic settings"
+
+3. **💫 Experiential Journeys**
+   - Document real experiences and adventures that showcase performance
+   - Example: "Weekend escape to hidden destinations highlighting adaptability and reliability"
+
+**BAD - Generic (AVOID THIS):**
+- "Premium Brand Experience"
+- "Authenticity and personal storytelling"
+- "Visual appeal aligned with brand aesthetic"
+
+---
+
+## 👥 Individual Influencer Content Pillars
+
+**CRITICAL**: Each influencer should have UNIQUE content pillars tailored to their specific profile, not generic phrases.
+
+### ✅ GOOD Examples (Unique per Influencer):
+
+**Fitness Influencer (STREET WORKOUT):**
+- "💪 Fuel for Performance"
+- "🏋️ Strength in Simplicity"
+
+**Lifestyle Influencer (Karina Bran):**
+- "👗 Chic and Healthy Living"
+- "🏡 Homegrown Elegance"
+
+**Music Influencer (Nando Rodriguez):**
+- "🎶 Taste the Rhythm"
+- "🎤 Gourmet Jam Sessions"
+
+**Food Influencer (Andalushisha):**
+- "🌿 Flavors of Andalusia"
+- "🎉 Fiesta de Sabores"
+
+### ❌ BAD Examples (Generic - NEVER USE):
+
+**DO NOT use these generic phrases for individual influencers:**
+- "Authenticity and personal storytelling"
+- "Visual appeal aligned with brand aesthetic"
+- "Clear calls-to-action driving engagement and conversions"
+- "Fresh & Premium"
+- "Engaging content that resonates"
+
+**Why**: These phrases apply to ANY influencer and don't reflect their unique content style, audience, or brand fit. Each influencer's pillars should be unique based on their content categories, engagement style, and follower count.
+
+---
+
 ## 📝 Key Principles for Content Pillars
 
 ### ✅ DO:
