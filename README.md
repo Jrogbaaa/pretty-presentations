@@ -4,7 +4,7 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 
 **Status**: 🟢 **Production-Ready** | **Version**: 2.5.0 | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Input Sanitization + Safe Errors 🔒
 
-**Latest**: v2.5.0 **MANUAL INFLUENCER ADDITION FEATURE!** 👥✨ NEW: Users can now manually specify influencers by name! System automatically extracts influencer names from brief text and allows manual entry via form field. Searches database for matches - if found, uses real data; if not found, creates placeholder entries with AI-generated rationale explaining why they fit the brand. Manual influencers appear in separate "Manually Requested Influencers" section in text responses. Supports formats: "name", "@handle", "name (@handle)". FIXED: API route sanitization bug that stripped manual influencers. FIXED: Placeholder replacement logic bug that caused duplicate manual influencer sections. Tested on localhost - working perfectly! Production-ready! 🚀✅
+**Latest**: v2.5.0 **MANUAL INFLUENCER ADDITION + EXAMPLE-BASED TRAINING!** 👥✨🤖 NEW: Users can now manually specify influencers by name! System automatically extracts influencer names from brief text and allows manual entry via form field. Searches database for matches - if found, uses real data; if not found, creates placeholder entries with AI-generated rationale explaining why they fit the brand. Manual influencers appear in separate "Manually Requested Influencers" section in text responses. Supports formats: "name", "@handle", "name (@handle)". ENHANCED: Example-based training system! Markdown response generator now uses real examples from previous campaigns (Beauty, Spirits, Food, Home, Fashion) to generate specific, brand-aligned content instead of generic templates. System detects industry and provides relevant examples ("Midnight Serenade Sessions", "Tarde con los tuyos", "First Times That Matter"). AI trained on what good responses look like. FIXED: API route sanitization bug that stripped manual influencers. FIXED: Placeholder replacement logic bug that caused duplicate manual influencer sections. Tested on localhost - working perfectly! Production-ready! 🚀✅
 
 **Previous**: v2.4.9 **MINIMUM 3 INFLUENCERS GUARANTEED!** 🎯✨ FIXED: System now guarantees minimum 3 influencers matched for every brief. Enhanced influencer matching with aggressive fallback logic - bidirectional location matching, relaxed budget constraints (up to full budget per influencer), lowered engagement threshold to 0.3%, increased fetch limit to 500 influencers. Multiple fallback strategies ensure results even with strict filters. Database connection fixed using getAdminDb() instead of proxy. Tested and verified on both localhost and Vercel production - consistently returns 3+ influencers. Production-ready! 🚀✅
 
@@ -98,6 +98,32 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
   - Case-insensitive name match
   - Handle match (with/without @)
   - Partial name match
+
+### 🤖 Example-Based Response Training (v2.5.0) ⚡ NEW
+- **Industry-Specific Examples**: System includes real examples from previous campaigns stored in `examples/example-response-quality.md`
+- **Smart Industry Detection**: Automatically detects industry type from:
+  - Content themes (fragrance, gin, food, furniture, fashion)
+  - Client name (Nostrum, Pikolinos, IKEA, etc.)
+  - Campaign goals and target interests
+- **Example Categories**:
+  - **Beauty/Fragrance**: "Midnight Serenade Sessions", "Unboxing the Experience"
+  - **Spirits**: "Tarde con los tuyos" (Spanish social gatherings)
+  - **Food/Health**: "Gourmet Pairings That Elevate", "Moments of Enjoyment"
+  - **Home/Furniture**: "First Times That Matter", "From Box to Life"
+  - **Fashion**: "Style Stories", "Sustainable Style"
+- **Quality Standards**: Prompt includes DO's and DON'Ts:
+  - ✅ DO: Use specific, memorable theme names with concrete examples
+  - ❌ DON'T: Use generic phrases like "Fresh & Premium" or "Authenticity"
+- **Training Method**: Prompt-based training (not fine-tuning) using GPT-4o model
+  - Examples included directly in the prompt for each generation
+  - System message: "You are an expert influencer marketing strategist"
+  - Industry-specific examples dynamically injected based on brief analysis
+  - Generates specific, brand-aligned content vs generic templates
+- **Benefits**:
+  - Content pillars have unique names reflecting brand identity
+  - Strategic recommendations are actionable and brand-specific
+  - Executive summaries tailored to each client
+  - Psychographic insights reflect actual audience, not generic descriptions
 - **Placeholder Generation**: For influencers not found in database:
   - Creates placeholder entries with estimated follower counts based on campaign budget
   - Generates AI-powered rationale explaining why they fit the brand
