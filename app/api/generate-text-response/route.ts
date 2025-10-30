@@ -72,6 +72,7 @@ const sanitizeBrief = (input: any): ClientBrief => {
     platformPreferences,
     contentThemes,
     additionalNotes,
+    manualInfluencers: sanitizeArray(input.manualInfluencers),
     templateId: input.templateId || "modern"
   };
 };

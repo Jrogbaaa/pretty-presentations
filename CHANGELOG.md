@@ -2,6 +2,70 @@
 
 All notable changes to Pretty Presentations will be documented in this file.
 
+## [2.5.0] - 2025-10-30
+
+### 👥 Manual Influencer Addition Feature
+
+**Major new feature allowing users to manually specify influencers by name or handle**
+
+#### New Feature: Manual Influencer Input
+- **Form Field**: New "Manually Requested Influencers" section in brief form
+- **Format Support**: Accepts multiple input formats:
+  - "Influencer Name"
+  - "@instagram_handle"
+  - "Name (@handle)"
+  - "Name @handle"
+- **Automatic Extraction**: System automatically extracts influencer names from brief text during parsing
+- **Database Matching**: Searches database by name or handle with multiple matching strategies
+- **Placeholder Generation**: Creates placeholder entries with AI-generated rationale when influencers not found in database
+- **Separate Display**: Manual influencers appear in dedicated "Manually Requested Influencers" section in text responses
+
+#### Fixed: API Route Sanitization Bug
+- **Issue**: Manual influencers were being stripped out during API route sanitization
+- **Root Cause**: `sanitizeBrief` function in `app/api/generate-text-response/route.ts` didn't include `manualInfluencers` field
+- **Solution**: Added `manualInfluencers: sanitizeArray(input.manualInfluencers)` to sanitization function
+- **Impact**: ✅ Manual influencers now properly passed through to text response generation
+
+#### Fixed: Placeholder Replacement Logic Bug
+- **Issue**: Manual influencers could appear twice in markdown output when both `[MANUAL_INFLUENCER_SECTION_PLACEHOLDER]` and `[INFLUENCER_SECTION_PLACEHOLDER]` existed
+- **Root Cause**: Code replaced manual placeholder, then unconditionally replaced influencer placeholder with manual + algorithm sections, causing duplication
+- **Solution**: Updated logic to only combine sections if manual placeholder wasn't found and replaced
+- **Result**: ✅ Manual influencers appear once in their own section, algorithm-matched influencers appear separately
+
+#### Technical Implementation
+- **New File**: `lib/manual-influencer-matcher.ts` - Service for processing manual influencer inputs
+- **Functions**:
+  - `parseInfluencerInput()` - Extracts name and handle from various formats
+  - `searchInfluencerByName()` - Database queries with multiple matching strategies
+  - `createPlaceholderInfluencer()` - Generates placeholder entries with AI rationale
+  - `processManualInfluencers()` - Main orchestration function
+- **Updated Files**:
+  - `types/index.ts` - Added `manualInfluencers?: string[]` to `ClientBrief` interface
+  - `components/BriefForm.tsx` - Added manual influencer input field with tag-based UI
+  - `lib/brief-parser-openai.server.ts` - Enhanced to extract influencer names from brief text
+  - `lib/brief-parser.server.ts` - Enhanced to extract influencer names from brief text
+  - `lib/markdown-response-generator.server.ts` - Integrated manual influencers into markdown generation
+  - `lib/validation.ts` - Added validation for `manualInfluencers` field
+  - `app/api/generate-text-response/route.ts` - Fixed sanitization to include manual influencers
+
+#### Testing
+- ✅ Localhost: Verified manual influencer extraction, manual entry, database matching, placeholder generation
+- ✅ Verified no duplicate sections in text responses
+- ✅ Verified placeholder influencers appear with estimated data and AI rationale
+- ✅ Verified manual influencers appear separately from algorithm-matched influencers
+
+#### Files Modified
+- `types/index.ts`
+- `components/BriefForm.tsx`
+- `lib/brief-parser-openai.server.ts`
+- `lib/brief-parser.server.ts`
+- `lib/manual-influencer-matcher.ts` (new)
+- `lib/markdown-response-generator.server.ts`
+- `lib/validation.ts`
+- `app/api/generate-text-response/route.ts`
+
+---
+
 ## [2.4.9] - 2025-10-30
 
 ### 🎯 Minimum 3 Influencers Guaranteed
