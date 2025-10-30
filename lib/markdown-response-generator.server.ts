@@ -217,6 +217,140 @@ ${influencerCards}
 };
 
 /**
+ * Get example guidance based on brief content to ensure quality, specific responses
+ */
+const getExampleGuidance = (brief: ClientBrief): string => {
+  // Detect industry/category from content themes, client name, or campaign goals
+  const contentThemes = brief.contentThemes?.join(' ').toLowerCase() || '';
+  const clientName = brief.clientName.toLowerCase();
+  const goals = brief.campaignGoals.join(' ').toLowerCase();
+  const interests = brief.targetDemographics.interests.join(' ').toLowerCase();
+  
+  // Determine industry/type
+  const isBeauty = contentThemes.includes('fragrance') || contentThemes.includes('perfume') || 
+                   clientName.includes('perfume') || goals.includes('perfume');
+  const isSpirits = contentThemes.includes('gin') || contentThemes.includes('cocktail') || 
+                    contentThemes.includes('spirits') || contentThemes.includes('alcohol') ||
+                    clientName.includes('indias') || clientName.includes('spirits');
+  const isFood = contentThemes.includes('food') || contentThemes.includes('gastronom') || 
+                 contentThemes.includes('culinary') || contentThemes.includes('meal') ||
+                 interests.includes('food') || interests.includes('cooking') ||
+                 clientName.includes('nostrum') || clientName.includes('food');
+  const isHome = contentThemes.includes('home') || contentThemes.includes('furniture') || 
+                 contentThemes.includes('decor') || contentThemes.includes('interior') ||
+                 clientName.includes('ikea') || goals.includes('home');
+  const isFashion = contentThemes.includes('fashion') || contentThemes.includes('style') || 
+                    contentThemes.includes('outfit') || contentThemes.includes('wear') ||
+                    interests.includes('fashion') || interests.includes('style');
+  
+  let industryExamples = '';
+  
+  if (isBeauty) {
+    industryExamples = `
+**EXAMPLE FROM SIMILAR CAMPAIGN (Beauty/Fragrance):**
+
+1. **✨ Midnight Serenade Sessions**
+   - Create intimate, sensory-driven content featuring the fragrance in evening settings, paired with curated music playlists that match each scent's personality
+   - Example: "A candlelit evening routine: pairing The Band Midnight with lo-fi beats, showing how scent creates atmosphere"
+
+2. **🌟 Unboxing the Experience**
+   - Transform unboxing into a multi-sensory storytelling moment, emphasizing the premium packaging and first-spray moment
+   - Example: "First impressions video: blindfolded scent test revealing which fragrance matches different personality types"
+
+**YOUR TASK:** Generate content pillars THAT ARE SPECIFIC like the examples above. Each theme should:
+- Have a unique, memorable name that reflects ${brief.clientName}'s brand identity
+- Include concrete, actionable content ideas (not generic descriptions)
+- Reference specific formats, settings, or storytelling approaches
+- Connect authentically to the brand's values and target audience`;
+  } else if (isSpirits) {
+    industryExamples = `
+**EXAMPLE FROM SIMILAR CAMPAIGN (Spirits):**
+
+**"Tarde con los tuyos" (Afternoon with your people)**
+- A concept focusing on authentic social gatherings, friendship moments, and adapting lifestyle content for cold weather indoor settings
+- Content showcases gin as part of meaningful social connections
+- Example: "Sunday afternoon board games with friends, featuring perfectly crafted gin cocktails"
+
+**YOUR TASK:** Generate content pillars that are SPECIFIC and culturally relevant like this example. Create themes that reflect ${brief.clientName}'s unique positioning and Spanish culture.`;
+  } else if (isFood) {
+    industryExamples = `
+**EXAMPLE FROM SIMILAR CAMPAIGN (Food/Health):**
+
+1. **✨ Gourmet Pairings That Elevate**
+   - Explore unique ingredient pairings and gourmet recipes that elevate everyday meals
+   - Example: "Chef-inspired combinations featuring premium ingredients for a delightful culinary experience"
+
+2. **🌟 Moments of Enjoyment**
+   - Capture authentic moments of enjoyment and consumption in real-life settings
+   - Example: "Weekend brunch vibes with friends, featuring the newest product offerings"
+
+**YOUR TASK:** Generate content pillars that are SPECIFIC and aspirational like the examples above. Connect ${brief.clientName} to Spanish food culture and authentic gastronomic experiences.`;
+  } else if (isHome) {
+    industryExamples = `
+**EXAMPLE FROM SIMILAR CAMPAIGN (Home/Furniture):**
+
+1. **✨ First Times That Matter**
+   - Core creative direction focusing on emotional connections to "first times" - first apartment, first dinner party, first adult purchase
+   - Example: "A series following someone setting up their first real apartment, documenting the emotional journey"
+
+2. **🌟 From Box to Life**
+   - Show the transformation process - unboxing, assembly, and the moment it becomes part of daily life
+   - Example: "Assembly story: the moment furniture becomes your favorite reading nook"
+
+**YOUR TASK:** Generate content pillars that are SPECIFIC and emotionally resonant like the examples above. Connect ${brief.clientName} to life moments and emotional storytelling.`;
+  } else if (isFashion) {
+    industryExamples = `
+**EXAMPLE FROM SIMILAR CAMPAIGN (Fashion):**
+
+1. **✨ Style Stories**
+   - Document how fashion pieces integrate into everyday life and personal style narratives
+   - Example: "A week in style: showing how versatile pieces adapt from work to weekend"
+
+2. **🌟 Sustainable Style**
+   - Connect fashion choices to values and sustainability narratives
+   - Example: "Behind the craft: showcasing handcrafted quality and sustainable practices"
+
+**YOUR TASK:** Generate content pillars that are SPECIFIC and style-focused like the examples above. Connect ${brief.clientName} to personal style, values, and authentic fashion moments.`;
+  } else {
+    // Generic guidance for unknown industries
+    industryExamples = `
+**QUALITY STANDARDS - Content Pillars Must Be SPECIFIC:**
+
+**❌ AVOID GENERIC PHRASES LIKE:**
+- "Fresh & Premium"
+- "Authenticity and personal storytelling"
+- "Visual appeal aligned with brand aesthetic"
+- "Engaging content that drives conversions"
+
+**✅ CREATE SPECIFIC THEMES LIKE:**
+- "Midnight Serenade Sessions" (for fragrance: evening routines with curated playlists)
+- "Tarde con los tuyos" (for spirits: authentic social gatherings)
+- "First Times That Matter" (for furniture: emotional connections to first experiences)
+- "Gourmet Pairings That Elevate" (for food: unique ingredient combinations)
+
+**YOUR TASK:** Generate content pillars that:
+- Have unique, memorable names reflecting ${brief.clientName}'s brand identity
+- Include concrete, actionable content ideas (not generic descriptions)
+- Reference specific formats, settings, or storytelling approaches
+- Connect authentically to the brand's values and target audience`;
+  }
+  
+  return `
+**QUALITY REQUIREMENTS:**
+
+You must generate SPECIFIC, BRAND-ALIGNED content - NOT generic templates. Every section must be tailored to ${brief.clientName}'s unique positioning.
+
+${industryExamples}
+
+**CRITICAL REMINDERS:**
+- Executive Summary: Must be specific to ${brief.clientName}, not generic campaign language
+- Psychographic Insights: Must reflect the actual target audience, not generic social media user descriptions
+- Strategic Recommendations: Must be actionable and specific to ${brief.clientName}'s industry and goals
+- Content Pillars: Must have unique names and specific examples, not generic placeholders
+`;
+};
+
+/**
  * Generate markdown content using OpenAI
  */
 const generateMarkdownContent = async (
@@ -239,7 +373,13 @@ const generateMarkdownContent = async (
   const influencerSection = buildInfluencerSection(influencers, brief);
   const manualInfluencerSection = buildManualInfluencerSection(manualInfluencers, brief);
 
+  // Get example guidance based on industry/content themes
+  const exampleGuidance = getExampleGuidance(brief);
+
   const prompt = `You are a senior strategist at an elite influencer marketing agency. Generate a comprehensive, professional markdown document analyzing this brief and providing strategy recommendations.
+
+**CRITICAL: QUALITY STANDARDS**
+${exampleGuidance}
 
 **CLIENT BRIEF:**
 Client: ${brief.clientName}
@@ -322,23 +462,36 @@ Provide 2-3 sentences about this audience's content consumption habits, values, 
 
 ### 🎨 Strategic Content Pillars
 
-Create 3-4 compelling content themes that authentically connect ${brief.clientName} with the target audience:
+Create 3-4 compelling content themes that authentically connect ${brief.clientName} with the target audience. 
 
-1. **✨ [Theme 1 Name]**
-   - Description of content approach and storytelling angle
-   - Example: "[Specific content idea]"
+**IMPORTANT:** Each theme must be SPECIFIC, BRAND-ALIGNED, and CULTURALLY RELEVANT. Use unique, memorable names that reflect ${brief.clientName}'s brand identity and campaign goals. Include concrete, actionable content ideas with specific formats, settings, or storytelling approaches.
 
-2. **🌟 [Theme 2 Name]**
-   - Description of content approach and storytelling angle
-   - Example: "[Specific content idea]"
+**DO NOT USE GENERIC PHRASES LIKE:**
+- "Fresh & Premium"
+- "Authenticity and personal storytelling" 
+- "Visual appeal aligned with brand aesthetic"
 
-3. **💫 [Theme 3 Name]**
-   - Description of content approach and storytelling angle
-   - Example: "[Specific content idea]"
+**INSTEAD, CREATE SPECIFIC THEMES LIKE:**
+- "Midnight Serenade Sessions" (for fragrance: evening routines with curated playlists)
+- "Tarde con los tuyos" (for spirits: authentic social gatherings)
+- "First Times That Matter" (for furniture: emotional connections to first experiences)
 
-4. **🎯 [Theme 4 Name]** *(Optional but recommended)*
-   - Description of content approach and storytelling angle
-   - Example: "[Specific content idea]"
+For each theme:
+1. **✨ [Unique Theme Name That Reflects Brand]**
+   - Specific description of content approach and storytelling angle tailored to ${brief.clientName}
+   - Example: "[Concrete, actionable content idea with specific format/setting]"
+
+2. **🌟 [Unique Theme Name That Reflects Brand]**
+   - Specific description of content approach and storytelling angle tailored to ${brief.clientName}
+   - Example: "[Concrete, actionable content idea with specific format/setting]"
+
+3. **💫 [Unique Theme Name That Reflects Brand]**
+   - Specific description of content approach and storytelling angle tailored to ${brief.clientName}
+   - Example: "[Concrete, actionable content idea with specific format/setting]"
+
+4. **🎯 [Unique Theme Name That Reflects Brand]** *(Optional but recommended)*
+   - Specific description of content approach and storytelling angle tailored to ${brief.clientName}
+   - Example: "[Concrete, actionable content idea with specific format/setting]"
 
 ### 📅 Content Distribution Plan
 
@@ -500,21 +653,21 @@ Based on historical data and the selected influencers' average performance metri
 
 ## 📝 Strategic Recommendations
 
-Based on ${brief.clientName}'s objectives and the current influencer landscape:
+Based on ${brief.clientName}'s objectives and the current influencer landscape, provide 4-6 SPECIFIC, ACTIONABLE recommendations tailored to ${brief.clientName}'s industry and campaign goals.
 
-1. **Authenticity Over Perfection:** Encourage influencers to create genuine, relatable content rather than overly polished ads. Authentic content performs ${(15 + Math.random() * 10).toFixed(0)}% better on engagement.
+**CRITICAL:** These recommendations must be SPECIFIC to ${brief.clientName}, NOT generic influencer marketing advice.
 
-2. **Early Access Strategy:** Provide influencers with exclusive early access or behind-the-scenes content to create buzz and FOMO among their audiences.
+**EXAMPLE OF GOOD RECOMMENDATION:**
+"For Pikolinos: Partner with Spanish artisans and craftspeople who align with the handcrafted shoe narrative. Create 'Behind the Craft' series showcasing skilled artisans, connecting the brand to authentic Spanish craftsmanship heritage."
 
-3. **User-Generated Content:** Encourage influencers to create challenges or hashtag campaigns that inspire their followers to participate and create their own content.
+**EXAMPLE OF BAD RECOMMENDATION (AVOID THIS):**
+"Authenticity Over Perfection: Encourage influencers to create genuine, relatable content."
 
-4. **Cross-Platform Amplification:** Repurpose top-performing content across multiple platforms to maximize ROI and reach different audience segments.
-
-5. **Long-Term Relationships:** Consider converting top performers into brand ambassadors for ongoing partnership opportunities beyond this campaign.
-
-6. **Performance Tracking:** Implement robust tracking with unique discount codes or landing pages for each influencer to measure direct attribution.
-
-7. **Agile Optimization:** Monitor performance weekly and be prepared to reallocate budget to top-performing influencers mid-campaign.
+Generate recommendations that:
+- Are specific to ${brief.clientName}'s industry and brand positioning
+- Reference concrete tactics or approaches
+- Connect to the campaign goals: ${brief.campaignGoals.join(', ')}
+- Include actionable next steps when relevant
 
 ---
 
