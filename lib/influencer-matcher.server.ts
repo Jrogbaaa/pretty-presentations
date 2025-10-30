@@ -206,15 +206,21 @@ const selectOptimalMix = (
   // Try to select 1 macro (if budget allows) - but only use 40% max
   if (macro.length > 0 && selected.length < 3) {
     const macroInfluencer = macro[0];
-    const cost = macroInfluencer.rateCard.post * 3;
-    if (cost <= remainingBudget * 0.4) {
-      selected.push(macroInfluencer);
-      remainingBudget -= cost;
+    // Skip if already selected (check by id or handle) - shouldn't happen but safety check
+    if (!selected.some(s => s.id === macroInfluencer.id || s.handle === macroInfluencer.handle)) {
+      const cost = macroInfluencer.rateCard.post * 3;
+      if (cost <= remainingBudget * 0.4) {
+        selected.push(macroInfluencer);
+        remainingBudget -= cost;
+      }
     }
   }
 
   // Select mid-tier influencers - MORE LENIENT (just need to fit in remaining budget)
   for (let i = 0; i < midTier.length && selected.length < 8; i++) {
+    // Skip if already selected (check by id or handle)
+    if (selected.some(s => s.id === midTier[i].id || s.handle === midTier[i].handle)) continue;
+    
     const cost = midTier[i].rateCard.post * 3;
     // More lenient: if we have less than 3, allow up to 100% of remaining budget
     // If we have 3+, allow up to 50% of remaining budget
@@ -227,6 +233,9 @@ const selectOptimalMix = (
 
   // Fill with micro influencers - MORE LENIENT
   for (let i = 0; i < micro.length && selected.length < 8; i++) {
+    // Skip if already selected (check by id or handle)
+    if (selected.some(s => s.id === micro[i].id || s.handle === micro[i].handle)) continue;
+    
     const cost = micro[i].rateCard.post * 3;
     // More lenient: if we have less than 3, allow up to 100% of remaining budget
     if (cost <= remainingBudget) {
@@ -254,8 +263,8 @@ const selectOptimalMix = (
     for (const influencer of ranked) {
       if (selected.length >= 3) break;
       
-      // Skip if already selected
-      if (selected.some(s => s.id === influencer.id)) continue;
+      // Skip if already selected (check by id or handle)
+      if (selected.some(s => s.id === influencer.id || s.handle === influencer.handle)) continue;
       
       const cost = influencer.rateCard.post * 3;
       
@@ -293,16 +302,37 @@ const selectOptimalMix = (
       console.log(`   ⚠️ Still only ${selected.length} influencers. Taking top 3 regardless of budget...`);
       for (const influencer of ranked) {
         if (selected.length >= 3) break;
-        if (selected.some(s => s.id === influencer.id)) continue;
+        // Skip if already selected (check by id or handle)
+        if (selected.some(s => s.id === influencer.id || s.handle === influencer.handle)) continue;
         selected.push(influencer);
         console.log(`   Added ${influencer.name} (€${(influencer.rateCard.post * 3).toLocaleString()}) - final fallback`);
       }
     }
   }
 
-  console.log(`✅ [SERVER] Selected ${selected.length} influencers (target: min 3)`);
+  // Final deduplication pass to ensure no duplicates (by id or handle)
+  const uniqueSelected: Influencer[] = [];
+  const seenIds = new Set<string>();
+  const seenHandles = new Set<string>();
+  
+  for (const influencer of selected) {
+    const id = influencer.id || '';
+    const handle = influencer.handle || '';
+    
+    // Skip if we've already seen this influencer (by id or handle)
+    if (seenIds.has(id) || seenHandles.has(handle)) {
+      console.log(`   ⚠️ Skipping duplicate: ${influencer.name} (${id || handle})`);
+      continue;
+    }
+    
+    uniqueSelected.push(influencer);
+    if (id) seenIds.add(id);
+    if (handle) seenHandles.add(handle);
+  }
 
-  return selected;
+  console.log(`✅ [SERVER] Selected ${uniqueSelected.length} unique influencers (target: min 3)`);
+
+  return uniqueSelected;
 };
 
 const enrichSelectedInfluencers = async (

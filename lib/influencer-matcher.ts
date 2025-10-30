@@ -296,15 +296,22 @@ const selectOptimalMix = (
 
   // Add 1 macro if budget allows
   if (macro.length > 0) {
-    const cost = macro[0].rateCard.post * 3;
-    if (cost <= remainingBudget * 0.5) {
-      selected.push(macro[0]);
-      remainingBudget -= cost;
+    const macroInfluencer = macro[0];
+    // Skip if already selected (check by id or handle)
+    if (!selected.some(s => s.id === macroInfluencer.id || s.handle === macroInfluencer.handle)) {
+      const cost = macroInfluencer.rateCard.post * 3;
+      if (cost <= remainingBudget * 0.5) {
+        selected.push(macroInfluencer);
+        remainingBudget -= cost;
+      }
     }
   }
 
   // Add 2-3 mid-tier
   for (let i = 0; i < Math.min(3, midTier.length); i++) {
+    // Skip if already selected (check by id or handle)
+    if (selected.some(s => s.id === midTier[i].id || s.handle === midTier[i].handle)) continue;
+    
     const cost = midTier[i].rateCard.post * 3;
     if (cost <= remainingBudget && selected.length < 6) {
       selected.push(midTier[i]);
@@ -314,6 +321,9 @@ const selectOptimalMix = (
 
   // Add micro influencers to fill remaining budget
   for (let i = 0; i < micro.length && selected.length < 8; i++) {
+    // Skip if already selected (check by id or handle)
+    if (selected.some(s => s.id === micro[i].id || s.handle === micro[i].handle)) continue;
+    
     const cost = micro[i].rateCard.post * 3;
     if (cost <= remainingBudget) {
       selected.push(micro[i]);
@@ -321,7 +331,23 @@ const selectOptimalMix = (
     }
   }
 
-  return selected.slice(0, 8); // Max 8 influencers per presentation
+  // Final deduplication pass
+  const uniqueSelected: Influencer[] = [];
+  const seenIds = new Set<string>();
+  const seenHandles = new Set<string>();
+  
+  for (const influencer of selected) {
+    const id = influencer.id || '';
+    const handle = influencer.handle || '';
+    
+    if (seenIds.has(id) || seenHandles.has(handle)) continue;
+    
+    uniqueSelected.push(influencer);
+    if (id) seenIds.add(id);
+    if (handle) seenHandles.add(handle);
+  }
+
+  return uniqueSelected.slice(0, 8); // Max 8 influencers per presentation
 };
 
 const enrichSelectedInfluencers = async (
