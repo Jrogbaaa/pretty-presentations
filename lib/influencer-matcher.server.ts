@@ -65,14 +65,18 @@ const filterByBasicCriteria = (
     // Platform match
     const platformMatch = brief.platformPreferences.includes(influencer.platform);
     
-    // Location match
-    const locationMatch = influencer.demographics.location.some(loc =>
-      brief.targetDemographics.location.includes(loc)
-    );
+    // Location match - bidirectional (location contains filter or vice versa)
+    const locationMatch = brief.targetDemographics.location.length === 0 || 
+      influencer.demographics.location.some(loc =>
+        brief.targetDemographics.location.some(briefLoc =>
+          loc.toLowerCase().includes(briefLoc.toLowerCase()) ||
+          briefLoc.toLowerCase().includes(loc.toLowerCase())
+        )
+      );
     
-    // Budget feasibility (rough estimate)
+    // Budget feasibility - MORE LENIENT (allow influencers up to budget/2 per influencer)
     const estimatedCost = influencer.rateCard.post * 3;
-    const budgetMatch = estimatedCost <= brief.budget / 3; // Assuming at least 3 influencers
+    const budgetMatch = brief.budget === 0 || estimatedCost <= brief.budget / 2; // More lenient: allow up to half budget per influencer
     
     // Engagement rate threshold - MORE LENIENT
     const engagementMatch = influencer.engagement >= 0.5;

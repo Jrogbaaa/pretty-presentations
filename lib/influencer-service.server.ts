@@ -27,53 +27,134 @@ export const searchInfluencersServer = async (
   limitResults = 50
 ): Promise<Influencer[]> => {
   try {
+    console.log('🔍 [SERVER] Starting influencer search with filters:', JSON.stringify(filters, null, 2));
+    
     const influencersRef = adminDb.collection('influencers');
     
     // Build query
     let query: FirebaseFirestore.Query = influencersRef;
     
-    // Only use simple platform filter if provided
+    // Only use simple platform filter if provided and exactly 1 platform
     if (filters.platforms && filters.platforms.length === 1) {
       query = query.where('platform', '==', filters.platforms[0]);
+      console.log(`📱 [SERVER] Applied platform filter: ${filters.platforms[0]}`);
+    } else if (filters.platforms && filters.platforms.length > 1) {
+      console.log(`📱 [SERVER] Multiple platforms requested (${filters.platforms.length}), will filter client-side`);
+    } else {
+      console.log('📱 [SERVER] No platform filter applied');
     }
     
     // Fetch more results since we'll filter client-side
-    query = query.limit(limitResults * 4);
+    // If multiple platforms or no platform filter, fetch even more to ensure we have enough after filtering
+    const fetchLimit = (!filters.platforms || filters.platforms.length > 1)
+      ? limitResults * 10  // Fetch 10x more if multiple platforms or no filter
+      : limitResults * 6;   // Fetch 6x more if single platform
+    
+    query = query.limit(fetchLimit);
 
     const querySnapshot = await query.get();
+    console.log(`📊 [SERVER] Fetched ${querySnapshot.docs.length} documents from Firestore (limit: ${fetchLimit})`);
 
-    let influencers = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Influencer[];
+    // If initial query returned 0 docs and we had a platform filter, retry without platform filter
+    let finalSnapshot = querySnapshot;
+    if (querySnapshot.docs.length === 0 && filters.platforms && filters.platforms.length === 1) {
+      console.warn('⚠️  [SERVER] Initial query with platform filter returned 0 documents. Retrying without platform filter...');
+      const fallbackQuery = influencersRef.limit(fetchLimit);
+      const fallbackSnapshot = await fallbackQuery.get();
+      console.log(`📊 [SERVER] Fallback query fetched ${fallbackSnapshot.docs.length} documents`);
+      
+      if (fallbackSnapshot.docs.length > 0) {
+        finalSnapshot = fallbackSnapshot;
+      } else {
+        console.warn('⚠️  [SERVER] WARNING: Even without platform filter, query returned 0 documents!');
+        console.warn('   This could indicate:');
+        console.warn('   1. Database connection issue');
+        console.warn('   2. Collection "influencers" is empty');
+      }
+    } else if (querySnapshot.docs.length === 0) {
+      console.warn('⚠️  [SERVER] WARNING: Query returned 0 documents from Firestore!');
+      console.warn('   This could indicate:');
+      console.warn('   1. Database connection issue');
+      console.warn('   2. Collection "influencers" is empty');
+    }
+
+    let influencers = finalSnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+      } as Influencer;
+    });
+    
+    console.log(`📋 [SERVER] Mapped ${influencers.length} influencers from documents`);
 
     // Apply ALL filters client-side
+    console.log(`🔍 [SERVER] Applying client-side filters to ${influencers.length} influencers...`);
     influencers = applyClientSideFilters(influencers, filters);
+    console.log(`✅ [SERVER] After client-side filtering: ${influencers.length} influencers match`);
     
     // FALLBACK 1: If we got 0 results, try again without content category filter
     if (influencers.length === 0 && filters.contentCategories && filters.contentCategories.length > 0) {
       console.log('⚠️  [SERVER] 0 influencers with content category filter. Retrying without categories...');
       const relaxedFilters = { ...filters, contentCategories: undefined };
       influencers = applyClientSideFilters(
-        querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Influencer[],
+        finalSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Influencer[],
         relaxedFilters
       );
       console.log(`✅ [SERVER] Retry found ${influencers.length} influencers without category filter`);
     }
     
-    // FALLBACK 2: If still 0 results and platform filter exists, try expanding platforms
+    // FALLBACK 2: If still 0 results and location filter exists, try without location filter
+    if (influencers.length === 0 && filters.locations && filters.locations.length > 0) {
+      console.log('⚠️  [SERVER] 0 influencers with location filter. Retrying without location filter...');
+      const relaxedFilters = { ...filters, locations: undefined };
+      influencers = applyClientSideFilters(
+        finalSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Influencer[],
+        relaxedFilters
+      );
+      console.log(`✅ [SERVER] Retry without location filter found ${influencers.length} influencers`);
+    }
+    
+    // FALLBACK 3: If still 0 results and platform filter exists, try expanding platforms
     if (influencers.length === 0 && filters.platforms && filters.platforms.length > 0) {
       console.log('⚠️  [SERVER] 0 influencers with platform filter. Retrying with Instagram added...');
       const expandedFilters = { 
         ...filters, 
         platforms: [...filters.platforms, 'Instagram'] as Platform[],
-        contentCategories: undefined // Also remove content categories
+        contentCategories: undefined, // Also remove content categories
+        locations: undefined // Also remove location filter
       };
       influencers = applyClientSideFilters(
-        querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Influencer[],
+        finalSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Influencer[],
         expandedFilters
       );
       console.log(`✅ [SERVER] Retry with Instagram found ${influencers.length} influencers`);
+    }
+    
+    // FALLBACK 4: If still 0 results, try with minimal filters (only platform and budget)
+    if (influencers.length === 0) {
+      console.log('⚠️  [SERVER] 0 influencers after all fallbacks. Trying with minimal filters (platform + budget only)...');
+      const minimalFilters = {
+        platforms: filters.platforms,
+        maxBudget: filters.maxBudget
+      };
+      influencers = applyClientSideFilters(
+        finalSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Influencer[],
+        minimalFilters
+      );
+      console.log(`✅ [SERVER] Minimal filters found ${influencers.length} influencers`);
+    }
+    
+    // FALLBACK 5: Last resort - return top influencers by engagement regardless of filters
+    if (influencers.length === 0) {
+      console.log('⚠️  [SERVER] CRITICAL: 0 influencers after all filters. Returning top influencers by engagement...');
+      influencers = finalSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Influencer[];
+      influencers.sort((a, b) => b.engagement - a.engagement);
+      influencers = influencers.slice(0, limitResults);
+      console.log(`✅ [SERVER] Fallback returned ${influencers.length} top influencers by engagement`);
     }
     
     // Sort by engagement (client-side)
@@ -127,10 +208,13 @@ const applyClientSideFilters = (
       return false;
     }
     
-    // Location filter
+    // Location filter - bidirectional matching (checks if location contains filter or vice versa)
     if (filters.locations && filters.locations.length > 0) {
       const hasLocation = influencer.demographics.location.some((loc) =>
-        filters.locations!.some((filterLoc) => loc.toLowerCase().includes(filterLoc.toLowerCase()))
+        filters.locations!.some((filterLoc) => 
+          loc.toLowerCase().includes(filterLoc.toLowerCase()) ||
+          filterLoc.toLowerCase().includes(loc.toLowerCase())
+        )
       );
       if (!hasLocation) return false;
     }
