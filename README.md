@@ -2,9 +2,11 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 2.4.9 | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Input Sanitization + Safe Errors 🔒
+**Status**: 🟢 **Production-Ready** | **Version**: 2.5.0 | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Input Sanitization + Safe Errors 🔒
 
-**Latest**: v2.4.9 **MINIMUM 3 INFLUENCERS GUARANTEED!** 🎯✨ FIXED: System now guarantees minimum 3 influencers matched for every brief. Enhanced influencer matching with aggressive fallback logic - bidirectional location matching, relaxed budget constraints (up to full budget per influencer), lowered engagement threshold to 0.3%, increased fetch limit to 500 influencers. Multiple fallback strategies ensure results even with strict filters. Database connection fixed using getAdminDb() instead of proxy. Tested and verified on both localhost and Vercel production - consistently returns 3+ influencers. Production-ready! 🚀✅
+**Latest**: v2.5.0 **MANUAL INFLUENCER ADDITION FEATURE!** 👥✨ NEW: Users can now manually specify influencers by name! System automatically extracts influencer names from brief text and allows manual entry via form field. Searches database for matches - if found, uses real data; if not found, creates placeholder entries with AI-generated rationale explaining why they fit the brand. Manual influencers appear in separate "Manually Requested Influencers" section in text responses. Supports formats: "name", "@handle", "name (@handle)". FIXED: Placeholder replacement logic bug that caused duplicate manual influencer sections. Production-ready! 🚀✅
+
+**Previous**: v2.4.9 **MINIMUM 3 INFLUENCERS GUARANTEED!** 🎯✨ FIXED: System now guarantees minimum 3 influencers matched for every brief. Enhanced influencer matching with aggressive fallback logic - bidirectional location matching, relaxed budget constraints (up to full budget per influencer), lowered engagement threshold to 0.3%, increased fetch limit to 500 influencers. Multiple fallback strategies ensure results even with strict filters. Database connection fixed using getAdminDb() instead of proxy. Tested and verified on both localhost and Vercel production - consistently returns 3+ influencers. Production-ready! 🚀✅
 
 **Previous**: v2.4.8 **FIREBASE ADMIN & FALLBACK LOGIC COMPLETE!** 🔧✨ FIXED: Firebase Admin SDK private key format issue blocking Vercel deployments - created comprehensive troubleshooting guide with exact format requirements. ENHANCED: Intelligent fallback logic for influencer matching - when content categories don't match, system automatically retries without category filter and expands platforms. Guarantees influencer results for all valid briefs. Local testing shows perfect matching with fallback working seamlessly. Documentation updated with step-by-step Vercel setup guide. Ready for production deployment! 🚀✅
 
@@ -82,6 +84,33 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
   - Accelerates testing by 10x
   - New "Random Sample" button replaces static sample
 - **Documentation**: See `BRANDS_DATABASE_GUIDE.md`, `BRAND_INTELLIGENCE_INTEGRATION.md`
+
+### 👥 Manual Influencer Addition (v2.5.0) ⚡ NEW
+- **Automatic Extraction**: System automatically extracts influencer names from brief text during parsing
+- **Manual Entry**: New form field allows adding specific influencer names or Instagram handles
+- **Format Support**: Accepts multiple formats:
+  - "Influencer Name"
+  - "@instagram_handle"
+  - "Name (@handle)"
+  - "Name @handle"
+- **Database Matching**: Searches database by name or handle with multiple matching strategies:
+  - Exact name match
+  - Case-insensitive name match
+  - Handle match (with/without @)
+  - Partial name match
+- **Placeholder Generation**: For influencers not found in database:
+  - Creates placeholder entries with estimated follower counts based on campaign budget
+  - Generates AI-powered rationale explaining why they fit the brand
+  - Includes estimated engagement rates, costs, and content recommendations
+- **Separate Display**: Manual influencers appear in dedicated "Manually Requested Influencers" section in text responses
+- **Clear Indicators**: Shows which influencers are from database vs placeholders with "(estimated)" labels
+- **Smart Integration**: Works seamlessly alongside algorithm-matched influencers
+- **Example Usage**:
+  ```
+  Brief mentions: "We want @maria_garcia and Carlos Lopez (@carlos_lopez) for this campaign"
+  System extracts: ["@maria_garcia", "Carlos Lopez (@carlos_lopez)"]
+  Searches database → Shows real data if found, placeholder if not
+  ```
 
 ### 📤 PowerPoint Export (v2.2.0)
 - **PowerPoint (PPTX) Export**: 

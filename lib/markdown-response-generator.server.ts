@@ -3,6 +3,7 @@
 import OpenAI from "openai";
 import type { ClientBrief, SelectedInfluencer, BriefResponse } from "@/types";
 import { matchInfluencersServer } from "./influencer-matcher.server";
+import { processManualInfluencers } from "./manual-influencer-matcher";
 import { withRetry, RetryPresets } from "./retry";
 import { logInfo, logError, startTimer } from "./logger";
 import { OpenAIError } from "@/types/errors";
@@ -29,8 +30,17 @@ export const generateMarkdownResponse = async (
       matchedCount: matchedInfluencers.length
     });
 
+    // Step 1.5: Process manual influencers
+    const manualInfluencers = await processManualInfluencers(brief);
+    
+    logInfo('Manual influencer processing complete', {
+      manualCount: manualInfluencers.length,
+      fromDatabase: manualInfluencers.filter(inf => inf.id && !inf.id.startsWith('manual-')).length,
+      placeholders: manualInfluencers.filter(inf => inf.id && inf.id.startsWith('manual-')).length,
+    });
+
     // Step 2: Generate comprehensive markdown content
-    const markdownContent = await generateMarkdownContent(brief, matchedInfluencers);
+    const markdownContent = await generateMarkdownContent(brief, matchedInfluencers, manualInfluencers);
 
     // Step 3: Create response object
     const response: BriefResponse = {
@@ -40,7 +50,7 @@ export const generateMarkdownResponse = async (
       createdAt: new Date(),
       brief,
       markdownContent,
-      influencers: matchedInfluencers,
+      influencers: [...matchedInfluencers, ...manualInfluencers],
       status: "draft"
     };
 
@@ -59,6 +69,79 @@ export const generateMarkdownResponse = async (
     });
     throw error;
   }
+};
+
+/**
+ * Build the manual influencer section
+ */
+const buildManualInfluencerSection = (
+  influencers: SelectedInfluencer[],
+  brief: ClientBrief
+): string => {
+  if (influencers.length === 0) {
+    return "";
+  }
+
+  const influencerCards = influencers.map((inf, idx) => {
+    const isPlaceholder = inf.id.startsWith('manual-');
+    const tierEmoji = inf.followers >= 500000 ? '⭐' : inf.followers >= 100000 ? '✨' : '💫';
+    const tier = inf.followers >= 500000 ? 'Macro' : inf.followers >= 100000 ? 'Mid-tier' : 'Micro';
+    const engagementQuality = inf.engagement >= 3 ? 'Excellent' : inf.engagement >= 2 ? 'Strong' : 'Good';
+    const cpm = inf.costEstimate && inf.followers > 0 ? Math.round((inf.costEstimate / inf.followers) * 1000) : 0;
+    const firstName = inf.name.split(' ')[0];
+    
+    return `
+---
+
+### ${tierEmoji} ${idx + 1}. **${inf.name}**${inf.handle ? ` • [@${inf.handle}]` : ''}${isPlaceholder ? ' _(Not in database)_' : ''}
+
+<table>
+<tr>
+<td><strong>📊 Reach</strong></td>
+<td>${inf.followers.toLocaleString()} followers${isPlaceholder ? ' (estimated)' : ''}</td>
+<td><strong>💬 Engagement</strong></td>
+<td>${inf.engagement}% (${engagementQuality})${isPlaceholder ? ' (estimated)' : ''}</td>
+</tr>
+<tr>
+<td><strong>📱 Platform</strong></td>
+<td>${inf.platform}</td>
+<td><strong>🎭 Tier</strong></td>
+<td>${tier} Influencer</td>
+</tr>
+${inf.contentCategories.length > 0 ? `<tr>
+<td><strong>🎨 Content Focus</strong></td>
+<td colspan="3">${inf.contentCategories.slice(0, 4).join(", ")}</td>
+</tr>` : ''}
+<tr>
+<td><strong>💰 Investment</strong></td>
+<td colspan="3">€${inf.costEstimate?.toLocaleString() || "TBD"}${cpm > 0 ? ` (€${cpm} CPM)` : ''}${isPlaceholder ? ' (estimated)' : ''}</td>
+</tr>
+</table>
+
+#### 💡 Why ${firstName}?
+
+${inf.rationale || `${firstName} is an excellent fit based on audience alignment, engagement quality, and content style that matches ${brief.clientName}'s brand values.`}
+
+#### 🎬 Recommended Content Strategy
+
+**Deliverables:**
+${inf.proposedContent?.map(content => `- 📹 ${content}`).join('\n') || '- 📹 2-3 Instagram Reels (dynamic, trend-forward content)\n- 📸 3-4 Instagram Stories (behind-the-scenes, authentic moments)\n- 🖼️ 1 Carousel Post (educational or storytelling format)'}
+
+**Content Pillars:**
+- Authenticity and personal storytelling
+- Visual appeal aligned with ${brief.clientName}'s brand aesthetic
+- Clear calls-to-action driving engagement and conversions`;
+  });
+
+  const databaseCount = influencers.filter(inf => inf.id && !inf.id.startsWith('manual-')).length;
+  const placeholderCount = influencers.filter(inf => inf.id && inf.id.startsWith('manual-')).length;
+
+  return `## 👥 Manually Requested Influencers
+
+> **Note:** ${databaseCount > 0 ? `${databaseCount} influencer${databaseCount !== 1 ? 's were' : ' was'} found in our database. ` : ''}${placeholderCount > 0 ? `${placeholderCount} influencer${placeholderCount !== 1 ? 's' : ''} ${placeholderCount === 1 ? 'was' : 'were'} not found in our database - estimated data and AI-generated rationale provided.` : ''}
+${influencerCards.join('')}
+
+---`;
 };
 
 /**
@@ -138,7 +221,8 @@ ${influencerCards}
  */
 const generateMarkdownContent = async (
   brief: ClientBrief,
-  influencers: SelectedInfluencer[]
+  influencers: SelectedInfluencer[],
+  manualInfluencers: SelectedInfluencer[]
 ): Promise<string> => {
   const apiKey = process.env.OPENAI_API_KEY;
   
@@ -151,8 +235,9 @@ const generateMarkdownContent = async (
 
   const openai = new OpenAI({ apiKey });
 
-  // Build the actual influencer section with REAL DATA first
+  // Build the actual influencer sections with REAL DATA first
   const influencerSection = buildInfluencerSection(influencers, brief);
+  const manualInfluencerSection = buildManualInfluencerSection(manualInfluencers, brief);
 
   const prompt = `You are a senior strategist at an elite influencer marketing agency. Generate a comprehensive, professional markdown document analyzing this brief and providing strategy recommendations.
 
@@ -169,9 +254,10 @@ ${brief.additionalNotes ? `Additional Notes: ${brief.additionalNotes}` : ""}
 
 **IMPORTANT NOTES:**
 - ${influencers.length} influencers have been matched from our database of 3,000+ Spanish creators
-- The influencer lineup section will be automatically inserted - DO NOT generate influencer profiles
-- Use the [INFLUENCER_SECTION_PLACEHOLDER] marker where the influencer lineup should appear
-- Focus on generating the strategy, creative ideas, and recommendations based on the brief
+- ${manualInfluencers.length > 0 ? `${manualInfluencers.length} manually requested influencer${manualInfluencers.length !== 1 ? 's' : ''} ${manualInfluencers.length === 1 ? 'has' : 'have'} also been included` : ''}
+- The influencer lineup sections will be automatically inserted - DO NOT generate influencer profiles
+- Use the [INFLUENCER_SECTION_PLACEHOLDER] marker where the algorithm-matched influencer lineup should appear
+- ${manualInfluencers.length > 0 ? 'Use the [MANUAL_INFLUENCER_SECTION_PLACEHOLDER] marker where manually requested influencers should appear (if any). ' : ''}Focus on generating the strategy, creative ideas, and recommendations based on the brief
 
 **INSTRUCTIONS:**
 Create a comprehensive, beautifully formatted markdown document with exceptional visual hierarchy and clear sections:
@@ -481,8 +567,24 @@ Return ONLY the markdown content, no additional commentary or wrapper text.`;
     markdown = markdown.replace(/^```\n?/g, '').replace(/\n?```$/g, '');
     markdown = markdown.trim();
 
-    // Inject the REAL influencer section with actual matched data
-    markdown = markdown.replace('[INFLUENCER_SECTION_PLACEHOLDER]', influencerSection);
+    // Inject the REAL influencer sections with actual matched data
+    if (manualInfluencerSection) {
+      // If manual influencers exist, check if manual placeholder exists
+      const hadManualPlaceholder = markdown.includes('[MANUAL_INFLUENCER_SECTION_PLACEHOLDER]');
+      
+      if (hadManualPlaceholder) {
+        // Replace manual placeholder with manual section
+        markdown = markdown.replace('[MANUAL_INFLUENCER_SECTION_PLACEHOLDER]', manualInfluencerSection);
+        // Replace algorithm placeholder with only algorithm section (manual already inserted)
+        markdown = markdown.replace('[INFLUENCER_SECTION_PLACEHOLDER]', influencerSection);
+      } else {
+        // No manual placeholder found, combine both sections at algorithm placeholder
+        markdown = markdown.replace('[INFLUENCER_SECTION_PLACEHOLDER]', manualInfluencerSection + '\n\n' + influencerSection);
+      }
+    } else {
+      // Only algorithm-matched influencers
+      markdown = markdown.replace('[INFLUENCER_SECTION_PLACEHOLDER]', influencerSection);
+    }
 
     return markdown;
   } catch (error) {

@@ -60,6 +60,7 @@ Extract and return JSON with this exact structure:
   "timeline": "string (campaign period or deadline, note if TBD/uncertain)",
   "platformPreferences": ["Instagram", "TikTok", ...] (if not specified, suggest based on target)",
   "contentThemes": ["theme1", "theme2", ...] (creative direction, topics)",
+  "manualInfluencers": ["name1", "@handle1", "name2 (@handle2)", ...] (extract any influencer names, Instagram handles, or creator mentions from the brief. If no influencers mentioned, use empty array []),
   "additionalNotes": "string (urgency, special considerations, specific creator names, previous campaign references, multi-phase details, event components, budget scenarios)"
 }
 
@@ -102,9 +103,10 @@ CRITICAL PARSING RULES:
 
 6. CREATOR/TALENT MENTIONS:
    - Extract specific names requested (with Instagram handles if provided)
-   - Note if creators are suggestions vs. requirements
-   - Note any rejected names ("X said no")
-   - Include in additionalNotes with context
+   - Include in manualInfluencers array in formats: "name", "@handle", "name (@handle)", or "name @handle"
+   - Note if creators are suggestions vs. requirements in additionalNotes
+   - Note any rejected names ("X said no") in additionalNotes
+   - Example: If brief mentions "We want @maria_garcia and Carlos Lopez (@carlos_lopez)", extract: ["@maria_garcia", "Carlos Lopez (@carlos_lopez)"]
 
 7. CAMPAIGN TYPES TO IDENTIFY:
    - B2B vs B2C (if targeting businesses, note this)
@@ -157,6 +159,7 @@ Be comprehensive but accurate. Extract signal from noise. If information is miss
     }
     if (!parsed.contentThemes) parsed.contentThemes = [];
     if (!parsed.brandRequirements) parsed.brandRequirements = [];
+    if (!parsed.manualInfluencers) parsed.manualInfluencers = [];
 
     return parsed;
   } catch (error) {

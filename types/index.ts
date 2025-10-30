@@ -36,6 +36,7 @@ export interface ClientBrief {
   contentThemes: string[];
   additionalNotes?: string;
   templateId?: TemplateId;
+  manualInfluencers?: string[];
   uploadedImages?: Array<{
     id: string;
     url: string;

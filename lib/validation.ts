@@ -52,6 +52,8 @@ export const ClientBriefSchema = z.object({
   
   contentThemes: z.array(z.string()).default([]),
   
+  manualInfluencers: z.array(z.string()).default([]).optional(),
+  
   additionalNotes: z.string().max(2000, 'Additional notes must be less than 2000 characters').optional(),
   
   templateId: z.enum(['default', 'red-bull-event', 'scalpers-lifestyle']).optional(),
@@ -169,6 +171,9 @@ export const sanitizeBriefData = (data: Record<string, unknown>): Record<string,
       : [],
     contentThemes: Array.isArray(data.contentThemes)
       ? data.contentThemes.filter((t: unknown) => typeof t === 'string' && t.trim().length > 0)
+      : [],
+    manualInfluencers: Array.isArray(data.manualInfluencers)
+      ? data.manualInfluencers.filter((i: unknown) => typeof i === 'string' && i.trim().length > 0)
       : [],
     additionalNotes: typeof data.additionalNotes === 'string' ? data.additionalNotes.trim() || undefined : undefined,
   };

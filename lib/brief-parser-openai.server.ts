@@ -93,6 +93,7 @@ Extract and return JSON with this exact structure:
   "timeline": "string (campaign period or deadline)",
   "platformPreferences": ["Instagram", "TikTok", ...] (if not specified, suggest based on target),
   "contentThemes": ["theme1", "theme2", ...] (creative direction, topics),
+  "manualInfluencers": ["name1", "@handle1", "name2 (@handle2)", ...] (extract any influencer names, Instagram handles, or creator mentions from the brief),
   "additionalNotes": "string (urgency, special considerations, confidentiality, etc.)"
 }
 
@@ -103,6 +104,7 @@ Key instructions:
 - Infer platform preferences from target age if not specified
 - Capture urgency/timeline information
 - Note any special requirements (confidentiality, guarantees, etc.)
+- Extract influencer names: Look for mentions of creators, influencers, talent names, or Instagram handles (@username). Include formats like "name", "@handle", "name (@handle)", or "name @handle". If no influencers are mentioned, use an empty array []
 - Be comprehensive but accurate
 
 Return ONLY valid JSON, no markdown formatting.`;
@@ -141,6 +143,7 @@ Return ONLY valid JSON, no markdown formatting.`;
     }
     if (!rawParsed.contentThemes) rawParsed.contentThemes = [];
     if (!rawParsed.brandRequirements) rawParsed.brandRequirements = [];
+    if (!rawParsed.manualInfluencers) rawParsed.manualInfluencers = [];
 
     // Validate with Zod schema
     const { validateClientBrief, sanitizeBriefData } = await import('./validation');

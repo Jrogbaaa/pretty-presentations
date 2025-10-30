@@ -30,6 +30,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
       contentThemes: [],
       additionalNotes: "",
       templateId: "default",
+      manualInfluencers: [],
     }
   );
 
@@ -38,6 +39,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
   const [currentTheme, setCurrentTheme] = useState("");
   const [currentLocation, setCurrentLocation] = useState("");
   const [currentInterest, setCurrentInterest] = useState("");
+  const [currentManualInfluencer, setCurrentManualInfluencer] = useState("");
 
   const platforms: Platform[] = ["Instagram", "TikTok", "YouTube", "Twitter", "Facebook", "LinkedIn", "Twitch"];
 
@@ -500,6 +502,77 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
                 onClick={() => handleRemoveItem("contentThemes", index)}
                 className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200"
                 aria-label="Remove theme"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Manual Influencers */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Manually Requested Influencers
+        </label>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+          Add specific influencer names or Instagram handles you want to include. Formats: "name", "@handle", or "name (@handle)"
+        </p>
+        <div className="flex gap-2 mb-2">
+          <input
+            type="text"
+            value={currentManualInfluencer}
+            onChange={(e) => setCurrentManualInfluencer(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                if (currentManualInfluencer.trim()) {
+                  setFormData({
+                    ...formData,
+                    manualInfluencers: [...(formData.manualInfluencers || []), currentManualInfluencer.trim()],
+                  });
+                  setCurrentManualInfluencer("");
+                }
+              }
+            }}
+            className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+            placeholder="e.g., Maria Garcia, @maria_garcia, or Maria Garcia (@maria_garcia)"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              if (currentManualInfluencer.trim()) {
+                setFormData({
+                  ...formData,
+                  manualInfluencers: [...(formData.manualInfluencers || []), currentManualInfluencer.trim()],
+                });
+                setCurrentManualInfluencer("");
+              }
+            }}
+            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg hover:shadow-xl"
+          >
+            Add
+          </button>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {formData.manualInfluencers?.map((influencer, index) => (
+            <span
+              key={index}
+              className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 rounded-full text-sm border border-indigo-200 dark:border-indigo-800"
+            >
+              {influencer}
+              <button
+                type="button"
+                onClick={() => {
+                  const newInfluencers = [...(formData.manualInfluencers || [])];
+                  newInfluencers.splice(index, 1);
+                  setFormData({
+                    ...formData,
+                    manualInfluencers: newInfluencers,
+                  });
+                }}
+                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200"
+                aria-label="Remove influencer"
               >
                 ×
               </button>
