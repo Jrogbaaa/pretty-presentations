@@ -6,6 +6,7 @@
 import { searchInfluencersServer } from "./influencer-service.server";
 import type { ClientBrief, Influencer, SelectedInfluencer } from "@/types";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { matchBrandToInfluencers, getBrandIntelligenceSummary } from "./brand-matcher";
 
 // Initialize Google AI for enrichment
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "");
@@ -17,6 +18,49 @@ export const matchInfluencersServer = async (
   brief: ClientBrief
 ): Promise<SelectedInfluencer[]> => {
   try {
+    // BRAND INTELLIGENCE INTEGRATION - Enhance brief with brand data if available
+    let enhancedBrief = brief;
+    let brandSuggestions: string[] = [];
+    
+    if (brief.clientName && brief.clientName.trim()) {
+      console.log(`🔍 [SERVER] Looking up brand intelligence for: ${brief.clientName}`);
+      
+      try {
+        const brandIntelligence = await getBrandIntelligenceSummary(
+          brief.clientName,
+          brief
+        );
+        
+        if (brandIntelligence.brandFound && brandIntelligence.brandProfile) {
+          console.log(`✅ [SERVER] Brand found: ${brandIntelligence.brandProfile.name} (${brandIntelligence.matchQuality} match)`);
+          
+          // Enhance brief with brand data
+          const brandMatch = await matchBrandToInfluencers(
+            brief.clientName,
+            brief,
+            [] // We'll use the influencers after fetching
+          );
+          
+          enhancedBrief = brandMatch.enhancedBrief;
+          brandSuggestions = brandMatch.suggestions;
+          
+          console.log(`📊 [SERVER] Enhanced brief with brand profile:`);
+          console.log(`  - Industry: ${brandIntelligence.brandProfile.industry}`);
+          console.log(`  - Target Interests: ${brandIntelligence.brandProfile.targetInterests.join(', ')}`);
+          console.log(`  - Content Themes: ${brandIntelligence.brandProfile.contentThemes.slice(0, 3).join(', ')}`);
+        } else {
+          console.log(`⚠️  [SERVER] Brand "${brief.clientName}" not in database. Using brief details only.`);
+          brandSuggestions = brandIntelligence.recommendations;
+        }
+      } catch (brandError) {
+        console.warn('⚠️  [SERVER] Brand intelligence lookup failed:', brandError);
+        console.log('Continuing with original brief...');
+      }
+    }
+    
+    // Use enhanced brief for rest of matching process
+    brief = enhancedBrief;
+    
     console.log('🔍 [SERVER] Searching Firestore with filters:', {
       platforms: brief.platformPreferences,
       locations: brief.targetDemographics.location,
