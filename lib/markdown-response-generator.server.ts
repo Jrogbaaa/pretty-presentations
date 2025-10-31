@@ -736,7 +736,7 @@ Return ONLY the markdown content, no additional commentary or wrapper text.`;
     markdown = markdown.replace(/3,000\+ Verified Spanish Influencers.*$/gm, '');
     
     // Remove "Strategic Alignment" section if AI generated it
-    markdown = markdown.replace(/\*\*Strategic Alignment:\*\*\s*\n\n.*?(?=\n---|\n##|$)/gs, '');
+    markdown = markdown.replace(/\*\*Strategic Alignment:\*\*\s*\n\n[\s\S]*?(?=\n---|\n##|$)/g, '');
     
     // Clean up any double horizontal rules
     markdown = markdown.replace(/\n---\n---\n/g, '\n---\n');
