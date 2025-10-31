@@ -2,9 +2,9 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 2.5.3 | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
+**Status**: 🟢 **Production-Ready** | **Version**: 2.5.4 | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
 
-**Latest**: v2.5.3 **CRITICAL SECURITY FIXES!** 🔒🛡️ Fixed API key exposure vulnerability, added rate limiting to text response API (5 req/min), and updated environment variable structure for improved security. ⚠️ **BREAKING CHANGE**: Requires adding `GOOGLE_AI_API_KEY` to `.env.local` - see [CHANGELOG.md](./CHANGELOG.md) for migration guide. 🚀✅
+**Latest**: v2.5.4 **Response Format Refinements!** ✨ Streamlined text response format - removed generic Strategic Alignment section, simplified Content Distribution table (removed Frequency column), and removed AI footer attribution for more professional, client-ready documents. See [CHANGELOG.md](./CHANGELOG.md) for details. 🚀✅
 
 > 📝 **Full Version History**: See [CHANGELOG.md](./CHANGELOG.md) for complete release notes and previous versions.
 

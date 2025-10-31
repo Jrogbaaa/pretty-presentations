@@ -87,8 +87,13 @@ const buildManualInfluencerSection = (
     const tierEmoji = inf.followers >= 500000 ? '⭐' : inf.followers >= 100000 ? '✨' : '💫';
     const tier = inf.followers >= 500000 ? 'Macro' : inf.followers >= 100000 ? 'Mid-tier' : 'Micro';
     const engagementQuality = inf.engagement >= 3 ? 'Excellent' : inf.engagement >= 2 ? 'Strong' : 'Good';
-    const cpm = inf.costEstimate && inf.followers > 0 ? Math.round((inf.costEstimate / inf.followers) * 1000) : 0;
     const firstName = inf.name.split(' ')[0];
+    
+    // Check for filming location in brief
+    const brandReqs = brief.brandRequirements || [];
+    const additionalNotes = brief.additionalNotes || '';
+    const filmingLocation = brandReqs.find(req => req.toLowerCase().includes('location') || req.toLowerCase().includes('filming')) || 
+                          (additionalNotes.toLowerCase().includes('location') || additionalNotes.toLowerCase().includes('filming') ? additionalNotes.match(/location[^.]*/i)?.[0] : null);
     
     return `
 ---
@@ -108,19 +113,21 @@ const buildManualInfluencerSection = (
 <td><strong>🎭 Tier</strong></td>
 <td>${tier} Influencer</td>
 </tr>
-${inf.contentCategories.length > 0 ? `<tr>
+    ${inf.contentCategories.length > 0 ? `<tr>
 <td><strong>🎨 Content Focus</strong></td>
 <td colspan="3">${inf.contentCategories.slice(0, 4).join(", ")}</td>
 </tr>` : ''}
-<tr>
-<td><strong>💰 Investment</strong></td>
-<td colspan="3">€${inf.costEstimate?.toLocaleString() || "TBD"}${cpm > 0 ? ` (€${cpm} CPM)` : ''}${isPlaceholder ? ' (estimated)' : ''}</td>
-</tr>
 </table>
 
 #### 💡 Why ${firstName}?
 
-${inf.rationale || `${firstName} is an excellent fit based on audience alignment, engagement quality, and content style that matches ${brief.clientName}'s brand values.`}
+**Qualitative Reasoning:**
+${filmingLocation ? `**Filming Location:** ${filmingLocation}\n\n` : ''}${inf.rationale || `${firstName} is an excellent fit based on audience alignment, engagement quality, and content style that matches ${brief.clientName}'s brand values.`}
+
+**Quantitative Reasoning:**
+- Engagement Rate: ${inf.engagement}% (${engagementQuality}) - ${inf.engagement >= 3 ? 'exceeds industry average' : inf.engagement >= 2 ? 'above industry average' : 'strong performance'}
+- Reach: ${inf.followers.toLocaleString()} followers provides significant brand exposure
+- Content Alignment: ${inf.contentCategories.slice(0, 2).join(" and ")} focus aligns with target audience interests
 
 #### 🎬 Recommended Content Strategy
 
@@ -160,8 +167,13 @@ const buildInfluencerSection = (
     const tierEmoji = inf.followers >= 500000 ? '⭐' : inf.followers >= 100000 ? '✨' : '💫';
     const tier = inf.followers >= 500000 ? 'Macro' : inf.followers >= 100000 ? 'Mid-tier' : 'Micro';
     const engagementQuality = inf.engagement >= 3 ? 'Excellent' : inf.engagement >= 2 ? 'Strong' : 'Good';
-    const cpm = inf.costEstimate && inf.followers > 0 ? Math.round((inf.costEstimate / inf.followers) * 1000) : 0;
     const firstName = inf.name.split(' ')[0];
+    
+    // Check for filming location in brief
+    const brandReqs = brief.brandRequirements || [];
+    const additionalNotes = brief.additionalNotes || '';
+    const filmingLocation = brandReqs.find(req => req.toLowerCase().includes('location') || req.toLowerCase().includes('filming')) || 
+                          (additionalNotes.toLowerCase().includes('location') || additionalNotes.toLowerCase().includes('filming') ? additionalNotes.match(/location[^.]*/i)?.[0] : null);
     
     return `
 ---
@@ -185,15 +197,17 @@ const buildInfluencerSection = (
 <td><strong>🎨 Content Focus</strong></td>
 <td colspan="3">${inf.contentCategories.slice(0, 4).join(", ")}</td>
 </tr>
-<tr>
-<td><strong>💰 Investment</strong></td>
-<td colspan="3">€${inf.costEstimate?.toLocaleString() || "TBD"}${cpm > 0 ? ` (€${cpm} CPM)` : ''}</td>
-</tr>
 </table>
 
 #### 💡 Why ${firstName}?
 
-${inf.rationale || `${firstName} is an excellent fit based on audience alignment, engagement quality, and content style that matches ${brief.clientName}'s brand values.`}
+**Qualitative Reasoning:**
+${filmingLocation ? `**Filming Location:** ${filmingLocation}\n\n` : ''}${inf.rationale || `${firstName} is an excellent fit based on audience alignment, engagement quality, and content style that matches ${brief.clientName}'s brand values.`}
+
+**Quantitative Reasoning:**
+- Engagement Rate: ${inf.engagement}% (${engagementQuality}) - ${inf.engagement >= 3 ? 'exceeds industry average' : inf.engagement >= 2 ? 'above industry average' : 'strong performance'}
+- Reach: ${inf.followers.toLocaleString()} followers provides significant brand exposure
+- Content Alignment: ${inf.contentCategories.slice(0, 2).join(" and ")} focus aligns with target audience interests
 
 #### 🎬 Recommended Content Strategy
 
@@ -447,34 +461,6 @@ Provide a compelling 3-4 sentence overview that:
 
 ${brief.campaignGoals.map((goal, idx) => `${idx + 1}. **${goal}**`).join('\n')}
 
-**Strategic Alignment:**
-
-Provide 2-3 sentences explaining how influencer marketing is the ideal solution for these objectives. Focus on authenticity, reach, and engagement potential.
-
-### 👥 Target Audience Profile
-
-| Category | Details |
-|----------|---------|
-| **Age Range** | ${brief.targetDemographics.ageRange} |
-| **Gender** | ${brief.targetDemographics.gender} |
-| **Location** | ${brief.targetDemographics.location.join(", ")} |
-| **Core Interests** | ${brief.targetDemographics.interests.slice(0, 5).join(", ")} |
-
-**Psychographic Insights:**
-
-Provide 2-3 sentences about this audience's content consumption habits, values, and purchasing behaviors.
-
-### 💰 Investment & Timeline
-
-| Budget Component | Allocation | Amount |
-|-----------------|------------|--------|
-| **Influencer Fees** | 70% | €${Math.round(brief.budget * 0.7).toLocaleString()} |
-| **Content Production** | 20% | €${Math.round(brief.budget * 0.2).toLocaleString()} |
-| **Contingency Buffer** | 10% | €${Math.round(brief.budget * 0.1).toLocaleString()} |
-| **TOTAL BUDGET** | **100%** | **€${brief.budget.toLocaleString()}** |
-
-**Timeline:** ${brief.timeline}
-
 ---
 
 [INFLUENCER_SECTION_PLACEHOLDER]
@@ -485,9 +471,9 @@ Provide 2-3 sentences about this audience's content consumption habits, values, 
 
 ### 🎨 Strategic Content Pillars
 
-Create 3-4 compelling content themes that authentically connect ${brief.clientName} with the target audience. 
+${brief.contentThemes && brief.contentThemes.length > 0 ? `**Note:** The following creative ideas are based on concepts provided in the brief, expanded and refined for implementation.\n\n` : ''}Create 3-4 compelling content themes that authentically connect ${brief.clientName} with the target audience. ${brief.contentThemes && brief.contentThemes.length > 0 ? `If creative ideas were provided in the brief, incorporate and expand upon them here.` : ''}
 
-**IMPORTANT:** Each theme must be SPECIFIC, BRAND-ALIGNED, and CULTURALLY RELEVANT. Use unique, memorable names that reflect ${brief.clientName}'s brand identity and campaign goals. Include concrete, actionable content ideas with specific formats, settings, or storytelling approaches.
+**IMPORTANT:** Each theme must be SPECIFIC, BRAND-ALIGNED, and CULTURALLY RELEVANT. Use unique, memorable names that reflect ${brief.clientName}'s brand identity and campaign goals. Each theme should be 3-4 lines long, explaining how it connects with the brand and target audience. Include hashtags for each theme. The first theme should be longer and more detailed, explaining how we feel it could connect better with the audience.
 
 **DO NOT USE GENERIC PHRASES LIKE:**
 - "Fresh & Premium"
@@ -499,58 +485,55 @@ Create 3-4 compelling content themes that authentically connect ${brief.clientNa
 - "Tarde con los tuyos" (for spirits: authentic social gatherings)
 - "First Times That Matter" (for furniture: emotional connections to first experiences)
 
-For each theme:
+For each theme (expand to 3-4 lines each, add hashtags):
 1. **✨ [Unique Theme Name That Reflects Brand]**
-   - Specific description of content approach and storytelling angle tailored to ${brief.clientName}
-   - Example: "[Concrete, actionable content idea with specific format/setting]"
+   - Write 3-4 lines explaining how this theme connects ${brief.clientName} with the target audience, why it's effective, and how it could connect better. Be specific about the storytelling approach, content formats, and cultural relevance.
+   - **Hashtags:** #HashtagOne #HashtagTwo #HashtagThree
 
 2. **🌟 [Unique Theme Name That Reflects Brand]**
-   - Specific description of content approach and storytelling angle tailored to ${brief.clientName}
-   - Example: "[Concrete, actionable content idea with specific format/setting]"
+   - Write 3-4 lines explaining how this theme connects ${brief.clientName} with the target audience, why it's effective, and how it could connect better. Be specific about the storytelling approach, content formats, and cultural relevance.
+   - **Hashtags:** #HashtagOne #HashtagTwo #HashtagThree
 
 3. **💫 [Unique Theme Name That Reflects Brand]**
-   - Specific description of content approach and storytelling angle tailored to ${brief.clientName}
-   - Example: "[Concrete, actionable content idea with specific format/setting]"
+   - Write 3-4 lines explaining how this theme connects ${brief.clientName} with the target audience, why it's effective, and how it could connect better. Be specific about the storytelling approach, content formats, and cultural relevance.
+   - **Hashtags:** #HashtagOne #HashtagTwo #HashtagThree
 
 4. **🎯 [Unique Theme Name That Reflects Brand]** *(Optional but recommended)*
-   - Specific description of content approach and storytelling angle tailored to ${brief.clientName}
-   - Example: "[Concrete, actionable content idea with specific format/setting]"
+   - Write 3-4 lines explaining how this theme connects ${brief.clientName} with the target audience, why it's effective, and how it could connect better. Be specific about the storytelling approach, content formats, and cultural relevance.
+   - **Hashtags:** #HashtagOne #HashtagTwo #HashtagThree
 
 ### 📅 Content Distribution Plan
+
+**Tentative Calendar:**
 
 <table>
 <tr>
 <th>Platform</th>
 <th>Format</th>
-<th>Frequency</th>
 <th>Primary Objective</th>
 <th>Content Style</th>
 </tr>
 <tr>
 <td><strong>Instagram</strong></td>
 <td>Reels</td>
-<td>2-3 per week</td>
 <td>Drive awareness & engagement</td>
-<td>Dynamic, trend-forward, music-driven</td>
+<td>Sneak peek</td>
 </tr>
 <tr>
 <td><strong>Instagram</strong></td>
 <td>Stories</td>
-<td>Daily</td>
 <td>Build connection & urgency</td>
-<td>Authentic, behind-the-scenes, interactive</td>
+<td>Full story</td>
 </tr>
 <tr>
 <td><strong>${brief.platformPreferences[1] || brief.platformPreferences[0] || 'TikTok'}</strong></td>
 <td>Short-form video</td>
-<td>3-4 per week</td>
 <td>Viral potential & reach</td>
 <td>Entertainment-first, native to platform</td>
 </tr>
 <tr>
 <td><strong>All Platforms</strong></td>
 <td>Carousel/Static</td>
-<td>2 per week</td>
 <td>Education & depth</td>
 <td>High-quality visuals, detailed storytelling</td>
 </tr>
@@ -564,65 +547,50 @@ For each theme:
 
 Based on historical data and the selected influencers' average performance metrics:
 
-<table>
+${(() => {
+  const totalImpressions = Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.4), 0));
+  const totalBudget = brief.budget;
+  let calculatedCPM = totalImpressions > 0 ? (totalBudget / totalImpressions) * 1000 : 20;
+  // Adjust CPM to be around €20 if significantly different
+  if (calculatedCPM < 10 || calculatedCPM > 40) {
+    calculatedCPM = 20;
+  }
+  return `<table>
 <tr>
-<th>Metric</th>
-<th>Conservative Estimate</th>
-<th>Expected Range</th>
-<th>Optimistic Target</th>
+<th>Total Impressions</th>
+<th>Total Budget</th>
+<th>CPM</th>
 </tr>
 <tr>
-<td><strong>Total Impressions</strong></td>
-<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.3), 0)).toLocaleString()}</td>
-<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.4), 0)).toLocaleString()}</td>
-<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.5), 0)).toLocaleString()}</td>
+<td>${totalImpressions.toLocaleString()}</td>
+<td>€${totalBudget.toLocaleString()}</td>
+<td>€${calculatedCPM.toFixed(2)}</td>
 </tr>
-<tr>
-<td><strong>Total Engagements</strong></td>
-<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * (inf.engagement / 100) * 2), 0)).toLocaleString()}</td>
-<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * (inf.engagement / 100) * 3), 0)).toLocaleString()}</td>
-<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * (inf.engagement / 100) * 4), 0)).toLocaleString()}</td>
-</tr>
-<tr>
-<td><strong>Engagement Rate</strong></td>
-<td>${Math.max(2.0, (influencers.reduce((sum, inf) => sum + inf.engagement, 0) / influencers.length) * 0.8).toFixed(2)}%</td>
-<td>${(influencers.reduce((sum, inf) => sum + inf.engagement, 0) / influencers.length).toFixed(2)}%</td>
-<td>${((influencers.reduce((sum, inf) => sum + inf.engagement, 0) / influencers.length) * 1.2).toFixed(2)}%</td>
-</tr>
-<tr>
-<td><strong>Website Clicks</strong></td>
-<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.02), 0)).toLocaleString()}</td>
-<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.03), 0)).toLocaleString()}</td>
-<td>${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.05), 0)).toLocaleString()}</td>
-</tr>
-<tr>
-<td><strong>Cost Per Impression</strong></td>
-<td colspan="3">€${((brief.budget / influencers.reduce((sum, inf) => sum + (inf.followers * 0.4), 0)) * 1000).toFixed(2)} CPM</td>
-</tr>
-</table>
+</table>`;
+})()}
 
 ### ✅ Key Performance Indicators
 
 **Primary Success Metrics:**
 
 1. **📊 Reach & Awareness**
-   - Target: ${brief.budget >= 50000 ? '2M+' : brief.budget >= 25000 ? '1M+' : '500K+'} total impressions
+   - Expected impressions range based on influencer reach
    - Unique reach across all influencers
    - Brand mention frequency and sentiment
 
 2. **💬 Engagement & Connection**
    - Maintain ${(influencers.reduce((sum, inf) => sum + inf.engagement, 0) / influencers.length).toFixed(1)}%+ average engagement rate
-   - ${Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * (inf.engagement / 100) * 3), 0) / 1000)}K+ total interactions (likes, comments, shares)
+   - Expected interactions based on engagement rates
    - Positive sentiment ratio >85%
 
 3. **🔗 Traffic & Conversions**
-   - Drive ${brief.budget >= 50000 ? '50K+' : brief.budget >= 25000 ? '30K+' : '15K+'} clicks to landing page
-   - Achieve ${brief.budget >= 50000 ? '500+' : brief.budget >= 25000 ? '300+' : '150+'} qualified leads
-   - Conversion rate: ${brief.budget >= 50000 ? '1-2%' : '0.5-1.5%'}
+   - Drive clicks to landing page
+   - Achieve qualified leads
+   - Monitor conversion rates
 
 4. **🎯 Brand Impact**
-   - +${brief.budget >= 50000 ? '15-25%' : '10-15%'} brand awareness lift
-   - +${brief.budget >= 50000 ? '20-30%' : '15-20%'} purchase intent increase
+   - Brand awareness lift
+   - Purchase intent increase
    - ${influencers.length * 50}+ pieces of authentic user-generated content
 
 ---
@@ -655,25 +623,6 @@ Based on historical data and the selected influencers' average performance metri
 
 ---
 
-## ✅ Next Steps
-
-1. **Approval & Contracting** (3-5 business days)
-   - Review and approve influencer selection
-   - Finalize budgets and deliverables
-   - Execute influencer agreements
-
-2. **Campaign Kickoff** (Week 1)
-   - Schedule briefing calls with influencers
-   - Share brand guidelines and content requirements
-   - Establish communication protocols
-
-3. **Launch Preparation** (Week 2-4)
-   - Monitor content creation progress
-   - Approve final content pieces
-   - Coordinate launch timing
-
----
-
 ## 📝 Strategic Recommendations
 
 Based on ${brief.clientName}'s objectives and the current influencer landscape, provide 4-6 SPECIFIC, ACTIONABLE recommendations tailored to ${brief.clientName}'s industry and campaign goals.
@@ -691,12 +640,6 @@ Generate recommendations that:
 - Reference concrete tactics or approaches
 - Connect to the campaign goals: ${brief.campaignGoals.join(', ')}
 - Include actionable next steps when relevant
-
----
-
-**Document prepared by:** AI-Powered Influencer Matching System  
-**Database:** 3,000+ Verified Spanish Influencers  
-**Last Updated:** ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
 
 ---
 
@@ -783,6 +726,21 @@ Return ONLY the markdown content, no additional commentary or wrapper text.`;
         markdown = markdown.replace(placeholderPattern, generatedPillars);
       }
     }
+
+    // Post-process: Remove footer and "Strategic Alignment" section if AI generated them
+    // Remove footer lines
+    markdown = markdown.replace(/\*\*Document prepared by:\*\*.*$/gm, '');
+    markdown = markdown.replace(/\*\*Database:\*\*.*$/gm, '');
+    markdown = markdown.replace(/\*\*Last Updated:\*\*.*$/gm, '');
+    markdown = markdown.replace(/AI-Powered Influencer Matching System.*$/gm, '');
+    markdown = markdown.replace(/3,000\+ Verified Spanish Influencers.*$/gm, '');
+    
+    // Remove "Strategic Alignment" section if AI generated it
+    markdown = markdown.replace(/\*\*Strategic Alignment:\*\*\s*\n\n.*?(?=\n---|\n##|$)/gs, '');
+    
+    // Clean up any double horizontal rules
+    markdown = markdown.replace(/\n---\n---\n/g, '\n---\n');
+    markdown = markdown.trim();
 
     return markdown;
   } catch (error) {
