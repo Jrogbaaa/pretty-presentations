@@ -2,6 +2,60 @@
 
 All notable changes to Pretty Presentations will be documented in this file.
 
+## [2.5.2] - 2025-10-31
+
+### 🧠 Brand Intelligence Integration Complete
+
+**Critical enhancement ensuring brand-aware matching for all text responses.**
+
+#### Enhanced: Server-Side Brand Intelligence Integration
+- **Issue**: Brand intelligence was only integrated into client-side influencer matching, not server-side matching used for text responses
+- **Impact**: Text responses were not benefiting from brand profile enrichment, potentially leading to less personalized matches
+- **Solution**: Integrated brand intelligence lookup into `matchInfluencersServer()` function
+- **Result**: ✅ All text responses now use brand intelligence for personalized, brand-aligned influencer matching
+
+#### Technical Implementation
+- **Updated Files**:
+  - `lib/influencer-matcher.server.ts`:
+    - Added brand intelligence lookup before influencer matching
+    - Enhances brief with brand profile data (industry, interests, content themes)
+    - Falls back gracefully if brand not found in database
+    - Matches client-side matcher functionality for consistency
+- **Brand Intelligence Flow**:
+  1. Look up brand in 218-brand database
+  2. If found, enhance brief with brand profile data
+  3. Use enhanced brief for influencer matching
+  4. Log brand lookup process for transparency
+- **Benefits**:
+  - Unique, brand-aligned responses per client
+  - Personalized influencer matches based on brand profile
+  - Consistent brand intelligence across all endpoints
+  - Better matching for known brands in database
+
+#### Example Flow
+```
+🔍 [SERVER] Looking up brand intelligence for: Vips
+✅ [SERVER] Brand found: Vips (exact match)
+📊 [SERVER] Enhanced brief with brand profile:
+  - Industry: Food & Beverage
+  - Target Interests: Dining, Food, Lifestyle
+  - Content Themes: Restaurant experiences, Food culture
+🎯 Using LAYAI scoring algorithm for influencer ranking...
+```
+
+#### Testing & Verification
+- ✅ Verified brand intelligence lookup works in server-side matcher
+- ✅ Verified brief enhancement happens before influencer matching
+- ✅ Verified fallback works if brand not found
+- ✅ Verified consistent behavior with client-side matcher
+
+#### Files Modified
+- `lib/influencer-matcher.server.ts` - Added brand intelligence integration
+- `README.md` - Updated with v2.5.2 changes
+- `CHANGELOG.md` - Added v2.5.2 entry
+
+---
+
 ## [2.5.1] - 2025-10-30
 
 ### ✨ Response Quality Improvements
