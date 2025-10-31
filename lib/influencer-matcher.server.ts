@@ -8,10 +8,10 @@ import type { ClientBrief, Influencer, SelectedInfluencer } from "@/types";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { matchBrandToInfluencers, getBrandIntelligenceSummary } from "./brand-matcher";
 
-// Initialize Google AI for enrichment
-const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "");
+// Initialize Google AI for enrichment (using non-public env var for server-side security)
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || "");
 const model = genAI.getGenerativeModel({
-  model: process.env.NEXT_PUBLIC_GOOGLE_AI_MODEL || "gemini-2.5-flash",
+  model: process.env.GOOGLE_AI_MODEL || "gemini-2.5-flash",
 });
 
 export const matchInfluencersServer = async (

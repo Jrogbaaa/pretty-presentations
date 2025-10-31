@@ -2,9 +2,9 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 2.5.2 | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Input Sanitization + Safe Errors 🔒
+**Status**: 🟢 **Production-Ready** | **Version**: 2.5.3 | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
 
-**Latest**: v2.5.2 **BRAND INTELLIGENCE INTEGRATION COMPLETE!** 🧠✨ Brand intelligence now integrated into server-side influencer matching for text responses. System automatically looks up brands in 218-brand database and enhances briefs with industry, target interests, and content themes before matching influencers. Ensures unique, brand-aligned responses per client. 🚀✅
+**Latest**: v2.5.3 **CRITICAL SECURITY FIXES!** 🔒🛡️ Fixed API key exposure vulnerability, added rate limiting to text response API (5 req/min), and updated environment variable structure for improved security. ⚠️ **BREAKING CHANGE**: Requires adding `GOOGLE_AI_API_KEY` to `.env.local` - see [CHANGELOG.md](./CHANGELOG.md) for migration guide. 🚀✅
 
 > 📝 **Full Version History**: See [CHANGELOG.md](./CHANGELOG.md) for complete release notes and previous versions.
 
@@ -454,6 +454,8 @@ See [Quick Start](#-quick-start) above for basic setup.
 
 ## 🔧 Environment Variables
 
+> 🔒 **Security Notice (v2.5.3)**: Environment variable structure updated for improved security. `GOOGLE_AI_API_KEY` is now required for server-side operations. See [CHANGELOG.md](./CHANGELOG.md) for migration guide.
+
 Create a `.env.local` file with the following variables:
 
 ```env
@@ -472,17 +474,26 @@ FIREBASE_ADMIN_PROJECT_ID=your_project_id
 FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk@your_project.iam.gserviceaccount.com
 FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 
-# OpenAI Configuration (Required for brief parsing & content generation)
+# OpenAI Configuration (Required for response generation)
 OPENAI_API_KEY=sk-proj-your-key-here
+
+# Google AI Configuration (Required for server-side operations)
+# Get key from: https://aistudio.google.com/app/apikey
+GOOGLE_AI_API_KEY=your_google_ai_api_key_here
+GOOGLE_AI_MODEL=gemini-2.5-flash
 
 # Image Generation (Optional - for Nano Banana via Replicate)
 REPLICATE_API_TOKEN=your_replicate_token
 NEXT_PUBLIC_ENABLE_IMAGE_GENERATION=true
 ```
 
-**Note**: Gemini/Vertex AI configuration removed in v2.4.0. System now uses OpenAI exclusively for all AI processing.
+**⚠️ Important Security Notes:**
+- **Never use `NEXT_PUBLIC_` prefix for server-side API keys** - these are exposed to the browser
+- **`GOOGLE_AI_API_KEY`** (no NEXT_PUBLIC_) is used for server-side brief parsing and brand matching
+- **`OPENAI_API_KEY`** is used for response generation with GPT-4o
+- Rate limiting is active: 5 requests/minute for text responses, 10 req/min for images
 
-**See `env.example` for template**
+**See `env.example` for complete template with all optional variables**
 
 ### Available Scripts
 

@@ -2,6 +2,49 @@
 
 All notable changes to Pretty Presentations will be documented in this file.
 
+## [2.5.3] - 2025-10-31
+
+### 🔒 Critical Security Fixes
+
+**BREAKING CHANGE**: Environment variable structure updated for improved security.
+
+#### 🔴 Fixed: API Key Exposure Vulnerability
+- **Issue**: Server-side code was using `NEXT_PUBLIC_GOOGLE_AI_API_KEY`, exposing API keys to browser
+- **Security Risk**: HIGH - API keys were visible in client-side JavaScript bundle, allowing unauthorized usage
+- **Fix**: Created separate `GOOGLE_AI_API_KEY` (non-public) for server-side operations
+- **Impact**: ⚠️ **REQUIRES ENV UPDATE** - Add `GOOGLE_AI_API_KEY` to your `.env.local` file
+- **Files Updated**:
+  - `lib/brand-matcher.ts` - Now uses `GOOGLE_AI_API_KEY`
+  - `lib/brand-service.ts` - Now uses `GOOGLE_AI_API_KEY`
+  - `lib/influencer-matcher.server.ts` - Now uses `GOOGLE_AI_API_KEY`
+  - `env.example` - Added `GOOGLE_AI_API_KEY` documentation
+
+#### 🔴 Fixed: Missing Rate Limiting on Text Response API
+- **Issue**: `/api/generate-text-response` endpoint had no rate limiting
+- **Security Risk**: MEDIUM - Attackers could spam expensive GPT-4o calls ($0.10-0.50 per request)
+- **Fix**: Implemented 5 requests/minute rate limit with proper HTTP 429 responses
+- **Features**:
+  - Returns `Retry-After` header for client retry logic
+  - Provides formatted reset time in error response
+  - Uses existing rate limiter infrastructure
+- **Files Updated**:
+  - `app/api/generate-text-response/route.ts` - Added rate limiting
+
+#### 📝 Fixed: Missing Environment Variable Documentation
+- **Issue**: `OPENAI_API_KEY` was used but not documented in `env.example`
+- **Fix**: Added comprehensive documentation for all API keys
+- **Files Updated**:
+  - `env.example` - Added `OPENAI_API_KEY` and `GOOGLE_AI_API_KEY` with usage notes
+  - `lib/env-validation.ts` - Added validation for new environment variables
+
+#### ✅ Enhanced: Environment Variable Validation
+- **Added**: `GOOGLE_AI_API_KEY` to required variables
+- **Added**: Validation for `googleAI` service group
+- **Added**: Setup instructions for missing Google AI keys
+- **Improved**: Error messages with specific API key sources
+
+---
+
 ## [2.5.2] - 2025-10-31
 
 ### 🧠 Brand Intelligence Integration Complete

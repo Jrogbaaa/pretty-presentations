@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateMarkdownResponse } from "@/lib/markdown-response-generator.server";
 import type { ClientBrief, Platform } from "@/types";
+import { RateLimiter, getClientIdentifier } from "@/lib/rate-limiter";
+
+// Rate limiter for text response generation (expensive GPT-4o operation)
+const textResponseLimiter = new RateLimiter({
+  windowMs: 60000,  // 1 minute window
+  maxRequests: 5    // 5 requests per minute (conservative for expensive operations)
+});
 
 /**
  * Sanitize string input to prevent injection attacks
@@ -83,6 +90,27 @@ const sanitizeBrief = (input: any): ClientBrief => {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting check (prevent abuse of expensive GPT-4o calls)
+    const clientId = getClientIdentifier(request);
+    const rateLimitResult = textResponseLimiter.checkLimit(clientId);
+    
+    if (!rateLimitResult.allowed) {
+      const resetDate = new Date(rateLimitResult.resetTime);
+      return NextResponse.json(
+        { 
+          error: 'Rate limit exceeded. Please try again later.',
+          resetTime: rateLimitResult.resetTime,
+          resetTimeFormatted: resetDate.toLocaleTimeString()
+        },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000).toString()
+          }
+        }
+      );
+    }
+    
     const rawInput = await request.json();
     
     // Sanitize and validate input

@@ -2,8 +2,8 @@ import type { ClientBrief, SelectedInfluencer, BrandProfile } from '@/types';
 import { getBrandProfile, searchBrands } from './brand-service';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || '');
+// Initialize Gemini AI (using non-public env var for server-side security)
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
 
 /**
  * Main entry point: Match brand to influencers using brand intelligence
