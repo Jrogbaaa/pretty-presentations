@@ -1,9 +1,11 @@
 import type { ClientBrief, SelectedInfluencer, BrandProfile } from '@/types';
 import { getBrandProfile, searchBrands } from './brand-service';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 
-// Initialize Gemini AI (using non-public env var for server-side security)
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
+// Initialize OpenAI
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || '',
+});
 
 /**
  * Main entry point: Match brand to influencers using brand intelligence
@@ -100,67 +102,72 @@ ${brandProfile.matchReason ? `Match Context: ${brandProfile.matchReason}` : ''}
 
 /**
  * Generate AI-powered brand-specific suggestions
+ * Uses data-driven fallbacks, optionally enhanced with OpenAI
  */
 async function generateBrandSuggestions(
   brandProfile: BrandProfile,
   brief: ClientBrief
 ): Promise<string[]> {
-  try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    
-    const prompt = `You are a brand marketing strategist. Given the following brand and campaign brief, provide specific actionable suggestions for influencer selection and campaign strategy.
+  // Smart data-driven fallback suggestions
+  const fallbackSuggestions = [
+    `Prioritize influencers with ${brandProfile.targetInterests.slice(0, 2).join(' and ')} content focus`,
+    `Align content themes with: ${brandProfile.contentThemes.slice(0, 3).join(', ')}`,
+    `Target ${brandProfile.targetAge} ${brandProfile.targetGender} demographic`,
+    `Focus on ${brief.platformPreferences.join(' and ')} for maximum reach`,
+  ];
 
-Brand: ${brandProfile.name}
-Industry: ${brandProfile.industry}
-Description: ${brandProfile.description}
-Target Demographics: ${brandProfile.targetAge}, ${brandProfile.targetGender}
-Target Interests: ${brandProfile.targetInterests.join(', ')}
+  // Only use OpenAI if API key is configured
+  if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.length < 20) {
+    return fallbackSuggestions;
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a brand strategy expert. Provide specific, actionable suggestions as a JSON array of strings.'
+        },
+        {
+          role: 'user',
+          content: `Brand: ${brandProfile.name} (${brandProfile.industry})
+${brandProfile.description}
+Target: ${brandProfile.targetAge} ${brandProfile.targetGender}
+Interests: ${brandProfile.targetInterests.join(', ')}
 Content Themes: ${brandProfile.contentThemes.join(', ')}
-${brandProfile.matchScore !== 100 ? `Note: This is a ${brandProfile.matchScore}% match - ${brandProfile.matchReason}` : ''}
 
 Campaign Goals: ${brief.campaignGoals.join(', ')}
 Budget: €${brief.budget}
-Target Demographics: ${brief.targetDemographics.ageRange}, ${brief.targetDemographics.gender}, ${brief.targetDemographics.location.join(', ')}
+Demographics: ${brief.targetDemographics.ageRange}, ${brief.targetDemographics.gender}, ${brief.targetDemographics.location.join(', ')}
 Platforms: ${brief.platformPreferences.join(', ')}
 
-Provide 4-6 specific, actionable suggestions for:
-1. Types of influencers to prioritize
-2. Content angles that align with brand identity
-3. Campaign execution tips
-4. Potential pitfalls to avoid
+Provide 4-6 specific suggestions for influencer selection and campaign strategy.
+Return ONLY a JSON array of strings: ["suggestion 1", "suggestion 2", ...]`
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 400,
+    });
 
-Return as a JSON array of strings:
-["suggestion 1", "suggestion 2", ...]
-
-Return ONLY valid JSON, no other text.`;
-
-    const result = await model.generateContent(prompt);
-    const response = result.response.text();
-    
-    // Extract JSON from response
-    const jsonMatch = response.match(/\[\s*"[\s\S]*"\s*\]/);
-    if (!jsonMatch) {
-      console.error('No JSON found in AI response:', response);
-      return [
-        `Focus on influencers with ${brandProfile.targetInterests.slice(0, 2).join(' and ')} content`,
-        `Align content themes with: ${brandProfile.contentThemes.slice(0, 3).join(', ')}`,
-        `Target ${brandProfile.targetAge} ${brandProfile.targetGender} audience`,
-      ];
+    const content = response.choices[0]?.message?.content;
+    if (content) {
+      const jsonMatch = content.match(/\[\s*"[\s\S]*"\s*\]/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
     }
     
-    return JSON.parse(jsonMatch[0]);
+    return fallbackSuggestions;
   } catch (error) {
-    console.error('Error generating brand suggestions:', error);
-    return [
-      `Focus on influencers with ${brandProfile.targetInterests.slice(0, 2).join(' and ')} content`,
-      `Align content themes with: ${brandProfile.contentThemes.slice(0, 3).join(', ')}`,
-      `Target ${brandProfile.targetAge} ${brandProfile.targetGender} audience`,
-    ];
+    // Silently return fallback suggestions - no need to log API issues
+    return fallbackSuggestions;
   }
 }
 
 /**
  * Identify brand category for unknown brands
+ * Uses OpenAI for classification
  */
 export async function identifyBrandCategory(
   brandName: string,
@@ -170,51 +177,55 @@ export async function identifyBrandCategory(
   suggestedInterests: string[];
   confidence: number;
 }> {
-  try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    
-    const prompt = `You are a brand classification expert. Analyze the following brand and determine its industry and target interests.
+  const fallback = {
+    industry: 'Unknown',
+    suggestedInterests: [],
+    confidence: 0,
+  };
 
-Brand Name: "${brandName}"
+  if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.length < 20) {
+    return fallback;
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{
+        role: 'system',
+        content: 'You are a brand classification expert. Return ONLY valid JSON.'
+      }, {
+        role: 'user',
+        content: `Classify this brand:
+
+Brand: "${brandName}"
 ${briefContext ? `Context: ${briefContext}` : ''}
 
-Task: Classify this brand into an industry category and identify key target interests.
+Industries: Fashion & Retail, Food & Grocery, Sports & Fitness, Beauty & Cosmetics, Electronics & Technology, Automotive, Financial Services, Telecommunications, Energy & Fuel, Hospitality & Tourism, Home & Decor, Home Improvement
 
-Common industries: Fashion & Retail, Food & Grocery, Sports & Fitness, Beauty & Cosmetics, Electronics & Technology, Automotive, Food & Restaurant, Financial Services, Telecommunications, Energy & Fuel, Hospitality & Tourism, Transportation, Home & Decor, Home Improvement
+Interests: Fashion, Shopping, Sports, Fitness, Food, Technology, Gaming, Travel, Beauty, Wellness, Lifestyle, Business
 
-Common interests: Fashion, Shopping, Sports, Fitness, Food, Technology, Gaming, Travel, Beauty, Wellness, Lifestyle, Business, etc.
-
-Return ONLY a JSON object with this exact structure:
+Return ONLY this JSON:
 {
-  "industry": "category name",
+  "industry": "category",
   "suggestedInterests": ["interest1", "interest2", "interest3"],
   "confidence": 85
-}
+}`
+      }],
+      temperature: 0.5,
+      max_tokens: 200,
+    });
 
-Return ONLY valid JSON, no other text.`;
-
-    const result = await model.generateContent(prompt);
-    const response = result.response.text();
-    
-    // Extract JSON from response
-    const jsonMatch = response.match(/\{\s*"industry"[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error('No JSON found in AI response:', response);
-      return {
-        industry: 'Unknown',
-        suggestedInterests: [],
-        confidence: 0,
-      };
+    const content = response.choices[0]?.message?.content;
+    if (content) {
+      const jsonMatch = content.match(/\{\s*"industry"[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
     }
     
-    return JSON.parse(jsonMatch[0]);
+    return fallback;
   } catch (error) {
-    console.error('Error identifying brand category:', error);
-    return {
-      industry: 'Unknown',
-      suggestedInterests: [],
-      confidence: 0,
-    };
+    return fallback;
   }
 }
 

@@ -127,9 +127,9 @@ Extract and return JSON with this exact structure:
     "cities": ["city1", "city2"] (specific cities required, e.g., Madrid, Barcelona, Sevilla, Valencia),
     "coreCities": ["city1"] (priority cities if mentioned, e.g., Madrid and Barcelona as core),
     "requireDistribution": boolean (true if profiles must be distributed across multiple cities),
-    "minPerCity": number,
-    "maxPerCity": number
-  } (ONLY include if geographic distribution is explicitly required),
+    "minPerCity": number (OMIT if not specified),
+    "maxPerCity": number (OMIT if not specified)
+  } (OMIT ENTIRE OBJECT if geographic distribution NOT explicitly required),
   
   "deliverables": [
     {
@@ -150,15 +150,21 @@ Extract and return JSON with this exact structure:
   
   "campaignHistory": {
     "isFollowUp": boolean (true if this is Wave 2, follow-up, or references previous campaign),
-    "wave": number (e.g., 2 for Wave 2),
+    "wave": number (e.g., 2 for Wave 2. OMIT this field if wave number not mentioned),
     "successfulInfluencers": ["name1", "@handle1"] (creators mentioned as performing well previously)
-  } (ONLY include if follow-up campaign mentioned),
+  } (OMIT ENTIRE OBJECT if NOT a follow-up campaign),
   
   "targetAudienceType": "B2C|B2B|D2C" (B2B if targeting business owners like Square, B2C for consumers),
   "campaignType": "string (e.g., Product Launch, Brand Awareness, Event-based, Multi-phase)"
 }
 
 CRITICAL PARSING INSTRUCTIONS:
+
+0. OPTIONAL FIELDS - IMPORTANT:
+   - ONLY include optional complex fields (campaignHistory, geographicDistribution, budgetScenarios, phases, constraints) when EXPLICITLY mentioned in the brief
+   - Do NOT include these fields with default/empty values if they're not in the brief
+   - When in doubt, OMIT the field rather than guessing
+   - Missing fields will be prompted in the UI if needed
 
 1. MULTI-PHASE CAMPAIGNS (like IKEA GREJSIMOJS):
    - Look for phrases: "Phase 1", "Phase 2", "Fase 1", "oleada", "wave"

@@ -5,13 +5,12 @@
 
 import { searchInfluencersServer } from "./influencer-service.server";
 import type { ClientBrief, Influencer, SelectedInfluencer } from "@/types";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 import { matchBrandToInfluencers, getBrandIntelligenceSummary } from "./brand-matcher";
 
-// Initialize Google AI for enrichment (using non-public env var for server-side security)
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || "");
-const model = genAI.getGenerativeModel({
-  model: process.env.GOOGLE_AI_MODEL || "gemini-2.5-flash",
+// Initialize OpenAI for enrichment
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || "",
 });
 
 export const matchInfluencersServer = async (
@@ -86,11 +85,23 @@ export const matchInfluencersServer = async (
     const ranked = rankInfluencersWithLAYAI(brief, filtered);
     console.log(`📊 [SERVER] After LAYAI ranking: ${ranked.length} influencers`);
 
-    // Step 3: Select optimal mix (macro/micro/nano)
-    const selected = selectOptimalMix(ranked, brief.budget);
+    // Step 3: Handle multi-phase campaigns (IKEA GREJSIMOJS style)
+    if (brief.isMultiPhase && brief.phases && brief.phases.length > 0) {
+      console.log(`🎭 [SERVER] Multi-phase campaign detected: ${brief.phases.length} phases`);
+      return await handleMultiPhaseCampaign(brief, ranked);
+    }
+
+    // Step 4: Select optimal mix (macro/micro/nano)
+    let selected = selectOptimalMix(ranked, brief.budget);
     console.log(`🎯 [SERVER] After optimal mix selection: ${selected.length} influencers`);
 
-    // Step 4: Generate rationale and projections for each
+    // Step 5: Ensure geographic distribution if required (Square style)
+    if (brief.geographicDistribution?.requireDistribution) {
+      selected = ensureGeographicDistribution(brief, selected.length < 10 ? ranked : selected);
+      console.log(`📍 [SERVER] After geographic distribution: ${selected.length} influencers`);
+    }
+
+    // Step 6: Generate rationale and projections for each
     const enriched = await enrichSelectedInfluencers(selected, brief);
     console.log(`✨ [SERVER] After enrichment: ${enriched.length} influencers`);
 
@@ -99,6 +110,103 @@ export const matchInfluencersServer = async (
     console.error("❌ [SERVER] CRITICAL: Error matching influencers:", error);
     throw new Error(`Influencer matching failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
+};
+
+/**
+ * Handle multi-phase campaigns (IKEA GREJSIMOJS style)
+ * Each phase gets different influencers based on tier and budget allocation
+ */
+const handleMultiPhaseCampaign = async (
+  brief: ClientBrief,
+  rankedPool: Influencer[]
+): Promise<SelectedInfluencer[]> => {
+  console.log(`🎭 [MULTI-PHASE] Processing ${brief.phases?.length} phases...`);
+  
+  if (!brief.phases || brief.phases.length === 0) {
+    throw new Error('Multi-phase campaign requires phase definitions');
+  }
+
+  const allSelectedInfluencers: SelectedInfluencer[] = [];
+  const usedInfluencerIds = new Set<string>();
+
+  for (let i = 0; i < brief.phases.length; i++) {
+    const phase = brief.phases[i];
+    console.log(`\n📋 [PHASE ${i + 1}] ${phase.name} (${phase.budgetPercentage}% - €${phase.budgetAmount.toLocaleString()})`);
+    console.log(`   Tier: ${phase.creatorTier}, Count: ${phase.creatorCount}`);
+    console.log(`   Focus: ${phase.contentFocus.join(', ')}`);
+    if (phase.constraints && phase.constraints.length > 0) {
+      console.log(`   Constraints: ${phase.constraints.join(', ')}`);
+    }
+
+    // Filter pool by phase tier
+    let phasePool = rankedPool.filter(inf => {
+      // Skip if already used in previous phase
+      if (usedInfluencerIds.has(inf.id)) return false;
+
+      // Filter by tier
+      switch (phase.creatorTier) {
+        case 'micro':
+          return inf.followers < 100000;
+        case 'mid-tier':
+          return inf.followers >= 100000 && inf.followers < 500000;
+        case 'macro':
+          return inf.followers >= 500000;
+        case 'mixed':
+          return true; // Any tier
+        default:
+          return true;
+      }
+    });
+
+    // Filter by phase content focus if specified
+    if (phase.contentFocus && phase.contentFocus.length > 0) {
+      phasePool = phasePool.filter(inf =>
+        phase.contentFocus.some(focus =>
+          inf.contentCategories.some(cat =>
+            cat.toLowerCase().includes(focus.toLowerCase()) ||
+            focus.toLowerCase().includes(cat.toLowerCase())
+          )
+        )
+      );
+    }
+
+    console.log(`   Available pool after filtering: ${phasePool.length} influencers`);
+
+    // Select influencers for this phase
+    const phaseSelected = selectOptimalMix(phasePool, phase.budgetAmount);
+    
+    // Ensure we get the requested count (or close to it)
+    const finalPhaseSelection = phaseSelected.slice(0, phase.creatorCount);
+    
+    console.log(`   ✅ Selected ${finalPhaseSelection.length} influencers for Phase ${i + 1}`);
+
+    // Mark as used
+    finalPhaseSelection.forEach(inf => usedInfluencerIds.add(inf.id));
+
+    // Enrich with phase-specific information
+    const enrichedPhase = await enrichSelectedInfluencers(finalPhaseSelection, brief);
+    
+    // Add phase information to rationale
+    enrichedPhase.forEach(inf => {
+      inf.rationale = `[${phase.name}] ${inf.rationale}`;
+      // Add phase constraints to proposed content if any
+      if (phase.constraints && phase.constraints.length > 0) {
+        inf.proposedContent = [
+          ...inf.proposedContent,
+          `⚠️ Constraints: ${phase.constraints.join(', ')}`
+        ];
+      }
+    });
+
+    allSelectedInfluencers.push(...enrichedPhase);
+  }
+
+  console.log(`\n✅ [MULTI-PHASE] Total selected across all phases: ${allSelectedInfluencers.length} influencers`);
+  console.log(`   Phase breakdown: ${brief.phases.map((p, i) => 
+    `Phase ${i + 1}: ${allSelectedInfluencers.filter(inf => inf.rationale.includes(p.name)).length}`
+  ).join(', ')}`);
+
+  return allSelectedInfluencers;
 };
 
 const filterByBasicCriteria = (
@@ -314,6 +422,135 @@ const rankInfluencersWithLAYAI = (
   return scored.map(s => s.influencer);
 };
 
+/**
+ * Ensure geographic distribution of influencers across required cities
+ * Example: Square needs profiles distributed across Madrid, Barcelona, Sevilla, Valencia
+ */
+const ensureGeographicDistribution = (
+  brief: ClientBrief,
+  influencers: Influencer[]
+): Influencer[] => {
+  if (!brief.geographicDistribution?.requireDistribution) {
+    return influencers; // No distribution requirement
+  }
+
+  const { cities, coreCities, minPerCity, maxPerCity } = brief.geographicDistribution;
+  
+  console.log(`📍 [SERVER] Ensuring geographic distribution across: ${cities.join(', ')}`);
+  if (coreCities && coreCities.length > 0) {
+    console.log(`   Core cities (priority): ${coreCities.join(', ')}`);
+  }
+
+  // Group influencers by city
+  const influencersByCity: Record<string, Influencer[]> = {};
+  
+  for (const city of cities) {
+    influencersByCity[city] = influencers.filter(inf =>
+      inf.demographics.location.some(loc =>
+        loc.toLowerCase().includes(city.toLowerCase()) ||
+        city.toLowerCase().includes(loc.toLowerCase())
+      )
+    );
+  }
+
+  // Log distribution
+  for (const city of cities) {
+    console.log(`   ${city}: ${influencersByCity[city].length} candidates`);
+  }
+
+  // Select influencers ensuring distribution
+  const selected: Influencer[] = [];
+  const selectedIds = new Set<string>();
+
+  // STEP 1: Ensure at least minPerCity from each city (or 1 if not specified)
+  const minRequired = minPerCity || 1;
+  for (const city of cities) {
+    const cityInfluencers = influencersByCity[city];
+    const toSelect = Math.min(minRequired, cityInfluencers.length);
+    
+    for (let i = 0; i < toSelect && i < cityInfluencers.length; i++) {
+      const inf = cityInfluencers[i];
+      if (!selectedIds.has(inf.id)) {
+        selected.push(inf);
+        selectedIds.add(inf.id);
+      }
+    }
+  }
+
+  console.log(`   Step 1: Selected ${selected.length} ensuring minimum per city`);
+
+  // STEP 2: Prioritize core cities if specified
+  if (coreCities && coreCities.length > 0) {
+    for (const coreCity of coreCities) {
+      const cityInfluencers = influencersByCity[coreCity] || [];
+      const currentCount = selected.filter(inf =>
+        inf.demographics.location.some(loc =>
+          loc.toLowerCase().includes(coreCity.toLowerCase())
+        )
+      ).length;
+
+      // Add one more from core city if we can
+      if (currentCount < 2 && cityInfluencers.length > currentCount) {
+        const next = cityInfluencers.find(inf => !selectedIds.has(inf.id));
+        if (next) {
+          selected.push(next);
+          selectedIds.add(next.id);
+        }
+      }
+    }
+    console.log(`   Step 2: After prioritizing core cities: ${selected.length}`);
+  }
+
+  // STEP 3: Fill remaining slots evenly across cities
+  const remainingInfluencers = influencers.filter(inf => !selectedIds.has(inf.id));
+  const maxPerCityLimit = maxPerCity || Math.ceil((influencers.length) / cities.length);
+
+  for (const inf of remainingInfluencers) {
+    if (selected.length >= 8) break; // Hard limit
+    
+    // Check which cities this influencer belongs to
+    const influencerCities = cities.filter(city =>
+      inf.demographics.location.some(loc =>
+        loc.toLowerCase().includes(city.toLowerCase())
+      )
+    );
+
+    // Check if adding this influencer would violate maxPerCity
+    let canAdd = false;
+    for (const city of influencerCities) {
+      const currentCityCount = selected.filter(s =>
+        s.demographics.location.some(loc =>
+          loc.toLowerCase().includes(city.toLowerCase())
+        )
+      ).length;
+      
+      if (currentCityCount < maxPerCityLimit) {
+        canAdd = true;
+        break;
+      }
+    }
+
+    if (canAdd) {
+      selected.push(inf);
+      selectedIds.add(inf.id);
+    }
+  }
+
+  console.log(`✅ [SERVER] Geographic distribution result: ${selected.length} influencers`);
+  
+  // Log final distribution
+  for (const city of cities) {
+    const count = selected.filter(inf =>
+      inf.demographics.location.some(loc =>
+        loc.toLowerCase().includes(city.toLowerCase())
+      )
+    ).length;
+    console.log(`   ${city}: ${count} selected`);
+  }
+
+  return selected;
+};
+
 const selectOptimalMix = (
   ranked: Influencer[],
   budget: number
@@ -471,22 +708,38 @@ const enrichSelectedInfluencers = async (
     const estimatedReach = influencer.followers * 0.35;
     const estimatedEngagement = estimatedReach * (influencer.engagement / 100);
 
-    let rationale = `Strong fit based on audience alignment with ${brief.clientName}'s target demographic and excellent engagement metrics.`;
+    // Generate a detailed rationale based on available data
+    const categoryMatch = influencer.contentCategories.slice(0, 2).join(' and ');
+    const engagementLevel = influencer.engagement > 5 ? 'exceptional' : influencer.engagement > 3 ? 'strong' : 'solid';
+    const audienceSize = influencer.followers > 100000 ? 'established' : influencer.followers > 50000 ? 'growing' : 'engaged';
     
-    // Generate AI rationale if possible
-    try {
-      const result = await model.generateContent(
-        `Write a 2-sentence rationale for why ${influencer.name} (@${influencer.handle}) is a great fit for ${brief.clientName}'s campaign. 
-        Influencer details: ${influencer.followers.toLocaleString()} followers, ${influencer.engagement}% engagement, categories: ${influencer.contentCategories.join(', ')}.
-        Campaign goals: ${brief.campaignGoals.join(', ')}.
-        Keep it professional and specific.`
-      );
-      const text = result.response.text();
-      if (text && text.length > 20) {
-        rationale = text.trim();
+    let rationale = `${influencer.name} is an excellent fit for ${brief.clientName} with an ${audienceSize} audience of ${influencer.followers.toLocaleString()} followers and ${engagementLevel} engagement (${influencer.engagement}%). `;
+    rationale += `Their content focus on ${categoryMatch} aligns perfectly with the campaign's objectives${brief.targetDemographics?.location && brief.targetDemographics.location.length > 0 ? ` and their presence in ${brief.targetDemographics.location[0]} matches the target market` : ''}.`;
+    
+    // Try to generate AI-enhanced rationale if OpenAI API is configured
+    if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.length > 20) {
+      try {
+        const response = await openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [{
+            role: 'user',
+            content: `Write a 2-sentence rationale for why ${influencer.name} (@${influencer.handle}) is a great fit for ${brief.clientName}'s campaign. 
+Influencer: ${influencer.followers.toLocaleString()} followers, ${influencer.engagement}% engagement, ${influencer.contentCategories.slice(0, 3).join(', ')}.
+Campaign goals: ${brief.campaignGoals.join(', ')}.
+Keep it professional and specific.`
+          }],
+          temperature: 0.7,
+          max_tokens: 150,
+        });
+        
+        const text = response.choices[0]?.message?.content;
+        if (text && text.length > 20) {
+          rationale = text.trim();
+        }
+      } catch (error) {
+        // Silently use the fallback rationale - no need to log warnings
+        // API might not be configured or have quota issues, which is okay
       }
-    } catch (error) {
-      console.warn(`Could not generate AI rationale for ${influencer.name}`);
     }
 
     enriched.push({

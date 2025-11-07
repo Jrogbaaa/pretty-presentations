@@ -1,0 +1,66 @@
+{
+  "timestamp": "2025-11-07T10:18:28.601Z",
+  "summary": {
+    "passed": 0,
+    "total": 5,
+    "avgScore": 0,
+    "totalDuration": 0.005
+  },
+  "results": [
+    {
+      "test": "brief-puerto-de-indias.md",
+      "passed": false,
+      "score": 0,
+      "errors": [
+        "FATAL: OPENAI_API_KEY environment variable is not set. Get one at https://platform.openai.com/api-keys"
+      ],
+      "warnings": [],
+      "extractedData": null,
+      "duration": 1
+    },
+    {
+      "test": "brief-ikea-grejsimojs.md",
+      "passed": false,
+      "score": 0,
+      "errors": [
+        "FATAL: OPENAI_API_KEY environment variable is not set. Get one at https://platform.openai.com/api-keys"
+      ],
+      "warnings": [],
+      "extractedData": null,
+      "duration": 1
+    },
+    {
+      "test": "brief-square.md",
+      "passed": false,
+      "score": 0,
+      "errors": [
+        "FATAL: OPENAI_API_KEY environment variable is not set. Get one at https://platform.openai.com/api-keys"
+      ],
+      "warnings": [],
+      "extractedData": null,
+      "duration": 1
+    },
+    {
+      "test": "brief-pyd-halloween.md",
+      "passed": false,
+      "score": 0,
+      "errors": [
+        "FATAL: OPENAI_API_KEY environment variable is not set. Get one at https://platform.openai.com/api-keys"
+      ],
+      "warnings": [],
+      "extractedData": null,
+      "duration": 1
+    },
+    {
+      "test": "brief-imagin.md",
+      "passed": false,
+      "score": 0,
+      "errors": [
+        "FATAL: OPENAI_API_KEY environment variable is not set. Get one at https://platform.openai.com/api-keys"
+      ],
+      "warnings": [],
+      "extractedData": null,
+      "duration": 1
+    }
+  ]
+}

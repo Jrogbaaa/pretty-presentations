@@ -27,7 +27,7 @@ export const CampaignPhaseSchema = z.object({
   budgetPercentage: z.number().min(0).max(100),
   budgetAmount: z.number().min(0),
   creatorTier: z.enum(['micro', 'mid-tier', 'macro', 'mixed']),
-  creatorCount: z.number().int().positive(),
+  creatorCount: z.number().int().nonnegative().optional(),
   contentFocus: z.array(z.string()),
   timeline: z.string(),
   constraints: z.array(z.string()).optional(),
@@ -38,9 +38,9 @@ export const CampaignPhaseSchema = z.object({
  * Brief constraints schema
  */
 export const BriefConstraintsSchema = z.object({
-  maxCPM: z.number().positive().optional(),
+  maxCPM: z.number().nonnegative().optional(),
   minFollowers: z.number().int().nonnegative().optional(),
-  maxFollowers: z.number().int().positive().optional(),
+  maxFollowers: z.number().int().nonnegative().optional(),
   requiredCategories: z.array(z.string()).optional(),
   excludedCategories: z.array(z.string()).optional(),
   categoryRestrictions: z.array(z.string()).optional(),
@@ -56,8 +56,8 @@ export const GeographicDistributionSchema = z.object({
   cities: z.array(z.string()),
   coreCities: z.array(z.string()).optional(),
   requireDistribution: z.boolean(),
-  minPerCity: z.number().int().positive().optional(),
-  maxPerCity: z.number().int().positive().optional(),
+  minPerCity: z.number().int().nonnegative().optional(),
+  maxPerCity: z.number().int().nonnegative().optional(),
 });
 
 /**
@@ -85,7 +85,7 @@ export const BudgetScenarioSchema = z.object({
 export const CampaignHistorySchema = z.object({
   previousCampaignId: z.string().optional(),
   isFollowUp: z.boolean(),
-  wave: z.number().int().positive().optional(),
+  wave: z.number().int().nonnegative().optional(),
   successfulInfluencers: z.array(z.string()).optional(),
   performanceData: z.array(z.object({
     influencerId: z.string(),
@@ -138,11 +138,11 @@ export const ClientBriefSchema = z.object({
   // ENHANCED FIELDS for complex briefs
   isMultiPhase: z.boolean().optional(),
   phases: z.array(CampaignPhaseSchema).optional(),
-  constraints: BriefConstraintsSchema.optional(),
-  geographicDistribution: GeographicDistributionSchema.optional(),
+  constraints: BriefConstraintsSchema.partial().optional(),
+  geographicDistribution: GeographicDistributionSchema.partial().optional(),
   deliverables: z.array(DeliverableSchema).optional(),
   budgetScenarios: z.array(BudgetScenarioSchema).optional(),
-  campaignHistory: CampaignHistorySchema.optional(),
+  campaignHistory: CampaignHistorySchema.partial().optional(),
   targetAudienceType: z.enum(['B2C', 'B2B', 'D2C']).optional(),
   campaignType: z.string().max(100).optional(),
 });

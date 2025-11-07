@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { collection, addDoc, doc, getDoc } from "firebase/firestore";
+import { adminDb } from "@/lib/firebase-admin";
 import type { BriefResponse } from "@/types";
 
 /**
  * POST /api/responses
- * Save a brief response to Firestore
+ * Save a brief response to Firestore (using Admin SDK for server-side operations)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +18,8 @@ export async function POST(request: NextRequest) {
         : response.createdAt,
     };
 
-    const docRef = await addDoc(collection(db, "responses"), responseData);
+    // Use Admin SDK to write to Firestore
+    const docRef = await adminDb.collection("responses").add(responseData);
 
     return NextResponse.json(
       { 
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
 /**
  * GET /api/responses/[id]
- * Retrieve a brief response from Firestore
+ * Retrieve a brief response from Firestore (using Admin SDK)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -57,10 +57,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const docRef = doc(db, "responses", id);
-    const docSnap = await getDoc(docRef);
+    // Use Admin SDK to read from Firestore
+    const docRef = adminDb.collection("responses").doc(id);
+    const docSnap = await docRef.get();
 
-    if (!docSnap.exists()) {
+    if (!docSnap.exists) {
       return NextResponse.json(
         { success: false, error: "Response not found" },
         { status: 404 }
