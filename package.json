@@ -7,7 +7,12 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:e2e": "playwright test",
     "test:firebase": "ts-node scripts/test-firebase.ts",
+    "test:firestore-rules": "ts-node scripts/test-firestore-rules.ts",
     "test:matching": "ts-node scripts/test-matching.ts",
     "test:influencer-matching": "ts-node scripts/test-influencer-matching.ts",
     "test:ikea": "ts-node scripts/test-ikea-campaign.ts",
@@ -57,10 +62,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/ui": "^3.2.4",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }

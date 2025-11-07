@@ -1,0 +1,98 @@
+rules_version = '2';
+
+// Production Firestore Security Rules
+// Last updated: v2.5.3 - Security hardening
+//
+// IMPORTANT: These are production-ready rules with authentication
+// If you don't have authentication set up yet, use firestore.rules (development rules)
+//
+// To deploy: firebase deploy --only firestore:rules
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function: Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function: Check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Helper function: Check if user is admin (add admin UIDs here)
+    function isAdmin() {
+      return isAuthenticated() && 
+        request.auth.uid in [
+          // Add admin user IDs here
+          // "admin-uid-1",
+          // "admin-uid-2"
+        ];
+    }
+
+    // Influencers Collection
+    // - Read: Requires authentication (protect from scraping)
+    // - Write: Admin only (via Firebase Admin SDK)
+    match /influencers/{influencerId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only via Admin SDK
+    }
+
+    // Presentations Collection
+    // - Read: Owner only
+    // - Create: Any authenticated user
+    // - Update/Delete: Owner only
+    match /presentations/{presentationId} {
+      allow read: if isAuthenticated() && 
+        (isOwner(resource.data.createdBy) || isAdmin());
+      
+      allow create: if isAuthenticated() && 
+        request.resource.data.createdBy == request.auth.uid;
+      
+      allow update, delete: if isAuthenticated() && 
+        (isOwner(resource.data.createdBy) || isAdmin());
+    }
+
+    // Responses Collection (Text responses)
+    // - Read: Owner only
+    // - Create: Any authenticated user
+    // - Update/Delete: Owner only
+    match /responses/{responseId} {
+      allow read: if isAuthenticated() && 
+        (isOwner(resource.data.createdBy) || isAdmin());
+      
+      allow create: if isAuthenticated() && 
+        request.resource.data.createdBy == request.auth.uid;
+      
+      allow update, delete: if isAuthenticated() && 
+        (isOwner(resource.data.createdBy) || isAdmin());
+    }
+
+    // Brands Collection (Read-only reference data)
+    // - Read: Requires authentication
+    // - Write: Admin only
+    match /brands/{brandId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // User Preferences/Settings (future use)
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // Analytics/Logs (write-only for tracking)
+    match /analytics/{doc} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    // Deny all other collections by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

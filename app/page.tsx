@@ -16,6 +16,7 @@ const HomePage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingMode, setProcessingMode] = useState<"presentation" | "text">("presentation");
   const [error, setError] = useState<string | null>(null);
+  const [rateLimitResetTime, setRateLimitResetTime] = useState<number | null>(null);
   const [parsedBrief, setParsedBrief] = useState<ClientBrief | null>(null);
   const [showUpload, setShowUpload] = useState(true);
   const [isOnline, setIsOnline] = useState(true);
@@ -44,6 +45,25 @@ const HomePage = () => {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  // Rate limit countdown timer
+  useEffect(() => {
+    if (!rateLimitResetTime) return;
+
+    const updateCountdown = () => {
+      const now = Date.now();
+      if (now >= rateLimitResetTime) {
+        setRateLimitResetTime(null);
+        setError(null);
+      }
+    };
+
+    // Update every second
+    const interval = setInterval(updateCountdown, 1000);
+    updateCountdown(); // Run immediately
+
+    return () => clearInterval(interval);
+  }, [rateLimitResetTime]);
 
   const handleParsedBrief = (brief: ClientBrief) => {
     setParsedBrief(brief);
@@ -148,6 +168,7 @@ const HomePage = () => {
     setProcessingMode("text");
     setIsProcessing(true);
     setError(null);
+    setRateLimitResetTime(null);
 
     try {
       // Call API route to generate markdown response
@@ -158,6 +179,15 @@ const HomePage = () => {
       });
 
       const data = await res.json();
+
+      // Handle rate limiting
+      if (res.status === 429) {
+        const resetTime = data.resetTime || Date.now() + 60000;
+        setRateLimitResetTime(resetTime);
+        setError(data.error || 'Rate limit exceeded. Please try again later.');
+        setIsProcessing(false);
+        return;
+      }
 
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to generate response");
@@ -358,14 +388,59 @@ const HomePage = () => {
 
           {/* Error Display */}
           {error && (
-            <div className="mb-8 p-6 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl">⚠️</span>
+            <div 
+              className={`mb-8 p-6 border-2 rounded-xl ${
+                rateLimitResetTime 
+                  ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' 
+                  : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+              }`}
+              role="alert"
+              aria-live="assertive"
+            >
+              <div className="flex items-start gap-3">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  rateLimitResetTime 
+                    ? 'bg-orange-100 dark:bg-orange-900/30' 
+                    : 'bg-red-100 dark:bg-red-900/30'
+                }`}>
+                  <span className="text-2xl">{rateLimitResetTime ? '⏱️' : '⚠️'}</span>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-red-900 dark:text-red-300 text-lg">Error</h3>
-                  <p className="text-red-700 dark:text-red-400">{error}</p>
+                <div className="flex-1">
+                  <h3 className={`font-semibold text-lg mb-1 ${
+                    rateLimitResetTime 
+                      ? 'text-orange-900 dark:text-orange-300' 
+                      : 'text-red-900 dark:text-red-300'
+                  }`}>
+                    {rateLimitResetTime ? 'Rate Limit Reached' : 'Error'}
+                  </h3>
+                  <p className={
+                    rateLimitResetTime 
+                      ? 'text-orange-700 dark:text-orange-400' 
+                      : 'text-red-700 dark:text-red-400'
+                  }>
+                    {error}
+                  </p>
+                  {rateLimitResetTime && (() => {
+                    const secondsRemaining = Math.max(0, Math.ceil((rateLimitResetTime - Date.now()) / 1000));
+                    const minutes = Math.floor(secondsRemaining / 60);
+                    const seconds = secondsRemaining % 60;
+                    
+                    return (
+                      <div className="mt-3 flex items-center gap-2">
+                        <div className="bg-orange-100 dark:bg-orange-900/40 px-4 py-2 rounded-lg">
+                          <p className="text-orange-900 dark:text-orange-200 font-mono text-lg font-semibold">
+                            {minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : `${seconds}s`}
+                          </p>
+                          <p className="text-orange-700 dark:text-orange-400 text-xs mt-1">
+                            Try again in
+                          </p>
+                        </div>
+                        <p className="text-sm text-orange-600 dark:text-orange-400">
+                          To prevent abuse, we limit requests to 5 per minute. Your limit will reset shortly.
+                        </p>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             </div>

@@ -1,5 +1,20 @@
 rules_version = '2';
 
+// Development Firestore Security Rules
+// Last updated: v2.5.3
+//
+// ⚠️ WARNING: These rules allow public read/write for development convenience
+// For production deployment, use firestore.rules.production instead
+//
+// Current security status:
+// - influencers: Public read (⚠️ allows scraping)
+// - presentations: Public read/write (⚠️ anyone can modify)
+// - responses: Public read/write (⚠️ anyone can modify)
+//
+// To deploy production rules: 
+//   cp firestore.rules.production firestore.rules
+//   firebase deploy --only firestore:rules
+
 service cloud.firestore {
   match /databases/{database}/documents {
     
