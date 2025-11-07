@@ -31,7 +31,7 @@ export interface CampaignPhase {
   budgetPercentage: number;
   budgetAmount: number;
   creatorTier: "micro" | "mid-tier" | "macro" | "mixed";
-  creatorCount: number;
+  creatorCount?: number; // Optional: may not always be specified in brief
   contentFocus: string[];
   timeline: string;
   constraints?: string[]; // e.g., "embargo: no product reveals"
@@ -53,9 +53,9 @@ export interface BriefConstraints {
 
 // Geographic distribution requirements
 export interface GeographicDistribution {
-  cities: string[];
+  cities?: string[]; // Optional: may not always be specified
   coreCities?: string[]; // Priority cities (e.g., Square: Madrid and Barcelona are core)
-  requireDistribution: boolean;
+  requireDistribution?: boolean; // Optional: defaults to false if not specified
   minPerCity?: number;
   maxPerCity?: number;
 }
@@ -78,7 +78,7 @@ export interface BudgetScenario {
 // Campaign history for follow-up campaigns
 export interface CampaignHistory {
   previousCampaignId?: string;
-  isFollowUp: boolean;
+  isFollowUp?: boolean; // Optional: defaults to false if not specified
   wave?: number;
   successfulInfluencers?: string[]; // IDs or handles of well-performing creators
   performanceData?: Array<{

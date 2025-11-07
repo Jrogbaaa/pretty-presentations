@@ -436,6 +436,12 @@ const ensureGeographicDistribution = (
 
   const { cities, coreCities, minPerCity, maxPerCity } = brief.geographicDistribution;
   
+  // Safety check: cities must be defined for geographic distribution
+  if (!cities || cities.length === 0) {
+    console.warn('⚠️  [SERVER] Geographic distribution requested but no cities specified. Returning all influencers.');
+    return influencers;
+  }
+  
   console.log(`📍 [SERVER] Ensuring geographic distribution across: ${cities.join(', ')}`);
   if (coreCities && coreCities.length > 0) {
     console.log(`   Core cities (priority): ${coreCities.join(', ')}`);
