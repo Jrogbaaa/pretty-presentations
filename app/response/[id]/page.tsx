@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Download, Copy, ArrowLeft, Check, FileText } from "lucide-react";
+import { Download, Copy, ArrowLeft, Check, FileText, Edit, Save, X } from "lucide-react";
 import type { BriefResponse } from "@/types";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -16,6 +16,8 @@ const ResponsePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState("");
 
   useEffect(() => {
     const loadResponse = async () => {
@@ -41,6 +43,7 @@ const ResponsePage = () => {
 
         if (data.success) {
           setResponse(data.data);
+          setEditedContent(data.data.markdownContent);
         } else {
           setError(data.error || "Failed to load response");
         }
@@ -130,6 +133,36 @@ const ResponsePage = () => {
     router.push("/");
   };
 
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditedContent(response?.markdownContent || "");
+  };
+
+  const handleSave = () => {
+    if (!response) return;
+    
+    // Update the response object with edited content
+    const updatedResponse = {
+      ...response,
+      markdownContent: editedContent
+    };
+    setResponse(updatedResponse);
+    
+    // Update sessionStorage if it exists
+    const id = params.id as string;
+    const sessionData = sessionStorage.getItem(`response-${id}`);
+    if (sessionData) {
+      sessionStorage.setItem(`response-${id}`, JSON.stringify(updatedResponse));
+    }
+    
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditedContent(response?.markdownContent || "");
+    setIsEditing(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -192,29 +225,57 @@ const ResponsePage = () => {
             </div>
             
             <div className="flex gap-2">
-              <button
-                onClick={handleCopy}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    Copied!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    Copy
-                  </>
-                )}
-              </button>
-              <button
-                onClick={handleDownload}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
-              >
-                <Download className="w-4 h-4" />
-                Export PDF
-              </button>
+              {isEditing ? (
+                <>
+                  <button
+                    onClick={handleCancel}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save Changes
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleEdit}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </button>
+                  <button
+                    onClick={handleCopy}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        Copy
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleDownload}
+                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                  >
+                    <Download className="w-4 h-4" />
+                    Export PDF
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -222,19 +283,61 @@ const ResponsePage = () => {
 
       {/* Content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div 
-          id="response-content"
-          className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-10 md:p-16"
-        >
-          <div className="response-content prose prose-xl dark:prose-invert max-w-none">
-            <ReactMarkdown 
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw]}
-            >
-              {response.markdownContent}
-            </ReactMarkdown>
+        {isEditing ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Editor */}
+            <div className="bg-white rounded-3xl shadow-xl p-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Edit Markdown
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Make changes to the content. Markdown formatting is supported.
+                </p>
+              </div>
+              <textarea
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                className="w-full h-[calc(100vh-300px)] p-4 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Enter markdown content..."
+              />
+            </div>
+            
+            {/* Preview */}
+            <div className="bg-white rounded-3xl shadow-xl p-10">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Live Preview
+                </h3>
+                <p className="text-sm text-gray-600">
+                  See how your changes will look
+                </p>
+              </div>
+              <div className="response-content prose prose-xl max-w-none overflow-y-auto h-[calc(100vh-300px)]">
+                <ReactMarkdown 
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw]}
+                >
+                  {editedContent}
+                </ReactMarkdown>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div 
+            id="response-content"
+            className="bg-white rounded-3xl shadow-xl p-10 md:p-16"
+          >
+            <div className="response-content prose prose-xl max-w-none">
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
+              >
+                {response.markdownContent}
+              </ReactMarkdown>
+            </div>
+          </div>
+        )}
 
         {/* Footer Info */}
         <div className="mt-8 text-center">

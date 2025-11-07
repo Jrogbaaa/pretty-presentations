@@ -117,62 +117,8 @@
   border-top: 2px solid rgb(209 213 219) !important;
 }
 
-/* Dark mode overrides */
-.dark .response-content h1 {
-  color: #FFFFFF !important;
-  border-bottom-color: rgb(192 132 252) !important;
-}
-
-.dark .response-content h2 {
-  color: #FFFFFF !important;
-  border-bottom-color: rgb(75 85 99) !important;
-}
-
-.dark .response-content h3 {
-  color: rgb(192 132 252) !important;
-}
-
-.dark .response-content h4 {
-  color: #FFFFFF !important;
-}
-
-.dark .response-content p,
-.dark .response-content li {
-  color: #FFFFFF !important;
-}
-
-.dark .response-content strong {
-  color: #FFFFFF !important;
-}
-
-.dark .response-content th {
-  background: linear-gradient(to bottom right, rgb(88 28 135 / 0.4), rgb(107 33 168 / 0.4)) !important;
-  color: #FFFFFF !important;
-}
-
-.dark .response-content td {
-  color: #FFFFFF !important;
-  border-color: rgb(75 85 99) !important;
-}
-
-.dark .response-content tr:hover {
-  background-color: rgb(31 41 55 / 0.5) !important;
-}
-
-.dark .response-content blockquote {
-  background: linear-gradient(to right, rgb(88 28 135 / 0.2), rgb(157 23 77 / 0.2)) !important;
-  color: #FFFFFF !important;
-}
-
+/* Ensure blockquote paragraphs inherit color */
 .response-content blockquote p {
   color: inherit !important;
-}
-
-.dark .response-content blockquote p {
-  color: #FFFFFF !important;
-}
-
-.dark .response-content hr {
-  border-top-color: rgb(75 85 99) !important;
 }
 

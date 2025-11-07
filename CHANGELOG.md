@@ -2,6 +2,79 @@
 
 All notable changes to Pretty Presentations will be documented in this file.
 
+## [2.5.7] - 2025-11-07
+
+### ✨ Response Display & Editing Enhancements
+
+**Major UX improvements for response viewing and editing experience.**
+
+#### Fixed: Dark Mode Display Issues
+- **FIXED:** Text responses now force light mode for consistent, readable presentation
+  - Removed `dark:bg-gray-800` from response content container
+  - Removed `dark:prose-invert` from prose styling
+  - Cleaned up dark mode CSS overrides
+- **RESULT:** 
+  - ✅ White background always displayed for response content
+  - ✅ Black text on white background ensures readability
+  - ✅ Consistent appearance regardless of user's system theme
+  - ✅ Better PDF exports with consistent styling
+- **BENEFIT:** Professional, document-style presentation that's always readable
+
+#### Added: Inline Text Editing
+- **NEW:** Edit response content directly before exporting
+  - "Edit" button in header to enter edit mode
+  - Split-screen editor with live preview
+  - Left panel: Markdown editor (monospace, syntax-friendly)
+  - Right panel: Live preview with real-time rendering
+- **FEATURES:**
+  - ✅ Full markdown support (headers, lists, tables, formatting)
+  - ✅ Live preview updates as you type
+  - ✅ Save/Cancel buttons for changes
+  - ✅ Changes persist in sessionStorage during session
+  - ✅ PDF export uses edited content
+  - ✅ Responsive design with proper scrolling
+- **USE CASE:** Make quick tweaks to AI-generated content before sending to clients
+- **WORKFLOW:**
+  1. Click "Edit" button
+  2. Make changes in left editor
+  3. See live preview on right
+  4. Click "Save Changes" to apply (or "Cancel" to discard)
+  5. Export PDF with your customized content
+
+#### Technical Implementation
+- **Updated Files**:
+  - `app/response/[id]/page.tsx`:
+    - Added editing state management (`isEditing`, `editedContent`)
+    - Implemented `handleEdit()`, `handleSave()`, `handleCancel()` functions
+    - Added split-screen layout with textarea and preview
+    - Updated button UI to show Edit/Save/Cancel based on state
+    - SessionStorage integration for edited content persistence
+  - `app/response/[id]/response-styles.css`:
+    - Removed all dark mode CSS overrides
+    - Simplified to light-mode-only styles
+    - Kept only essential blockquote color inheritance rule
+
+#### User Experience Improvements
+- **Navigation:** Header stays themed to user's preference (dark/light)
+- **Content:** Always displays in professional light mode
+- **Editing:** Full-featured markdown editor with instant preview
+- **Persistence:** Edits saved throughout browser session
+- **Export:** PDF generation includes all your customizations
+
+#### Files Modified
+- `app/response/[id]/page.tsx` - Added inline editing feature, fixed dark mode
+- `app/response/[id]/response-styles.css` - Removed dark mode overrides
+
+#### Benefits
+- ✅ Consistent, readable response display in all themes
+- ✅ Quick content editing without regenerating
+- ✅ Professional document appearance
+- ✅ Better PDF export quality
+- ✅ Improved user workflow efficiency
+- ✅ No more dark-on-dark text issues
+
+---
+
 ## [2.5.6] - 2025-11-07
 
 ### ✨ Text Response Template Refinements - Client Feedback

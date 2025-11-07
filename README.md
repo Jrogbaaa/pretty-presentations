@@ -2,9 +2,9 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 2.5.6 | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
+**Status**: 🟢 **Production-Ready** | **Version**: 2.5.7 | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
 
-**Latest**: v2.5.6 **Client Workflow Refinements!** ✨ Text responses now exclude budget mentions and campaign execution details, focusing purely on strategy and recommendations. Aligns with real-world agency workflow where budget and execution are handled separately. See [CHANGELOG.md](./CHANGELOG.md) for details. 🚀✅
+**Latest**: v2.5.7 **Response Display & Editing!** ✨ Fixed dark mode display issues (responses now always show light mode for readability) + Added inline text editing with live preview. Make quick tweaks to AI-generated content before exporting to PDF. See [CHANGELOG.md](./CHANGELOG.md) for details. 🚀✅
 
 > 📝 **Full Version History**: See [CHANGELOG.md](./CHANGELOG.md) for complete release notes and previous versions.
 
@@ -152,7 +152,7 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
   - PPTX is the universal editable format supported by all platforms
   - Simplified user experience with one clear export path
 
-### 📄 Text Response PDF Export (v2.4.0) ⚡ NEW
+### 📄 Text Response PDF Export (v2.4.0+) ⚡ ENHANCED
 - **Professional PDF Generation**:
   - One-click export of text responses as formatted PDFs
   - Preserves all styling, tables, and typography
@@ -160,6 +160,18 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
   - Replaces basic markdown download
   - Generates professional documents ready for clients
   - File naming: `ClientName-influencer-recommendations.pdf`
+- **Inline Text Editing (v2.5.7)**: ⚡ NEW
+  - Edit response content directly before exporting
+  - Split-screen editor with live markdown preview
+  - Full markdown support (headers, lists, tables, formatting)
+  - Changes persist in sessionStorage during session
+  - PDF export uses your edited content
+  - Perfect for making quick tweaks before sending to clients
+- **Consistent Display (v2.5.7)**: ⚡ NEW
+  - Responses always display in light mode (white background, black text)
+  - Ensures readability regardless of user's system theme
+  - Better PDF export quality with consistent styling
+  - Professional document appearance
 - **HTML Table Rendering Fixed**:
   - Custom ReactMarkdown components with inline styles
   - rehype-raw plugin for proper HTML parsing
@@ -167,9 +179,9 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
   - No more raw `<table>`, `<tr>`, `<td>` text
 - **Enhanced Text Visibility**:
   - Fixed blockquote text contrast (light on light issue)
-  - Darker text colors for better readability
+  - Pure black text colors for maximum readability
   - Font-medium weight for emphasis
-  - All text elements now properly visible
+  - All text elements properly visible in all modes
 - **Proper Architecture**:
   - Created `/api/generate-text-response` API route
   - Fixed client/server boundary violations
