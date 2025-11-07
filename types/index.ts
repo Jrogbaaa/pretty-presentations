@@ -25,6 +25,71 @@ export interface BriefResponse {
   status: "draft" | "delivered";
 }
 
+// Campaign Phase for multi-phase campaigns (e.g., IKEA GREJSIMOJS: Rumor → Revelation → Rush)
+export interface CampaignPhase {
+  name: string;
+  budgetPercentage: number;
+  budgetAmount: number;
+  creatorTier: "micro" | "mid-tier" | "macro" | "mixed";
+  creatorCount: number;
+  contentFocus: string[];
+  timeline: string;
+  constraints?: string[]; // e.g., "embargo: no product reveals"
+  description?: string;
+}
+
+// Hard constraints for brief enforcement
+export interface BriefConstraints {
+  maxCPM?: number; // Maximum cost per thousand impressions (e.g., Puerto de Indias: €20)
+  minFollowers?: number;
+  maxFollowers?: number;
+  requiredCategories?: string[];
+  excludedCategories?: string[];
+  categoryRestrictions?: string[]; // e.g., "must be willing to work with spirits/alcohol"
+  mustHaveVerification?: boolean;
+  requireEventAttendance?: boolean; // PYD Halloween: physical attendance required
+  requirePublicSpeaking?: boolean; // Square: must be able to speak at events
+}
+
+// Geographic distribution requirements
+export interface GeographicDistribution {
+  cities: string[];
+  coreCities?: string[]; // Priority cities (e.g., Square: Madrid and Barcelona are core)
+  requireDistribution: boolean;
+  minPerCity?: number;
+  maxPerCity?: number;
+}
+
+// Deliverable types beyond social media
+export interface Deliverable {
+  type: "social" | "event" | "content-creation" | "speaking" | "ambassador" | "brand-integration";
+  description: string;
+  requirements?: string[];
+  quantity?: number;
+}
+
+// Budget scenarios for multi-budget briefs
+export interface BudgetScenario {
+  name: string; // e.g., "Scenario 1", "Conservative", "Aggressive"
+  amount: number;
+  description?: string;
+}
+
+// Campaign history for follow-up campaigns
+export interface CampaignHistory {
+  previousCampaignId?: string;
+  isFollowUp: boolean;
+  wave?: number;
+  successfulInfluencers?: string[]; // IDs or handles of well-performing creators
+  performanceData?: Array<{
+    influencerId: string;
+    reach: number;
+    engagement: number;
+    conversions?: number;
+    roi?: number;
+  }>;
+}
+
 export interface ClientBrief {
   clientName: string;
   campaignGoals: string[];
@@ -43,6 +108,17 @@ export interface ClientBrief {
     name: string;
     description?: string;
   }>;
+  
+  // ENHANCED FIELDS for complex briefs
+  isMultiPhase?: boolean;
+  phases?: CampaignPhase[];
+  constraints?: BriefConstraints;
+  geographicDistribution?: GeographicDistribution;
+  deliverables?: Deliverable[];
+  budgetScenarios?: BudgetScenario[];
+  campaignHistory?: CampaignHistory;
+  targetAudienceType?: "B2C" | "B2B" | "D2C";
+  campaignType?: string; // e.g., "Product Launch", "Brand Awareness", "Event-based"
 }
 
 export interface Demographics {
@@ -97,6 +173,30 @@ export interface SlideDesign {
   fontFamily: string;
 }
 
+// Influencer capabilities beyond social media
+export interface InfluencerCapabilities {
+  eventAppearances: boolean;
+  publicSpeaking: boolean;
+  contentCreation: boolean;
+  longTermAmbassador: boolean;
+  brandIntegration: boolean;
+}
+
+// Professional background (for B2B campaigns like Square)
+export interface ProfessionalBackground {
+  isEntrepreneur: boolean;
+  businessType?: string; // e.g., "restaurant owner", "tech founder"
+  businessName?: string;
+  yearsInBusiness?: number;
+  industryExpertise?: string[];
+}
+
+// Category preferences and restrictions
+export interface CategoryPreferences {
+  willingToWorkWith: string[]; // e.g., ["fashion", "beauty", "tech"]
+  notWillingToWorkWith: string[]; // e.g., ["alcohol", "gambling", "pharma"]
+}
+
 // Influencer Types
 export interface Influencer {
   id: string;
@@ -112,6 +212,14 @@ export interface Influencer {
   previousBrands: string[];
   rateCard: RateCard;
   performance: PerformanceMetrics;
+  
+  // ENHANCED FIELDS for complex scenarios
+  capabilities?: InfluencerCapabilities;
+  professionalBackground?: ProfessionalBackground;
+  categoryPreferences?: CategoryPreferences;
+  celebrityScore?: number; // 0-100, mainstream recognition level
+  audienceType?: "consumer" | "business" | "mixed";
+  cpm?: number; // Cost per thousand impressions (calculated or stored)
 }
 
 export interface SelectedInfluencer extends Influencer {

@@ -416,7 +416,6 @@ ${exampleGuidance}
 **CLIENT BRIEF:**
 Client: ${brief.clientName}
 Campaign Goals: ${brief.campaignGoals.join(", ")}
-Budget: €${brief.budget.toLocaleString()}
 Target Audience: ${brief.targetDemographics.ageRange}, ${brief.targetDemographics.gender}, ${brief.targetDemographics.location.join(", ")}
 Interests: ${brief.targetDemographics.interests.join(", ")}
 Timeline: ${brief.timeline}
@@ -441,7 +440,7 @@ Create a comprehensive, beautifully formatted markdown document with exceptional
 
 # 🎯 ${brief.clientName} - Influencer Marketing Proposal
 
-> **Campaign Budget:** €${brief.budget.toLocaleString()} | **Timeline:** ${brief.timeline} | **Platforms:** ${brief.platformPreferences.join(", ")}
+> **Timeline:** ${brief.timeline} | **Platforms:** ${brief.platformPreferences.join(", ")}
 
 ---
 
@@ -549,22 +548,16 @@ Based on historical data and the selected influencers' average performance metri
 
 ${(() => {
   const totalImpressions = Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.4), 0));
-  const totalBudget = brief.budget;
-  let calculatedCPM = totalImpressions > 0 ? (totalBudget / totalImpressions) * 1000 : 20;
-  // Adjust CPM to be around €20 if significantly different
-  if (calculatedCPM < 10 || calculatedCPM > 40) {
-    calculatedCPM = 20;
-  }
+  // CPM is typically around €20
+  const estimatedCPM = 20;
   return `<table>
 <tr>
 <th>Total Impressions</th>
-<th>Total Budget</th>
 <th>CPM</th>
 </tr>
 <tr>
 <td>${totalImpressions.toLocaleString()}</td>
-<td>€${totalBudget.toLocaleString()}</td>
-<td>€${calculatedCPM.toFixed(2)}</td>
+<td>€${estimatedCPM.toFixed(2)}</td>
 </tr>
 </table>`;
 })()}
@@ -592,34 +585,6 @@ ${(() => {
    - Brand awareness lift
    - Purchase intent increase
    - ${influencers.length * 50}+ pieces of authentic user-generated content
-
----
-
-## 🎬 Campaign Execution Plan
-
-### Phase 1: Briefing & Onboarding (Week 1-2)
-- Finalize influencer contracts and content guidelines
-- Conduct briefing sessions with selected influencers
-- Establish content calendar and posting schedule
-- Set up tracking links and UTM parameters
-
-### Phase 2: Content Creation (Week 3-4)
-- Influencers create and submit content for approval
-- Agency reviews and provides feedback
-- Revisions and final approvals
-- Schedule content for optimal posting times
-
-### Phase 3: Campaign Launch (Week 5-6)
-- Coordinated content rollout across all platforms
-- Real-time monitoring and engagement
-- Community management and response
-- Performance tracking against KPIs
-
-### Phase 4: Optimization & Reporting (Week 7-8)
-- Analyze performance data and insights
-- Optimize ongoing content based on results
-- Compile comprehensive campaign report
-- Strategic recommendations for future campaigns
 
 ---
 

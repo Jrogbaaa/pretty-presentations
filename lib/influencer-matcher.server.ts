@@ -114,10 +114,91 @@ const filterByBasicCriteria = (
   console.log(`🔍 [SERVER] Filtering ${pool.length} influencers with basic criteria...`);
   
   const filtered = pool.filter(influencer => {
-    // Platform match
+    // Platform match (REQUIRED)
     const platformMatch = brief.platformPreferences.includes(influencer.platform);
     if (!platformMatch) {
-      return false; // Platform is required
+      return false;
+    }
+    
+    // HARD CONSTRAINT: CPM Limit (Puerto de Indias style)
+    if (brief.constraints?.maxCPM) {
+      const influencerCPM = (influencer.rateCard.post / influencer.followers) * 1000;
+      if (influencerCPM > brief.constraints.maxCPM) {
+        console.log(`  ❌ ${influencer.name} exceeds max CPM: €${influencerCPM.toFixed(2)} > €${brief.constraints.maxCPM}`);
+        return false; // HARD LIMIT - reject if over
+      }
+    }
+    
+    // HARD CONSTRAINT: Follower limits
+    if (brief.constraints?.minFollowers && influencer.followers < brief.constraints.minFollowers) {
+      return false;
+    }
+    if (brief.constraints?.maxFollowers && influencer.followers > brief.constraints.maxFollowers) {
+      return false;
+    }
+    
+    // HARD CONSTRAINT: Required categories
+    if (brief.constraints?.requiredCategories && brief.constraints.requiredCategories.length > 0) {
+      const hasRequiredCategory = brief.constraints.requiredCategories.some(required =>
+        influencer.contentCategories.some(cat =>
+          cat.toLowerCase().includes(required.toLowerCase())
+        )
+      );
+      if (!hasRequiredCategory) {
+        return false;
+      }
+    }
+    
+    // HARD CONSTRAINT: Excluded categories
+    if (brief.constraints?.excludedCategories && brief.constraints.excludedCategories.length > 0) {
+      const hasExcludedCategory = brief.constraints.excludedCategories.some(excluded =>
+        influencer.contentCategories.some(cat =>
+          cat.toLowerCase().includes(excluded.toLowerCase())
+        )
+      );
+      if (hasExcludedCategory) {
+        return false;
+      }
+    }
+    
+    // HARD CONSTRAINT: Category restrictions (e.g., "must be willing to work with spirits")
+    if (brief.constraints?.categoryRestrictions && brief.constraints.categoryRestrictions.length > 0) {
+      // Check influencer's category preferences if available
+      if (influencer.categoryPreferences?.notWillingToWorkWith) {
+        const hasConflict = brief.constraints.categoryRestrictions.some(restriction =>
+          influencer.categoryPreferences?.notWillingToWorkWith?.some(notWilling =>
+            restriction.toLowerCase().includes(notWilling.toLowerCase()) ||
+            notWilling.toLowerCase().includes(restriction.toLowerCase())
+          )
+        );
+        if (hasConflict) {
+          console.log(`  ❌ ${influencer.name} has category restriction conflict`);
+          return false;
+        }
+      }
+    }
+    
+    // HARD CONSTRAINT: Event attendance capability (PYD Halloween style)
+    if (brief.constraints?.requireEventAttendance) {
+      if (influencer.capabilities && !influencer.capabilities.eventAppearances) {
+        return false;
+      }
+    }
+    
+    // HARD CONSTRAINT: Public speaking capability (Square style)
+    if (brief.constraints?.requirePublicSpeaking) {
+      if (influencer.capabilities && !influencer.capabilities.publicSpeaking) {
+        return false;
+      }
+    }
+    
+    // HARD CONSTRAINT: Verification requirement
+    if (brief.constraints?.mustHaveVerification) {
+      // Check if influencer has verification flag (if we track it)
+      // For now, assume high follower count (500k+) implies verification
+      if (influencer.followers < 500000) {
+        return false;
+      }
     }
     
     // Location match - bidirectional (location contains filter or vice versa)
@@ -132,10 +213,10 @@ const filterByBasicCriteria = (
     
     // Budget feasibility - VERY LENIENT (allow influencers up to full budget per influencer if needed)
     const estimatedCost = influencer.rateCard.post * 3;
-    const budgetMatch = brief.budget === 0 || estimatedCost <= brief.budget; // Very lenient: allow up to full budget
+    const budgetMatch = brief.budget === 0 || estimatedCost <= brief.budget;
     
     // Engagement rate threshold - VERY LENIENT
-    const engagementMatch = influencer.engagement >= 0.3; // Lowered from 0.5 to 0.3
+    const engagementMatch = influencer.engagement >= 0.3;
 
     return platformMatch && locationMatch && budgetMatch && engagementMatch;
   });

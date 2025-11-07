@@ -2,6 +2,60 @@
 
 All notable changes to Pretty Presentations will be documented in this file.
 
+## [2.5.6] - 2025-11-07
+
+### ✨ Text Response Template Refinements - Client Feedback
+
+**Major update refining text response format based on client agency workflow requirements.**
+
+#### Removed: Budget References
+- **REMOVED**: All budget mentions from text responses
+  - Removed from CLIENT BRIEF section in prompt
+  - Removed from proposal header
+  - Removed "Total Budget" column from performance projections table
+- **Reason**: Clients handle budget discussions separately; responses focus on strategy
+
+#### Removed: Campaign Execution Plan Section
+- **REMOVED**: Entire "Campaign Execution Plan" section (Phase 1-4 breakdown)
+- **Reason**: Campaign execution details handled separately; streamlines response focus
+
+#### Updated: Performance Projections Table
+- **CHANGED**: Table now shows only "Total Impressions" and "CPM"
+- **REMOVED**: "Total Budget" column
+- **Result**: Cleaner, more focused performance metrics
+
+#### Content Distribution Enhancements (Already Implemented in v2.5.4-2.5.5)
+- ✅ Reels described as "sneak peek" content
+- ✅ Stories described as "full story" content
+- ✅ CPM estimation around €20 included in logic
+- ✅ Content Distribution Plan with tentative calendar format
+
+#### Technical Implementation
+- **Updated Files**:
+  - `lib/markdown-response-generator.server.ts`:
+    - Removed budget from brief details in prompt (line 419)
+    - Removed budget from proposal header (line 444)
+    - Updated performance table to exclude budget column (lines 550-563)
+    - Removed entire Campaign Execution Plan section (lines 598-623)
+- **Maintained Features**:
+  - Qualitative & quantitative influencer reasoning
+  - 3-4 line creative strategy descriptions with hashtags
+  - Filming location conditional inclusion
+  - Creative ideas from brief incorporated when present
+  - Expected impressions range (single estimate)
+
+#### Benefits
+- ✅ Responses focus purely on strategy and recommendations
+- ✅ Removes financial details handled elsewhere in workflow
+- ✅ Streamlines document for faster client review
+- ✅ Maintains professional, agency-ready quality
+- ✅ Aligns with real-world agency workflow patterns
+
+#### Files Modified
+- `lib/markdown-response-generator.server.ts` - Template refinements
+
+---
+
 ## [2.5.5] - 2025-11-07
 
 ### 🧪 Comprehensive Testing & Documentation Suite

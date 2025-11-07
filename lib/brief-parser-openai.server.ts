@@ -70,7 +70,7 @@ export const parseBriefDocument = async (
   const apiKey = process.env.OPENAI_API_KEY!;
   const openai = new OpenAI({ apiKey });
   
-  const prompt = `You are an expert at parsing client briefs for influencer marketing campaigns.
+  const prompt = `You are an expert at parsing client briefs for influencer marketing campaigns, including complex multi-phase campaigns, budget scenarios, and special constraints.
 
 Parse this brief into a structured format. The brief may be in Spanish, English, or mixed languages.
 
@@ -81,7 +81,7 @@ Extract and return JSON with this exact structure:
 {
   "clientName": "string (brand or company name)",
   "campaignGoals": ["goal1", "goal2", ...] (specific objectives),
-  "budget": number (in euros, extract number only. If no budget mentioned, use 0),
+  "budget": number (PRIMARY budget in euros, extract number only. If no budget mentioned, use 0),
   "targetDemographics": {
     "ageRange": "string (e.g., 25-65+, 18-35)",
     "gender": "string (e.g., All genders, 60% Female, Men and Women)",
@@ -94,20 +94,123 @@ Extract and return JSON with this exact structure:
   "platformPreferences": ["Instagram", "TikTok", ...] (if not specified, suggest based on target),
   "contentThemes": ["theme1", "theme2", ...] (creative direction, topics),
   "manualInfluencers": ["name1", "@handle1", "name2 (@handle2)", ...] (extract any influencer names, Instagram handles, or creator mentions from the brief),
-  "additionalNotes": "string (urgency, special considerations, confidentiality, etc.)"
+  "additionalNotes": "string (urgency, special considerations, confidentiality, etc.)",
+  
+  "isMultiPhase": boolean (true if campaign has multiple phases like IKEA GREJSIMOJS: Phase 1/2/3),
+  "phases": [
+    {
+      "name": "string (e.g., 'Phase 1: Teasing', 'Rumor', 'Revelation')",
+      "budgetPercentage": number (e.g., 20 for 20%),
+      "budgetAmount": number (calculated from budgetPercentage * budget),
+      "creatorTier": "micro|mid-tier|macro|mixed",
+      "creatorCount": number (e.g., 5-6 profiles),
+      "contentFocus": ["theme1", "theme2"] (specific to this phase),
+      "timeline": "string (phase dates)",
+      "constraints": ["constraint1"] (e.g., "embargo: no product reveals"),
+      "description": "string (phase strategy summary)"
+    }
+  ] (ONLY include if multi-phase campaign detected, otherwise omit or empty array),
+  
+  "constraints": {
+    "maxCPM": number (maximum cost per thousand impressions, e.g., 20 for €20 CPM like Puerto de Indias),
+    "minFollowers": number,
+    "maxFollowers": number,
+    "requiredCategories": ["category1"],
+    "excludedCategories": ["category1"],
+    "categoryRestrictions": ["restriction1"] (e.g., "must be willing to work with spirits/alcohol"),
+    "mustHaveVerification": boolean,
+    "requireEventAttendance": boolean (true if physical event attendance required like PYD Halloween),
+    "requirePublicSpeaking": boolean (true if must speak at events like Square)
+  } (ONLY include fields that are explicitly mentioned),
+  
+  "geographicDistribution": {
+    "cities": ["city1", "city2"] (specific cities required, e.g., Madrid, Barcelona, Sevilla, Valencia),
+    "coreCities": ["city1"] (priority cities if mentioned, e.g., Madrid and Barcelona as core),
+    "requireDistribution": boolean (true if profiles must be distributed across multiple cities),
+    "minPerCity": number,
+    "maxPerCity": number
+  } (ONLY include if geographic distribution is explicitly required),
+  
+  "deliverables": [
+    {
+      "type": "social|event|content-creation|speaking|ambassador|brand-integration",
+      "description": "string",
+      "requirements": ["requirement1"],
+      "quantity": number
+    }
+  ] (extract all deliverable types mentioned),
+  
+  "budgetScenarios": [
+    {
+      "name": "Scenario 1|Scenario 2|Conservative|Aggressive",
+      "amount": number,
+      "description": "string"
+    }
+  ] (ONLY include if multiple budget scenarios requested like IKEA €30k and €50k),
+  
+  "campaignHistory": {
+    "isFollowUp": boolean (true if this is Wave 2, follow-up, or references previous campaign),
+    "wave": number (e.g., 2 for Wave 2),
+    "successfulInfluencers": ["name1", "@handle1"] (creators mentioned as performing well previously)
+  } (ONLY include if follow-up campaign mentioned),
+  
+  "targetAudienceType": "B2C|B2B|D2C" (B2B if targeting business owners like Square, B2C for consumers),
+  "campaignType": "string (e.g., Product Launch, Brand Awareness, Event-based, Multi-phase)"
 }
 
-Key instructions:
-- Extract ALL relevant information, even if implicit
-- For Spanish briefs: "Presupuesto" = budget, "Territorio" = content themes, "Target" = demographics
-- If budget is not mentioned in the brief, set budget to 0 (user will be prompted to enter it later)
-- Infer platform preferences from target age if not specified
-- Capture urgency/timeline information
-- Note any special requirements (confidentiality, guarantees, etc.)
-- Extract influencer names: Look for mentions of creators, influencers, talent names, or Instagram handles (@username). Include formats like "name", "@handle", "name (@handle)", or "name @handle". If no influencers are mentioned, use an empty array []
-- Be comprehensive but accurate
+CRITICAL PARSING INSTRUCTIONS:
 
-Return ONLY valid JSON, no markdown formatting.`;
+1. MULTI-PHASE CAMPAIGNS (like IKEA GREJSIMOJS):
+   - Look for phrases: "Phase 1", "Phase 2", "Fase 1", "oleada", "wave"
+   - Extract budget percentages (e.g., "20% Phase 1, 40% Phase 2, 40% Phase 3")
+   - Extract phase names (e.g., "El Rumor", "La Revelación", "El Rush Final")
+   - Extract phase-specific strategies and creator requirements
+   - Note any phase constraints (e.g., "embargo: no products shown in Phase 1")
+
+2. BUDGET SCENARIOS (like IKEA):
+   - Look for: "hagamos dos escenarios", "two scenarios", "€30k and €50k"
+   - Extract all budget amounts mentioned as alternatives
+   - Use PRIMARY budget as main "budget" field
+
+3. HARD CONSTRAINTS:
+   - CPM limits: "máximo CPM de €20", "max CPM €20 per talent" → maxCPM: 20
+   - Category restrictions: "willing to work with spirits", "no alcohol brands"
+   - Event attendance: "asistencia a la academia", "attend OT academy" → requireEventAttendance: true
+   - Public speaking: "dar una charla", "speaker at events" → requirePublicSpeaking: true
+
+4. GEOGRAPHIC DISTRIBUTION (like Square):
+   - Look for: "distributed across", "repartidos en Madrid, Barcelona, Sevilla"
+   - Extract city lists and identify priority/core cities
+   - Set requireDistribution: true if distribution is important
+
+5. DELIVERABLES:
+   - Social: "1 Reel + 3 Stories", "2 posts"
+   - Event: "Academy attendance", "Asistencia Evento"
+   - Speaking: "dar una charla", "speaker talks"
+   - Brand Integration: "brand integration at OT"
+
+6. FOLLOW-UP CAMPAIGNS (like Puerto de Indias Wave 2):
+   - Look for: "Wave 2", "oleada 2", "repeat well-performing creators"
+   - Extract mentions of previous campaign performance
+   - Note if certain influencers should be repeated
+
+7. B2B vs B2C:
+   - B2B if targeting: "emprendedores", "business owners", "restaurateurs"
+   - B2C if targeting: consumers, general public
+
+8. MANUAL INFLUENCERS:
+   - Extract ALL mentioned names: "Laura Escanes", "Violeta Mangriyan", "@dyanbay"
+   - Include question marks: "¿Las podemos meter?" still means they're requested
+   - Include rejected options with note: "Dabiz Muñoz (said no)"
+
+9. For Spanish briefs: 
+   - "Presupuesto" = budget
+   - "Territorio" = content themes
+   - "Target" = demographics
+   - "PDM" = presentation deadline
+   - "PTE" = pending/TBD
+
+Return ONLY valid JSON, no markdown formatting. Be COMPREHENSIVE - extract every detail mentioned in the brief.`;
 
   try {
     const response = await withRetry(
@@ -137,13 +240,41 @@ Return ONLY valid JSON, no markdown formatting.`;
 
     const rawParsed = JSON.parse(text);
 
-    // Set defaults for optional fields before validation
+    // Set defaults for required fields
     if (!rawParsed.platformPreferences || rawParsed.platformPreferences.length === 0) {
       rawParsed.platformPreferences = ["Instagram", "TikTok"];
     }
     if (!rawParsed.contentThemes) rawParsed.contentThemes = [];
     if (!rawParsed.brandRequirements) rawParsed.brandRequirements = [];
     if (!rawParsed.manualInfluencers) rawParsed.manualInfluencers = [];
+    
+    // Set defaults for enhanced optional fields
+    if (!rawParsed.isMultiPhase) rawParsed.isMultiPhase = false;
+    if (!rawParsed.phases) rawParsed.phases = [];
+    if (!rawParsed.deliverables) rawParsed.deliverables = [];
+    if (!rawParsed.budgetScenarios) rawParsed.budgetScenarios = [];
+    
+    // Calculate phase budget amounts if percentages provided
+    if (rawParsed.phases && rawParsed.phases.length > 0 && rawParsed.budget > 0) {
+      rawParsed.phases = rawParsed.phases.map((phase: any) => ({
+        ...phase,
+        budgetAmount: Math.round((phase.budgetPercentage / 100) * rawParsed.budget)
+      }));
+    }
+    
+    // Log complex brief detection
+    if (rawParsed.isMultiPhase) {
+      console.log(`🎯 [PARSER] Multi-phase campaign detected: ${rawParsed.phases.length} phases`);
+    }
+    if (rawParsed.constraints?.maxCPM) {
+      console.log(`🎯 [PARSER] Hard CPM constraint detected: €${rawParsed.constraints.maxCPM}`);
+    }
+    if (rawParsed.geographicDistribution?.requireDistribution) {
+      console.log(`🎯 [PARSER] Geographic distribution required: ${rawParsed.geographicDistribution.cities.join(', ')}`);
+    }
+    if (rawParsed.budgetScenarios && rawParsed.budgetScenarios.length > 1) {
+      console.log(`🎯 [PARSER] Multi-budget scenarios detected: ${rawParsed.budgetScenarios.length} scenarios`);
+    }
 
     // Validate with Zod schema
     const { validateClientBrief, sanitizeBriefData } = await import('./validation');

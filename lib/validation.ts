@@ -20,6 +20,83 @@ export const TargetDemographicsSchema = z.object({
 });
 
 /**
+ * Campaign Phase schema for multi-phase campaigns
+ */
+export const CampaignPhaseSchema = z.object({
+  name: z.string(),
+  budgetPercentage: z.number().min(0).max(100),
+  budgetAmount: z.number().min(0),
+  creatorTier: z.enum(['micro', 'mid-tier', 'macro', 'mixed']),
+  creatorCount: z.number().int().positive(),
+  contentFocus: z.array(z.string()),
+  timeline: z.string(),
+  constraints: z.array(z.string()).optional(),
+  description: z.string().optional(),
+});
+
+/**
+ * Brief constraints schema
+ */
+export const BriefConstraintsSchema = z.object({
+  maxCPM: z.number().positive().optional(),
+  minFollowers: z.number().int().nonnegative().optional(),
+  maxFollowers: z.number().int().positive().optional(),
+  requiredCategories: z.array(z.string()).optional(),
+  excludedCategories: z.array(z.string()).optional(),
+  categoryRestrictions: z.array(z.string()).optional(),
+  mustHaveVerification: z.boolean().optional(),
+  requireEventAttendance: z.boolean().optional(),
+  requirePublicSpeaking: z.boolean().optional(),
+});
+
+/**
+ * Geographic distribution schema
+ */
+export const GeographicDistributionSchema = z.object({
+  cities: z.array(z.string()),
+  coreCities: z.array(z.string()).optional(),
+  requireDistribution: z.boolean(),
+  minPerCity: z.number().int().positive().optional(),
+  maxPerCity: z.number().int().positive().optional(),
+});
+
+/**
+ * Deliverable schema
+ */
+export const DeliverableSchema = z.object({
+  type: z.enum(['social', 'event', 'content-creation', 'speaking', 'ambassador', 'brand-integration']),
+  description: z.string(),
+  requirements: z.array(z.string()).optional(),
+  quantity: z.number().int().positive().optional(),
+});
+
+/**
+ * Budget scenario schema
+ */
+export const BudgetScenarioSchema = z.object({
+  name: z.string(),
+  amount: z.number().int().nonnegative(),
+  description: z.string().optional(),
+});
+
+/**
+ * Campaign history schema
+ */
+export const CampaignHistorySchema = z.object({
+  previousCampaignId: z.string().optional(),
+  isFollowUp: z.boolean(),
+  wave: z.number().int().positive().optional(),
+  successfulInfluencers: z.array(z.string()).optional(),
+  performanceData: z.array(z.object({
+    influencerId: z.string(),
+    reach: z.number(),
+    engagement: z.number(),
+    conversions: z.number().optional(),
+    roi: z.number().optional(),
+  })).optional(),
+});
+
+/**
  * Client brief schema with comprehensive validation
  */
 export const ClientBriefSchema = z.object({
@@ -57,6 +134,17 @@ export const ClientBriefSchema = z.object({
   additionalNotes: z.string().max(2000, 'Additional notes must be less than 2000 characters').optional(),
   
   templateId: z.enum(['default', 'red-bull-event', 'scalpers-lifestyle']).optional(),
+  
+  // ENHANCED FIELDS for complex briefs
+  isMultiPhase: z.boolean().optional(),
+  phases: z.array(CampaignPhaseSchema).optional(),
+  constraints: BriefConstraintsSchema.optional(),
+  geographicDistribution: GeographicDistributionSchema.optional(),
+  deliverables: z.array(DeliverableSchema).optional(),
+  budgetScenarios: z.array(BudgetScenarioSchema).optional(),
+  campaignHistory: CampaignHistorySchema.optional(),
+  targetAudienceType: z.enum(['B2C', 'B2B', 'D2C']).optional(),
+  campaignType: z.string().max(100).optional(),
 });
 
 /**

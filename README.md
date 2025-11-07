@@ -2,9 +2,9 @@
 
 An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 2.5.4 | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
+**Status**: 🟢 **Production-Ready** | **Version**: 2.5.6 | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
 
-**Latest**: v2.5.4 **Response Format Refinements!** ✨ Streamlined text response format - removed generic Strategic Alignment section, simplified Content Distribution table (removed Frequency column), and removed AI footer attribution for more professional, client-ready documents. See [CHANGELOG.md](./CHANGELOG.md) for details. 🚀✅
+**Latest**: v2.5.6 **Client Workflow Refinements!** ✨ Text responses now exclude budget mentions and campaign execution details, focusing purely on strategy and recommendations. Aligns with real-world agency workflow where budget and execution are handled separately. See [CHANGELOG.md](./CHANGELOG.md) for details. 🚀✅
 
 > 📝 **Full Version History**: See [CHANGELOG.md](./CHANGELOG.md) for complete release notes and previous versions.
 
