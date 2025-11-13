@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import type { ClientBrief, Platform } from "@/types";
 import type { TemplateId } from "@/types/templates";
 import { TEMPLATES } from "@/types/templates";
+import PresentationEngineSelector, { type PresentationEngine } from "./PresentationEngineSelector";
 
 interface BriefFormProps {
-  onSubmit: (brief: ClientBrief) => void;
+  onSubmit: (brief: ClientBrief, engine?: PresentationEngine) => void;
   onGenerateTextResponse?: (brief: ClientBrief) => void;
   isProcessing: boolean;
   initialData?: ClientBrief;
@@ -40,6 +41,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
   const [currentLocation, setCurrentLocation] = useState("");
   const [currentInterest, setCurrentInterest] = useState("");
   const [currentManualInfluencer, setCurrentManualInfluencer] = useState("");
+  const [selectedEngine, setSelectedEngine] = useState<PresentationEngine>("standard");
 
   const platforms: Platform[] = ["Instagram", "TikTok", "YouTube", "Twitter", "Facebook", "LinkedIn", "Twitch"];
 
@@ -119,7 +121,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
       formData.platformPreferences &&
       formData.platformPreferences.length > 0
     ) {
-      onSubmit(formData as ClientBrief);
+      onSubmit(formData as ClientBrief, selectedEngine);
     } else {
       alert("Please fill in all required fields");
     }
@@ -669,6 +671,13 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
           </div>
         )}
       </div>
+
+      {/* Presentation Engine Selector */}
+      <PresentationEngineSelector
+        selectedEngine={selectedEngine}
+        onEngineChange={setSelectedEngine}
+        disabled={isProcessing}
+      />
 
       {/* Submit Buttons */}
       <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">

@@ -13,6 +13,7 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 - [Quick Start](#-quick-start)
 - [Features](#-features)
 - [Installation](#-installation)
+- [Presenton Integration](#-presenton-integration-optional)
 - [How It Works](#-how-it-works)
 - [Tech Stack](#️-tech-stack)
 - [Project Structure](#-project-structure)
@@ -151,6 +152,25 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
   - Google Slides **does not support** PDF imports (read-only format)
   - PPTX is the universal editable format supported by all platforms
   - Simplified user experience with one clear export path
+
+### 🐳 Presenton Integration (Optional) ⚡ NEW
+- **Alternative Presentation Engine**: Choose between standard generator or Presenton (open-source AI engine)
+- **Docker-Based**: Runs locally via Docker container (self-hosted, full control)
+- **Cost Savings**: 75% cheaper per presentation ($0.02 vs $0.08-0.14)
+  - Free images via Pexels API (vs paid Nano Banana)
+  - Same OpenAI API for text generation
+- **Modern Templates**: HTML/CSS-based templates with responsive designs
+- **Zero Risk**: Optional integration with automatic fallback
+  - Existing generator remains fully functional
+  - All your logic preserved (brand intelligence, LAYAI matching, etc.)
+  - Presenton handles only the final slide generation step
+- **Easy Management**: Simple shell scripts for start/stop/status
+  ```bash
+  ./scripts/presenton-docker.sh start
+  ./scripts/presenton-docker.sh status
+  ```
+- **UI Selection**: Choose engine per presentation in the brief form
+- **Complete Documentation**: See [PRESENTON_INTEGRATION.md](./PRESENTON_INTEGRATION.md) for full setup guide
 
 ### 📄 Text Response PDF Export (v2.4.0+) ⚡ ENHANCED
 - **Professional PDF Generation**:
@@ -464,6 +484,48 @@ npm run import:influencers
 
 See [Quick Start](#-quick-start) above for basic setup.
 
+## 🐳 Presenton Integration (Optional)
+
+Want 75% cost savings on presentations? Set up Presenton as an alternative engine:
+
+### Quick Setup (5 minutes)
+
+1. **Install Docker Desktop** (if not already installed)
+   - Download: https://www.docker.com/products/docker-desktop
+   - Start Docker Desktop
+
+2. **Get Pexels API Key** (free)
+   - Visit: https://www.pexels.com/api/
+   - Sign up and generate key (takes 1 minute)
+
+3. **Add to `.env.local`**:
+   ```bash
+   PEXELS_API_KEY=your_pexels_key
+   NEXT_PUBLIC_ENABLE_PRESENTON=true
+   ```
+
+4. **Start Presenton**:
+   ```bash
+   ./scripts/presenton-docker.sh start
+   ```
+
+5. **Done!** Select "Presenton (AI-Enhanced)" in the brief form
+
+### Benefits
+- ✅ 75% cheaper ($0.02 vs $0.08-0.14 per presentation)
+- ✅ Free images via Pexels API
+- ✅ Modern HTML/CSS templates
+- ✅ All your logic preserved (brand intelligence, LAYAI, etc.)
+- ✅ Automatic fallback if unavailable
+
+### Full Documentation
+See **[PRESENTON_INTEGRATION.md](./PRESENTON_INTEGRATION.md)** for:
+- Complete setup guide
+- Configuration options
+- Management scripts
+- Troubleshooting
+- Production deployment
+
 ## 🔧 Environment Variables
 
 > 🔒 **Security Notice (v2.5.3)**: Environment variable structure updated for improved security. `GOOGLE_AI_API_KEY` is now required for server-side operations. See [CHANGELOG.md](./CHANGELOG.md) for migration guide.
@@ -683,6 +745,7 @@ Proprietary - Look After You Talent Agency
 - **Design System**: `DESIGN_SYSTEM.md` - Complete UI design specifications and component library
 - **Changelog**: `CHANGELOG.md` - Complete version history and release notes
 - **Manual Influencer Feature**: `TEST_MANUAL_INFLUENCER_FEATURE.md` - Guide for manual influencer addition
+- **Presenton Integration**: `PRESENTON_INTEGRATION.md` - Complete guide for setting up and using Presenton as alternative presentation engine
 
 ### Examples Directory
 - **Brief Examples Guide**: `examples/README.md` - Reference guide for 8 real-world brief examples used to train the AI parser

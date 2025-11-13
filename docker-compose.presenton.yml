@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  presenton:
+    image: ghcr.io/presenton/presenton:latest
+    container_name: presenton
+    ports:
+      - "5001:80"
+    environment:
+      # LLM Configuration - Using OpenAI for consistency
+      - LLM=openai
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      
+      # Image Provider - Using Pexels (free)
+      - IMAGE_PROVIDER=pexels
+      - PEXELS_API_KEY=${PEXELS_API_KEY}
+      
+      # Security - Prevent key changes via UI
+      - CAN_CHANGE_KEYS=false
+      
+      # Optional: Disable anonymous telemetry
+      - DISABLE_ANONYMOUS_TELEMETRY=true
+    volumes:
+      - ./presenton_data:/app_data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+

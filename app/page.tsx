@@ -11,6 +11,7 @@ import { HeroSection } from "@/components/ui/hero-section-dark";
 import { Target, Zap, Sparkles, Upload, FileCheck, Presentation, WifiOff } from "lucide-react";
 import type { ClientBrief } from "@/types";
 import { getUserFriendlyError } from "@/types/errors";
+import type { PresentationEngine } from "@/components/PresentationEngineSelector";
 
 const HomePage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -71,7 +72,7 @@ const HomePage = () => {
     setError(null);
   };
 
-  const handleSubmit = async (brief: ClientBrief) => {
+  const handleSubmit = async (brief: ClientBrief, engine: PresentationEngine = "standard") => {
     // Check budget is provided
     if (!brief.budget || brief.budget === 0) {
       setError('Please enter a campaign budget before generating your presentation.');
@@ -89,6 +90,45 @@ const HomePage = () => {
     setError(null);
 
     try {
+      // Check if Presenton was selected
+      if (engine === "presenton") {
+        console.log("🚀 Using Presenton engine...");
+        
+        try {
+          // Call Presenton generation API
+          const response = await fetch("/api/presenton/generate", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(brief),
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok && data.success) {
+            console.log("✅ Presenton generation successful!", data);
+            
+            alert(`Presentation generated successfully with Presenton!\n\nPresentation ID: ${data.presentationId}\n\nYou can download it from the Presenton container's app_data directory.`);
+            
+            setIsProcessing(false);
+            return;
+          } else {
+            // Presenton failed, fall back to standard
+            console.warn("⚠️ Presenton generation failed, falling back to standard generator");
+            setError("Presenton is not available. Using standard generator instead.");
+            // Fall through to standard generator
+          }
+        } catch (presentonError) {
+          console.error("❌ Presenton error:", presentonError);
+          setError("Presenton generation failed. Using standard generator instead.");
+          // Fall through to standard generator
+        }
+      }
+      
+      // Standard generator (or fallback from Presenton)
+      console.log("🎯 Using standard generator...");
+      
       // Process the brief and generate presentation
       // Pass empty array to fetch real influencers from Firestore database (~3k Spanish influencers)
       // Will automatically fall back to mockInfluencers if Firestore is unavailable

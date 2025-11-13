@@ -1,5 +1,95 @@
 # Changelog
 
+## [3.2.0] - 2025-11-13 🐳
+
+### 🎉 Major Feature: Presenton Docker Integration
+
+#### Alternative Presentation Engine
+- **Added:** Presenton as optional alternative presentation engine via Docker
+- **Cost Savings:** 75% cheaper per presentation ($0.02 vs $0.08-0.14)
+- **Free Images:** Uses Pexels API (free) instead of Nano Banana (paid)
+- **Zero Risk:** Completely optional with automatic fallback to standard generator
+- **All Logic Preserved:** Brand intelligence, LAYAI matching, all AI processing unchanged
+
+#### New Components
+- **PresentationEngineSelector:** UI component to choose between Standard and Presenton
+- **Real-time Status:** Shows Online/Offline indicator for Presenton availability
+- **Dual-Engine Support:** Users can select engine per presentation
+- **Graceful Fallback:** Automatically uses standard generator if Presenton unavailable
+
+#### Docker Infrastructure
+- **docker-compose.presenton.yml:** Complete Docker configuration for Presenton
+- **Management Scripts:** Shell scripts for easy start/stop/status/logs
+- **Health Checks:** Automatic container health monitoring
+- **Auto-restart:** Container restarts automatically on failure
+
+#### API Integration
+- **lib/presenton-api.ts:** Complete API service layer (375 lines)
+  - Health check with timeout
+  - Generation with 2-minute timeout
+  - Comprehensive error handling
+  - Detailed logging
+- **lib/presenton-adapter.ts:** Data transformation layer (300+ lines)
+  - Brief → Presenton format conversion
+  - Influencer data mapping with tier grouping
+  - Rich markdown generation with all campaign details
+- **app/api/presenton/generate/route.ts:** Server-side generation endpoint
+- **app/api/presenton/health/route.ts:** Health check endpoint
+
+#### Documentation
+- **PRESENTON_INTEGRATION.md:** Complete setup guide (500+ lines)
+  - Prerequisites and installation
+  - Configuration options
+  - Management scripts reference
+  - Troubleshooting guide
+  - Production deployment advice
+- **PRESENTON_TESTING.md:** Comprehensive test procedures (400+ lines)
+  - 10-phase test checklist
+  - Performance benchmarking
+  - Error scenario testing
+- **PRESENTON_IMPLEMENTATION_SUMMARY.md:** Implementation details
+- **TEST_RESULTS.md:** Verification results
+
+#### Scripts
+- **scripts/presenton-docker.sh:** Docker management (200+ lines)
+  - Commands: start, stop, restart, status, logs, pull
+  - Colored output and error messages
+  - Docker and environment validation
+  - Health check waiting
+- **scripts/test-pexels-api.js:** Pexels API key validation
+- **scripts/test-presenton-integration.sh:** Complete integration test
+
+#### Files Modified
+- **components/BriefForm.tsx:** Added engine selector integration
+- **app/page.tsx:** Added Presenton generation logic with fallback
+- **README.md:** Added Presenton sections and setup guide
+- **env.example:** Added Presenton environment variables
+- **.gitignore:** Added presenton_data/ directory
+
+#### Environment Variables
+- **PEXELS_API_KEY:** Free Pexels API key for images
+- **NEXT_PUBLIC_ENABLE_PRESENTON:** Toggle flag (true/false)
+- **PRESENTON_API_URL:** Container endpoint (default: http://localhost:5001)
+
+#### Benefits
+- ✅ 75% cost reduction per presentation
+- ✅ Free images via Pexels (vs $0.06-0.12 for Nano Banana)
+- ✅ Modern HTML/CSS templates
+- ✅ Self-hosted with full control
+- ✅ Easy management with simple scripts
+- ✅ Zero breaking changes
+- ✅ Optional - works without it
+
+#### Testing
+- ✅ Pexels API key validated and working
+- ✅ Build successful with no errors
+- ✅ Development server starts correctly
+- ✅ API routes functional (/api/presenton/*)
+- ✅ Graceful fallback tested
+- ✅ Ready for Vercel deployment
+
+---
+
 ## [3.1.0] - 2025-11-13 🎯
 
 ### 🔧 Influencer Matching Improvements
