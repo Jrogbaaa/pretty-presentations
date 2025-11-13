@@ -259,6 +259,149 @@ Return a JSON object with:
   }
 };
 
+/**
+ * Reflect on and refine generated presentation content
+ * This second-pass improves quality, specificity, and creative depth
+ */
+const refinePresentationContent = async (
+  initialContent: any,
+  brief: ClientBrief,
+  influencers: SelectedInfluencer[]
+): Promise<any> => {
+  const openai = getOpenAI();
+
+  const hasSalesGoal = brief.campaignGoals.some(g => {
+    const lower = g.toLowerCase();
+    return lower.includes('ventas') || lower.includes('sales') || lower.includes('conversión') || lower.includes('revenue');
+  });
+  
+  const reflectionPrompt = `You are a senior business strategist reviewing a campaign presentation. Your task is to ensure this presentation demonstrates clear business value and revenue potential - not just creative concepts.
+
+**CRITICAL MINDSET: This is a REVENUE GENERATION SYSTEM, not a creative showcase.**
+
+**ORIGINAL CONTENT (JSON):**
+${JSON.stringify(initialContent, null, 2)}
+
+**CLIENT CONTEXT:**
+- Client: ${brief.clientName}
+- Campaign Goals: ${brief.campaignGoals.join(', ')}
+- Budget: €${brief.budget.toLocaleString()}
+- Target Audience: ${brief.targetDemographics.ageRange}, ${brief.targetDemographics.gender}
+- Content Themes: ${brief.contentThemes?.join(', ') || 'General'}
+${hasSalesGoal ? '- **PRIMARY OBJECTIVE:** Drive measurable sales and revenue outcomes' : ''}
+
+**MATCHED INFLUENCERS:**
+${influencers.map(i => `- ${i.name} (@${i.handle}): ${i.followers.toLocaleString()} followers, ${i.engagement}% ER`).join('\n')}
+
+**QUALITY ISSUES TO FIX:**
+
+❌ **Generic Creative Ideas Without Business Logic** - Each creative idea must:
+   - Have a unique, memorable title tied to ${brief.clientName}'s value proposition (not "Social Media Campaign")
+   - Include a compelling claim/tagline that triggers a buying behavior (urgency, social proof, trust)
+   - Feature detailed execution with clear conversion path (awareness → consideration → purchase)
+   - Explain HOW this drives revenue/conversions, not just engagement
+   - Reference specific content formats and their psychological impact on customers
+
+❌ **Template-like Campaign Summary Missing Strategic Context** - Must:
+   - Start with the business problem ${brief.clientName} is solving
+   - Quantify expected outcomes (projected revenue, ROIS, conversion rates)
+   - Reflect actual campaign goals with measurable success criteria
+   - Sound like a business investment proposal, not a creative brief
+
+❌ **Vague Target Strategy Without Behavioral Insights** - Each insight must:
+   - Explain the target's buying behavior and decision-making process
+   - Reference psychographic insights (values, fears, aspirations that drive purchases)
+   - Connect to specific marketing psychology principles (scarcity, authority, social proof)
+   - Explain HOW this insight translates to conversions
+
+❌ **Generic Recommendations Without ROI Context** - Must:
+   - Be specific to ${brief.clientName}'s industry and competitive positioning
+   - Include concrete tactics with expected business impact
+   - Reference proven marketing principles and why they work for ${brief.clientName}
+   - Quantify expected outcomes (even if estimated)
+
+❌ **Weak Influencer Rationales Missing Strategic Value** - Each influencer's "reason" must:
+   - Explain their strategic fit for ${brief.clientName}'s business goals
+   - Reference their specific audience's buying behavior and trust level
+   - Connect to campaign goals with clear conversion logic
+   - Explain WHY this influencer will drive revenue (not just engagement)
+
+**YOUR TASK:**
+1. Review each section with a BUSINESS LENS (not a creative lens)
+2. Ask: "How does this drive revenue for ${brief.clientName}?" for every element
+3. Rewrite weak sections to emphasize business outcomes and strategic value
+4. Quantify expected outcomes wherever possible
+5. Ensure the presentation feels like a revenue investment proposal
+6. Keep strong, strategic sections unchanged
+
+**CRITICAL STANDARDS:**
+- **Revenue Focus:** Every creative idea must have a clear path to conversions/sales
+- **Strategic Depth:** Reference customer psychology, competitive positioning, conversion tactics
+- **Quantification:** Include projected outcomes (ROIS, conversion rates, revenue estimates)
+- **Brand-Specific:** ${brief.clientName}-specific tactics that couldn't apply to any generic brand
+- **Business Language:** Sound like a strategist presenting to a CFO, not a creative to a CMO
+${hasSalesGoal ? '- **ROIS Emphasis:** For sales campaigns, every section should reinforce revenue potential' : ''}
+
+Return the COMPLETE improved JSON structure. Maintain exact same JSON schema and structure.`;
+
+  try {
+    const timer = startTimer('refinePresentationContent');
+    
+    const response = await withRetry(
+      () => openai.chat.completions.create({
+        model: "gpt-4o-mini", // Faster and cheaper for refinement
+        messages: [
+          {
+            role: "system",
+            content: "You are a senior business strategist who refines campaign presentations to demonstrate clear revenue potential and business value. Focus on strategic depth, quantifiable outcomes, and conversion logic. This is a revenue generation system, not a creative portfolio. Always return valid JSON without markdown formatting."
+          },
+          {
+            role: "user",
+            content: reflectionPrompt
+          }
+        ],
+        temperature: 0.7, // Maintain creativity in refinement
+        response_format: { type: "json_object" }
+      }),
+      RetryPresets.STANDARD
+    );
+
+    const text = response.choices[0]?.message?.content || JSON.stringify(initialContent);
+    const refinedContent = JSON.parse(text);
+    
+    const duration = timer.stop({ success: true });
+    
+    logInfo('Presentation content refined', {
+      duration,
+      tokens: response.usage?.total_tokens,
+      hasCreativeIdeas: !!refinedContent.creativeIdeas,
+      creativeIdeasCount: refinedContent.creativeIdeas?.length || 0
+    });
+
+    logAPIUsage('openai', 'content_refinement', {
+      tokens: response.usage?.total_tokens,
+      cost: (response.usage?.total_tokens || 0) * 0.0000015,
+      model: 'gpt-4o-mini',
+      success: true
+    });
+
+    return refinedContent;
+  } catch (error) {
+    logError(error, { 
+      function: 'refinePresentationContent',
+      fallbackToInitial: true 
+    });
+    
+    logAPIUsage('openai', 'content_refinement', {
+      model: 'gpt-4o-mini',
+      success: false
+    });
+    
+    // Graceful degradation: return initial content if refinement fails
+    return initialContent;
+  }
+};
+
 const generatePresentationContent = async (
   brief: ClientBrief,
   influencers: SelectedInfluencer[]
@@ -433,9 +576,6 @@ Generate sophisticated, agency-quality presentation content following this struc
     const text = response.choices[0]?.message?.content || "{}";
     const content = JSON.parse(text);
     
-    // Cache the result
-    contentCache.set(cacheKey, content);
-    
     logAPIUsage('openai', 'content_generation', {
       tokens: response.usage?.total_tokens,
       cost: (response.usage?.total_tokens || 0) * 0.0000015, // Approximate cost
@@ -443,7 +583,19 @@ Generate sophisticated, agency-quality presentation content following this struc
       success: true
     });
     
-    return content;
+    // Step 2: Reflection & Refinement
+    // Run the content through a second LLM pass to improve quality and specificity
+    logInfo('Starting presentation content refinement (second pass)', {
+      hasCreativeIdeas: !!content.creativeIdeas,
+      creativeIdeasCount: content.creativeIdeas?.length || 0
+    });
+    
+    const refinedContent = await refinePresentationContent(content, brief, influencers);
+    
+    // Cache the refined result
+    contentCache.set(cacheKey, refinedContent);
+    
+    return refinedContent;
   } catch (error) {
     logError(error, {
       function: 'generatePresentationContent',

@@ -7,7 +7,13 @@ import { processManualInfluencers } from "./manual-influencer-matcher";
 import { withRetry, RetryPresets } from "./retry";
 import { logInfo, logError, startTimer } from "./logger";
 import { OpenAIError } from "@/types/errors";
-import { calculateTieredMetrics } from "./tiered-cpm-calculator";
+import { 
+  calculateTieredMetrics, 
+  calculateHybridStrategy, 
+  extractImpressionGoal 
+} from "./tiered-cpm-calculator";
+import { detectCampaignStrategy, formatStrategyExplanation } from "./goal-detector";
+import { calculateRevenueMetrics, formatRevenueMetrics } from "./revenue-calculator";
 
 /**
  * Generate a comprehensive markdown response for a client brief
@@ -384,6 +390,149 @@ ${industryExamples}
 };
 
 /**
+ * Reflect on and refine generated markdown content
+ * This second-pass improves quality, specificity, and brand alignment
+ */
+const refineMarkdownContent = async (
+  initialContent: string,
+  brief: ClientBrief,
+  influencers: SelectedInfluencer[]
+): Promise<string> => {
+  const apiKey = process.env.OPENAI_API_KEY;
+  
+  if (!apiKey) {
+    logError('OpenAI API key missing for reflection, returning initial content', {});
+    return initialContent; // Graceful degradation
+  }
+
+  const openai = new OpenAI({ apiKey });
+
+  // Detect industry for specific quality checks
+  const contentThemes = brief.contentThemes?.join(' ').toLowerCase() || '';
+  const clientName = brief.clientName.toLowerCase();
+  const goals = brief.campaignGoals.join(' ').toLowerCase();
+
+  const hasSalesGoal = brief.campaignGoals.some(g => {
+    const lower = g.toLowerCase();
+    return lower.includes('ventas') || lower.includes('sales') || lower.includes('conversión') || lower.includes('revenue');
+  });
+  
+  const reflectionPrompt = `You are a senior business strategist reviewing a revenue-generation system proposal. Your task is to ensure this proposal will drive measurable business outcomes (sales, conversions, revenue) - not just vanity metrics.
+
+**CRITICAL MINDSET: This is a REVENUE GENERATION SYSTEM, not a content recommendation tool.**
+
+**ORIGINAL PROPOSAL:**
+${initialContent}
+
+**CLIENT CONTEXT:**
+- Client: ${brief.clientName}
+- Industry: ${contentThemes}
+- Campaign Goals: ${brief.campaignGoals.join(', ')}
+- Target Audience: ${brief.targetDemographics.ageRange}, ${brief.targetDemographics.gender}
+- Budget: €${brief.budget.toLocaleString()}
+${hasSalesGoal ? '- **PRIMARY OBJECTIVE:** Drive sales and revenue (not just content)' : ''}
+
+**QUALITY CHECKLIST - Identify and fix these issues:**
+
+❌ **Generic "Influencer Marketing" Language** - Replace phrases like:
+   - "Fresh & Premium", "Authenticity and storytelling" → Use specific tactics tied to conversion actions
+   - "Visual appeal aligned with brand aesthetic" → Explain how visuals drive purchase intent
+   - "Engaging content that drives conversions" → Specify WHAT engagement actions lead to WHAT business outcomes
+   - "Create genuine, relatable content" → Define genuine in terms of customer trust and buying behavior
+
+❌ **Missing Business Logic** - Every recommendation must answer:
+   - HOW will this drive revenue/sales/conversions?
+   - WHAT customer behavior change does this create?
+   - WHY is this approach more effective than alternatives?
+   ${hasSalesGoal ? '- WHAT is the expected ROIS (Return on Influencer Spend)?' : ''}
+
+❌ **Vague Content Pillars** - Each pillar must:
+   - Have a unique, memorable name tied to ${brief.clientName}'s value proposition (not "Social Media Activation")
+   - Explain the psychological trigger it activates (urgency, social proof, trust, aspiration)
+   - Specify the customer journey stage it targets (awareness → consideration → purchase)
+   - Define measurable success criteria
+
+❌ **Non-Actionable Recommendations** - Must be:
+   - Specific to ${brief.clientName}'s industry and competitive positioning
+   - Include concrete tactics with clear success metrics
+   - Reference proven marketing principles (scarcity, authority, social proof, etc.)
+   - Explain the expected ROI or business impact
+
+❌ **Template-like Executive Summary** - Should:
+   - Start with the business problem ${brief.clientName} is solving
+   - Quantify the expected outcome (e.g., "projected to generate €${(brief.budget * 2.5).toLocaleString()} in revenue")
+   - Reference specific campaign elements and their strategic rationale
+   - Sound like it was written by someone who understands ${brief.clientName}'s market
+
+**YOUR TASK:**
+1. Read through the proposal with a BUSINESS LENS (not a creative lens)
+2. Ask: "Will this drive revenue?" for every section
+3. Replace fluffy marketing language with strategic, outcome-focused copy
+4. Quantify expected outcomes wherever possible (ROIS, conversion rates, revenue)
+5. Ensure the proposal feels like a revenue investment plan, not a creative portfolio piece
+6. Keep all strong, strategic sections unchanged
+
+**CRITICAL STANDARDS:**
+- **Revenue Focus:** Every tactic must have a clear line to business outcomes
+- **Strategic Depth:** Reference marketing psychology, competitive positioning, customer journey
+- **Quantification:** Use numbers and projections (even if estimated) to build business case
+- **Brand-Specific:** ${brief.clientName} should be mentioned frequently with context-specific tactics
+${hasSalesGoal ? '- **ROIS Clarity:** If this is a sales campaign, the ROIS and revenue projections must be front and center' : ''}
+
+Return the COMPLETE improved proposal in markdown format. If a section is already excellent, keep it exactly as is.`;
+
+  try {
+    const timer = startTimer('refineMarkdownContent');
+    
+    const response = await withRetry(
+      () => openai.chat.completions.create({
+        model: "gpt-4o-mini", // Faster and cheaper for refinement
+        messages: [
+          {
+            role: "system",
+            content: "You are a senior business strategist who refines marketing proposals to drive measurable revenue outcomes. Focus on strategic depth, quantifiable projections, and clear business logic. This is a revenue generation system, not a creative portfolio. Return only markdown content without wrapper text."
+          },
+          {
+            role: "user",
+            content: reflectionPrompt
+          }
+        ],
+        temperature: 0.6, // Slightly lower for more focused refinement
+        max_tokens: 5000 // Allow for comprehensive refinement
+      }),
+      RetryPresets.STANDARD
+    );
+
+    let refinedMarkdown = response.choices[0]?.message?.content || initialContent;
+    
+    // Remove any code block wrappers
+    refinedMarkdown = refinedMarkdown.replace(/^```markdown\n?/g, '').replace(/\n?```$/g, '');
+    refinedMarkdown = refinedMarkdown.replace(/^```\n?/g, '').replace(/\n?```$/g, '');
+    refinedMarkdown = refinedMarkdown.trim();
+
+    const duration = timer.stop({ success: true });
+    
+    logInfo('Markdown content refined', {
+      duration,
+      originalLength: initialContent.length,
+      refinedLength: refinedMarkdown.length,
+      lengthDelta: refinedMarkdown.length - initialContent.length,
+      tokens: response.usage?.total_tokens
+    });
+
+    return refinedMarkdown;
+  } catch (error) {
+    logError(error, { 
+      function: 'refineMarkdownContent',
+      fallbackToInitial: true 
+    });
+    
+    // Graceful degradation: return initial content if refinement fails
+    return initialContent;
+  }
+};
+
+/**
  * Generate markdown content using OpenAI
  */
 const generateMarkdownContent = async (
@@ -462,6 +611,54 @@ Provide a compelling 3-4 sentence overview that:
 ${brief.campaignGoals.map((goal, idx) => `${idx + 1}. **${goal}**`).join('\n')}
 
 ---
+
+## 🎯 Campaign Strategy & Revenue Impact
+
+${(() => {
+  const strategy = detectCampaignStrategy(brief);
+  const strategyExplanation = formatStrategyExplanation(strategy, brief);
+  
+  // If it's a sales/revenue campaign, show revenue projections
+  if (strategy.goalType === 'sales') {
+    const revenueMetrics = calculateRevenueMetrics(
+      influencers,
+      brief.budget,
+      {
+        contentThemes: brief.contentThemes,
+        campaignGoals: brief.campaignGoals,
+        clientName: brief.clientName
+      }
+    );
+    
+    return `### 💰 Revenue-Driven Approach
+
+${strategyExplanation}
+
+${formatRevenueMetrics(revenueMetrics)}
+
+**Why Nano-Influencers Outperform for E-Commerce:**
+- **Higher Trust:** Smaller, engaged communities perceive recommendations as authentic advice from a friend, not ads
+- **Better Engagement:** 12-18% engagement rates vs 2-4% for macro-influencers
+- **Lower Fraud:** Credible audience percentages of 85-95% vs 60-75% for larger accounts
+- **Cost Efficiency:** €200-500 per post vs €5,000-20,000 for macro, allowing more creator partnerships
+
+---`;
+  } else if (strategy.goalType === 'awareness') {
+    return `### 📢 Awareness-Focused Approach
+
+${strategyExplanation}
+
+This balanced approach prioritizes reach while maintaining authenticity through a strategic mix of influencer tiers. We allocate ${(strategy.macroWeight * 100).toFixed(0)}% of budget to macro-influencers for maximum impression delivery.
+
+---`;
+  } else {
+    return `### 🎯 Strategic Approach
+
+${strategyExplanation}
+
+---`;
+  }
+})()}
 
 [INFLUENCER_SECTION_PLACEHOLDER]
 
@@ -549,7 +746,57 @@ Based on tiered engagement analysis and evidence-based reach rates:
 
 ${(() => {
   const tieredMetrics = calculateTieredMetrics(influencers);
-  return `<table>
+  const impressionGoal = extractImpressionGoal(brief);
+  
+  // Check if we need hybrid strategy
+  if (impressionGoal && impressionGoal > tieredMetrics.totalImpressions * 1.2) {
+    // Client has an impression goal that organic reach can't meet
+    const hybridStrategy = calculateHybridStrategy(tieredMetrics, impressionGoal);
+    
+    return `
+**⚠️ STRATEGIC CONFLICT DETECTED:**
+
+Your brief requests **${impressionGoal.toLocaleString()} impressions**, but the selected influencer team can organically deliver **${tieredMetrics.totalImpressions.toLocaleString()} impressions** (**${hybridStrategy.shortfallPercentage.toFixed(0)}% shortfall**).
+
+You cannot achieve all campaign goals with organic reach alone. We recommend a **Hybrid Strategy** that separates content creation from media distribution.
+
+---
+
+### 💡 Recommended: Hybrid Strategy
+
+<table>
+<tr>
+<th>Metric</th>
+<th>Total Impressions</th>
+<th>Blended CPM</th>
+</tr>
+<tr>
+<td><strong>TOTAL</strong></td>
+<td><strong>${hybridStrategy.totalImpressions.toLocaleString()}</strong></td>
+<td><strong>€${hybridStrategy.blendedCPM.toFixed(2)}</strong></td>
+</tr>
+</table>
+
+**Campaign Breakdown:**
+- **Total Budget Required:** €${hybridStrategy.totalBudget.toFixed(2)}
+- **Phase 1 (Content & Authenticity):** €${hybridStrategy.organicBudget.toFixed(2)} → ${hybridStrategy.organicImpressions.toLocaleString()} organic impressions
+- **Phase 2 (Paid Amplification):** €${hybridStrategy.paidAmplificationBudget.toFixed(2)} → ${hybridStrategy.paidAmplificationImpressions.toLocaleString()} paid impressions
+- **Quality Focus:** ${tieredMetrics.highROIPercentage.toFixed(0)}% of content budget in Tier 1 & 2 (conversion-driving influencers)
+
+**Why This Works:**
+1. **Phase 1 - Content Creation (€${hybridStrategy.organicBudget.toFixed(2)}):** Partner with ${tieredMetrics.totalInfluencers} high-engagement influencers to create authentic, credible content that drives real conversions and brand trust.
+
+2. **Phase 2 - Paid Amplification (€${hybridStrategy.paidAmplificationBudget.toFixed(2)}):** Use Influencer Whitelisted Ads to amplify that authentic content to ${hybridStrategy.paidAmplificationImpressions.toLocaleString()} additional people at €${hybridStrategy.paidCPM.toFixed(2)} CPM.
+
+**Result:** You get the **authenticity** of Tier 1 influencers AND the **mass reach** of a ${impressionGoal.toLocaleString()}-impression campaign.
+
+**Organic Content Tier Performance:**
+${tieredMetrics.tiers.map(tier => 
+  `- **${tier.tierLabel}:** ${tier.influencers.length} influencers | ${tier.estimatedImpressions.toLocaleString()} organic impressions | €${tier.strategicCPM.toFixed(2)} CPM`
+).join('\n')}`;
+  } else {
+    // Standard organic-only projection
+    return `<table>
 <tr>
 <th>Total Impressions</th>
 <th>Blended CPM</th>
@@ -563,11 +810,13 @@ ${(() => {
 **Campaign Breakdown:**
 - **Total Budget (Implied):** €${tieredMetrics.totalBudget.toFixed(2)}
 - **Quality Focus:** ${tieredMetrics.highROIPercentage.toFixed(0)}% of budget in Tier 1 & 2 (conversion-driving influencers)
+${impressionGoal ? `- **Impression Goal:** ${impressionGoal.toLocaleString()} (✅ **Achievable** with organic reach)` : ''}
 
 **Tier Performance:**
 ${tieredMetrics.tiers.map(tier => 
   `- **${tier.tierLabel}:** ${tier.influencers.length} influencers | ${tier.estimatedImpressions.toLocaleString()} impressions | €${tier.strategicCPM.toFixed(2)} CPM`
 ).join('\n')}`;
+  }
 })()}
 
 ### ✅ Key Performance Indicators
@@ -715,7 +964,15 @@ Return ONLY the markdown content, no additional commentary or wrapper text.`;
     markdown = markdown.replace(/\n---\n---\n/g, '\n---\n');
     markdown = markdown.trim();
 
-    return markdown;
+    // Step 2: Reflection & Refinement
+    // Run the content through a second LLM pass to improve quality and specificity
+    logInfo('Starting markdown refinement (second pass)', {
+      initialLength: markdown.length
+    });
+    
+    const refinedMarkdown = await refineMarkdownContent(markdown, brief, influencers);
+    
+    return refinedMarkdown;
   } catch (error) {
     logError(error, { function: 'generateMarkdownContent' });
     

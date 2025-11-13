@@ -240,6 +240,132 @@ ${totalRow}`;
 };
 
 /**
+ * Hybrid strategy for when organic impressions can't meet client goals
+ */
+export interface HybridStrategy {
+  organicImpressions: number;
+  organicBudget: number;
+  impressionGoal: number;
+  impressionShortfall: number;
+  paidAmplificationImpressions: number;
+  paidAmplificationBudget: number;
+  paidCPM: number; // Lower CPM for pure media buy
+  totalImpressions: number;
+  totalBudget: number;
+  blendedCPM: number;
+  shortfallPercentage: number;
+  needsHybridStrategy: boolean;
+}
+
+/**
+ * Calculate hybrid strategy when organic reach can't meet impression goals
+ * @param organicMetrics - The organic campaign metrics from calculateTieredMetrics
+ * @param impressionGoal - Client's target impressions (from brief)
+ * @param paidCPM - CPM for paid amplification (default: €18)
+ */
+export const calculateHybridStrategy = (
+  organicMetrics: TieredCampaignMetrics,
+  impressionGoal: number,
+  paidCPM: number = 18.00
+): HybridStrategy => {
+  const organicImpressions = organicMetrics.totalImpressions;
+  const organicBudget = organicMetrics.totalBudget;
+  
+  // Check if we need hybrid strategy
+  const needsHybridStrategy = impressionGoal > organicImpressions;
+  
+  if (!needsHybridStrategy) {
+    // Organic impressions already meet or exceed goal
+    return {
+      organicImpressions,
+      organicBudget,
+      impressionGoal,
+      impressionShortfall: 0,
+      paidAmplificationImpressions: 0,
+      paidAmplificationBudget: 0,
+      paidCPM: 0,
+      totalImpressions: organicImpressions,
+      totalBudget: organicBudget,
+      blendedCPM: organicMetrics.blendedCPM,
+      shortfallPercentage: 0,
+      needsHybridStrategy: false
+    };
+  }
+  
+  // Calculate shortfall
+  const impressionShortfall = impressionGoal - organicImpressions;
+  const shortfallPercentage = (impressionShortfall / impressionGoal) * 100;
+  
+  // Calculate paid amplification needs
+  const paidAmplificationBudget = (impressionShortfall / 1000) * paidCPM;
+  
+  // Calculate totals
+  const totalBudget = organicBudget + paidAmplificationBudget;
+  const totalImpressions = impressionGoal; // We're targeting the goal
+  const blendedCPM = (totalBudget / totalImpressions) * 1000;
+  
+  return {
+    organicImpressions,
+    organicBudget,
+    impressionGoal,
+    impressionShortfall,
+    paidAmplificationImpressions: impressionShortfall,
+    paidAmplificationBudget,
+    paidCPM,
+    totalImpressions,
+    totalBudget,
+    blendedCPM,
+    shortfallPercentage,
+    needsHybridStrategy: true
+  };
+};
+
+/**
+ * Extract impression goal from brief if explicitly stated
+ * Looks for patterns like: "2M impressions", "reach 2,000,000 people", "alcanzar 2M de impresiones"
+ */
+export const extractImpressionGoal = (brief: {
+  campaignGoals?: string[];
+  additionalNotes?: string;
+  brandRequirements?: string[];
+}): number | null => {
+  const textToSearch = [
+    ...(brief.campaignGoals || []),
+    brief.additionalNotes || '',
+    ...(brief.brandRequirements || [])
+  ].join(' ').toLowerCase();
+  
+  // Patterns to match impression goals
+  const patterns = [
+    // "2M impressions", "2 million impressions"
+    /(\d+(?:\.\d+)?)\s*(?:m|million)\s+(?:impressions|impresiones)/i,
+    // "2,000,000 impressions"
+    /(\d{1,3}(?:,\d{3})+)\s+(?:impressions|impresiones)/i,
+    // "alcanzar 2M de impresiones" (Spanish)
+    /alcanzar\s+(\d+(?:\.\d+)?)\s*(?:m|million)\s+(?:de\s+)?(?:impressions|impresiones)/i,
+    // "reach 2M people/users"
+    /reach\s+(\d+(?:\.\d+)?)\s*(?:m|million)\s+(?:people|users|personas)/i,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = textToSearch.match(pattern);
+    if (match) {
+      const numStr = match[1].replace(/,/g, ''); // Remove commas
+      let num = parseFloat(numStr);
+      
+      // Convert M/million to actual number
+      if (textToSearch.includes('m') || textToSearch.includes('million')) {
+        num = num * 1000000;
+      }
+      
+      return Math.round(num);
+    }
+  }
+  
+  return null;
+};
+
+/**
  * Generate strategic recommendations based on tiered metrics
  */
 export const generateTierRecommendations = (metrics: TieredCampaignMetrics): string[] => {

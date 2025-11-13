@@ -13,6 +13,7 @@ import {
   getReachRate, 
   getTierLabel 
 } from "./tiered-cpm-calculator";
+import { detectCampaignStrategy, formatStrategyExplanation } from "./goal-detector";
 
 // Initialize OpenAI for enrichment
 const openai = new OpenAI({
@@ -73,19 +74,26 @@ export const matchInfluencersServer = async (
       maxBudget: brief.budget
     });
     
-    // Fetch from Firestore using Admin SDK
+    // Fetch from Firestore using Admin SDK with generous pool size
     const pool = await searchInfluencersServer({
       platforms: brief.platformPreferences,
       locations: brief.targetDemographics.location,
       contentCategories: brief.contentThemes,
       maxBudget: brief.budget > 0 ? brief.budget : undefined,
-    }, 500); // Increased from 200 to 500 to ensure we have enough candidates
+    }, 1000); // Large pool (1000) to maximize selection options for budget utilization
     
     console.log(`✅ [SERVER] Fetched ${pool.length} influencers from Firestore`);
     
-    // Step 1: Filter influencers by basic criteria
-    const filtered = filterByBasicCriteria(brief, pool);
-    console.log(`📝 [SERVER] After basic criteria filter: ${filtered.length} influencers`);
+    // Step 1: Filter influencers by basic criteria (STRICT)
+    let filtered = filterByBasicCriteria(brief, pool, 'strict');
+    console.log(`📝 [SERVER] After STRICT criteria filter: ${filtered.length} influencers`);
+
+    // If pool is too small (<10 influencers), try RELAXED filtering
+    if (filtered.length < 10) {
+      console.log(`⚠️  [SERVER] Pool too small (${filtered.length}), trying RELAXED filtering...`);
+      filtered = filterByBasicCriteria(brief, pool, 'relaxed');
+      console.log(`📝 [SERVER] After RELAXED criteria filter: ${filtered.length} influencers`);
+    }
 
     // Step 2: Use LAYAI scoring algorithm to rank best matches
     const ranked = rankInfluencersWithLAYAI(brief, filtered);
@@ -97,9 +105,12 @@ export const matchInfluencersServer = async (
       return await handleMultiPhaseCampaign(brief, ranked);
     }
 
-    // Step 4: Select optimal mix (macro/micro/nano)
-    let selected = selectOptimalMix(ranked, brief.budget);
-    console.log(`🎯 [SERVER] After optimal mix selection: ${selected.length} influencers`);
+    // Step 4: Select optimal mix based on campaign strategy (macro/micro/nano)
+    const strategy = detectCampaignStrategy(brief);
+    console.log(`🎯 [SERVER] Detected campaign strategy: ${strategy.goalType} (nano: ${(strategy.nanoWeight * 100).toFixed(0)}%, micro: ${(strategy.microWeight * 100).toFixed(0)}%, macro: ${(strategy.macroWeight * 100).toFixed(0)}%)`);
+    
+    let selected = selectOptimalMixWithStrategy(ranked, brief.budget, strategy);
+    console.log(`🎯 [SERVER] After strategy-based mix selection: ${selected.length} influencers`);
 
     // Step 5: Ensure geographic distribution if required (Square style)
     if (brief.geographicDistribution?.requireDistribution) {
@@ -179,7 +190,9 @@ const handleMultiPhaseCampaign = async (
     console.log(`   Available pool after filtering: ${phasePool.length} influencers`);
 
     // Select influencers for this phase
-    const phaseSelected = selectOptimalMix(phasePool, phase.budgetAmount);
+    // Use strategy-based selection for multi-phase campaigns too
+    const phaseStrategy = detectCampaignStrategy(brief);
+    const phaseSelected = selectOptimalMixWithStrategy(phasePool, phase.budgetAmount, phaseStrategy);
     
     // Ensure we get the requested count (or close to it)
     const finalPhaseSelection = phaseSelected.slice(0, phase.creatorCount);
@@ -217,7 +230,8 @@ const handleMultiPhaseCampaign = async (
 
 const filterByBasicCriteria = (
   brief: ClientBrief,
-  pool: Influencer[]
+  pool: Influencer[],
+  mode: 'strict' | 'relaxed' = 'strict'
 ): Influencer[] => {
   // If pool is empty, return empty
   if (pool.length === 0) {
@@ -225,10 +239,10 @@ const filterByBasicCriteria = (
     return [];
   }
 
-  console.log(`🔍 [SERVER] Filtering ${pool.length} influencers with basic criteria...`);
+  console.log(`🔍 [SERVER] Filtering ${pool.length} influencers with ${mode.toUpperCase()} criteria...`);
   
   const filtered = pool.filter(influencer => {
-    // Platform match (REQUIRED)
+    // Platform match (ALWAYS REQUIRED)
     const platformMatch = brief.platformPreferences.includes(influencer.platform);
     if (!platformMatch) {
       return false;
@@ -315,9 +329,9 @@ const filterByBasicCriteria = (
       }
     }
     
-    // Location match - bidirectional (location contains filter or vice versa)
-    // If no location specified, skip location filter
-    const locationMatch = brief.targetDemographics.location.length === 0 || 
+    // Location match - STRICT: Must match, RELAXED: Optional (just gives bonus in ranking)
+    const locationMatch = mode === 'relaxed' || 
+      brief.targetDemographics.location.length === 0 || 
       influencer.demographics.location.some(loc =>
         brief.targetDemographics.location.some(briefLoc =>
           loc.toLowerCase().includes(briefLoc.toLowerCase()) ||
@@ -325,31 +339,17 @@ const filterByBasicCriteria = (
         )
       );
     
-    // Budget feasibility - VERY LENIENT (allow influencers up to full budget per influencer if needed)
+    // Budget feasibility - Always check (allow influencers up to full budget per influencer)
     const estimatedCost = influencer.rateCard.post * 3;
     const budgetMatch = brief.budget === 0 || estimatedCost <= brief.budget;
     
-    // Engagement rate threshold - VERY LENIENT
-    const engagementMatch = influencer.engagement >= 0.3;
+    // Engagement rate threshold - STRICT: 0.3%, RELAXED: No minimum
+    const engagementMatch = mode === 'relaxed' || influencer.engagement >= 0.3;
 
     return platformMatch && locationMatch && budgetMatch && engagementMatch;
   });
 
-  console.log(`✅ [SERVER] Basic criteria filter: ${filtered.length} influencers passed (from ${pool.length})`);
-  
-  // If we filtered out too many, relax location filter
-  if (filtered.length < 3 && brief.targetDemographics.location.length > 0) {
-    console.log(`⚠️  [SERVER] Only ${filtered.length} influencers passed strict filters. Relaxing location filter...`);
-    const relaxed = pool.filter(influencer => {
-      const platformMatch = brief.platformPreferences.includes(influencer.platform);
-      const estimatedCost = influencer.rateCard.post * 3;
-      const budgetMatch = brief.budget === 0 || estimatedCost <= brief.budget;
-      const engagementMatch = influencer.engagement >= 0.3;
-      return platformMatch && budgetMatch && engagementMatch; // Remove location requirement
-    });
-    console.log(`✅ [SERVER] Relaxed filter: ${relaxed.length} influencers passed`);
-    return relaxed;
-  }
+  console.log(`✅ [SERVER] ${mode.toUpperCase()} filter: ${filtered.length} influencers passed (from ${pool.length})`);
 
   return filtered;
 };
@@ -563,6 +563,148 @@ const ensureGeographicDistribution = (
   return selected;
 };
 
+/**
+ * Select optimal influencer mix based on campaign strategy
+ * BUDGET-AWARE: Tries to use 80-100% of available budget
+ * STRATEGY-AWARE: Prioritizes nano-influencers for sales, macro for awareness
+ */
+const selectOptimalMixWithStrategy = (
+  ranked: Influencer[],
+  budget: number,
+  strategy: ReturnType<typeof detectCampaignStrategy>
+): Influencer[] => {
+  if (ranked.length === 0) return [];
+  if (budget === 0) return selectOptimalMix(ranked, 0); // Fallback to old logic if no budget
+
+  const selected: Influencer[] = [];
+  
+  // Define tiers
+  const nano = ranked.filter(i => i.followers >= 1000 && i.followers < 50000);
+  const micro = ranked.filter(i => i.followers >= 50000 && i.followers < 500000);
+  const macro = ranked.filter(i => i.followers >= 500000);
+  
+  console.log(`📊 [SERVER] Available pool: ${nano.length} nano, ${micro.length} micro, ${macro.length} macro`);
+  
+  // Calculate budget per tier
+  const nanoBudget = budget * strategy.nanoWeight;
+  const microBudget = budget * strategy.microWeight;
+  const macroBudget = budget * strategy.macroWeight;
+  
+  // Target: Use 80-100% of total budget
+  let totalSpent = 0;
+  
+  // STEP 1: Fill nano tier (highest priority for sales campaigns)
+  console.log(`💫 [SERVER] Selecting nano-influencers (budget: €${nanoBudget.toFixed(0)})`);
+  for (const influencer of nano) {
+    if (selected.some(s => s.id === influencer.id)) continue;
+    
+    const cost = influencer.rateCard.post * 3;
+    const tierSpent = selected
+      .filter(s => s.followers < 50000)
+      .reduce((sum, s) => sum + (s.rateCard.post * 3), 0);
+    
+    // Allow some budget flexibility (±30%) per tier
+    if (tierSpent < nanoBudget * 1.3 && totalSpent + cost <= budget) {
+      selected.push(influencer);
+      totalSpent += cost;
+    }
+  }
+  console.log(`   Selected ${selected.filter(s => s.followers < 50000).length} nano-influencers (€${selected.filter(s => s.followers < 50000).reduce((sum, s) => sum + s.rateCard.post * 3, 0).toFixed(0)})`);
+  
+  // STEP 2: Fill micro tier
+  console.log(`✨ [SERVER] Selecting micro-influencers (budget: €${microBudget.toFixed(0)})`);
+  for (const influencer of micro) {
+    if (selected.some(s => s.id === influencer.id)) continue;
+    
+    const cost = influencer.rateCard.post * 3;
+    const tierSpent = selected
+      .filter(s => s.followers >= 50000 && s.followers < 500000)
+      .reduce((sum, s) => sum + (s.rateCard.post * 3), 0);
+    
+    if (tierSpent < microBudget * 1.3 && totalSpent + cost <= budget) {
+      selected.push(influencer);
+      totalSpent += cost;
+    }
+  }
+  console.log(`   Selected ${selected.filter(s => s.followers >= 50000 && s.followers < 500000).length} micro-influencers (€${selected.filter(s => s.followers >= 50000 && s.followers < 500000).reduce((sum, s) => sum + s.rateCard.post * 3, 0).toFixed(0)})`);
+  
+  // STEP 3: Fill macro tier
+  console.log(`⭐ [SERVER] Selecting macro-influencers (budget: €${macroBudget.toFixed(0)})`);
+  for (const influencer of macro) {
+    if (selected.some(s => s.id === influencer.id)) continue;
+    
+    const cost = influencer.rateCard.post * 3;
+    const tierSpent = selected
+      .filter(s => s.followers >= 500000)
+      .reduce((sum, s) => sum + (s.rateCard.post * 3), 0);
+    
+    if (tierSpent < macroBudget * 1.3 && totalSpent + cost <= budget) {
+      selected.push(influencer);
+      totalSpent += cost;
+    }
+  }
+  console.log(`   Selected ${selected.filter(s => s.followers >= 500000).length} macro-influencers (€${selected.filter(s => s.followers >= 500000).reduce((sum, s) => sum + s.rateCard.post * 3, 0).toFixed(0)})`);
+  
+  // STEP 4: Greedy fill to maximize budget utilization (80-100%)
+  const minTargetUtilization = 0.8; // 80%
+  const maxTargetUtilization = 0.95; // 95%
+  
+  if (totalSpent < budget * minTargetUtilization && ranked.length > selected.length) {
+    console.log(`📈 [SERVER] Budget under-utilized (${((totalSpent / budget) * 100).toFixed(0)}%). Greedy fill to maximize ROI...`);
+    
+    // Prioritize by strategy (nano for sales, macro for awareness)
+    const remaining = ranked.filter(r => !selected.some(s => s.id === r.id));
+    const sortedRemaining = strategy.goalType === 'sales'
+      ? remaining.sort((a, b) => a.followers - b.followers) // Smallest first for sales (better ROI)
+      : remaining.sort((a, b) => b.followers - a.followers); // Largest first for awareness (max reach)
+    
+    let addedCount = 0;
+    for (const influencer of sortedRemaining) {
+      const cost = influencer.rateCard.post * 3;
+      if (totalSpent + cost <= budget) {
+        selected.push(influencer);
+        totalSpent += cost;
+        addedCount++;
+        console.log(`     + Added ${influencer.name} (@${influencer.handle}, ${influencer.followers.toLocaleString()} followers, €${cost.toFixed(0)}) - Total: €${totalSpent.toFixed(0)} (${((totalSpent/budget)*100).toFixed(0)}%)`);
+        
+        // Stop when we reach target utilization or run out of budget
+        if (totalSpent >= budget * maxTargetUtilization) {
+          console.log(`   ✅ Target utilization reached: ${((totalSpent/budget)*100).toFixed(0)}%`);
+          break;
+        }
+      }
+    }
+    
+    if (addedCount > 0) {
+      console.log(`   ✅ Greedy fill added ${addedCount} influencers`);
+    } else {
+      console.log(`   ⚠️  No additional influencers fit within budget`);
+    }
+  }
+  
+  const utilizationPercent = ((totalSpent / budget) * 100).toFixed(1);
+  console.log(`💰 [SERVER] Final budget utilization: €${totalSpent.toFixed(0)} / €${budget.toFixed(0)} (${utilizationPercent}%)`);
+  console.log(`👥 [SERVER] Final selection: ${selected.length} influencers (${selected.filter(s => s.followers < 50000).length} nano, ${selected.filter(s => s.followers >= 50000 && s.followers < 500000).length} micro, ${selected.filter(s => s.followers >= 500000).length} macro)`);
+  
+  // Warn if budget utilization is low
+  if (totalSpent < budget * minTargetUtilization) {
+    console.log(`⚠️  [SERVER] Budget utilization below target: ${utilizationPercent}% (target: ${(minTargetUtilization * 100).toFixed(0)}%)`);
+    console.log(`   💡 This may indicate limited influencer pool for the specified criteria`);
+  }
+  
+  // Ensure minimum of 2 influencers (lowered from 3 to be less aggressive)
+  if (selected.length < 2) {
+    console.log(`⚠️  [SERVER] Only ${selected.length} influencers selected. Insufficient pool for campaign.`);
+    console.log(`   💡 Consider broadening criteria (location, interests) or increasing budget`);
+  }
+  
+  return selected;
+};
+
+/**
+ * OLD LOGIC: Kept as fallback
+ * Select optimal mix without strategy (legacy behavior)
+ */
 const selectOptimalMix = (
   ranked: Influencer[],
   budget: number

@@ -40,17 +40,24 @@ const PRESENTATION_STEPS: ProcessingStep[] = [
   },
   {
     id: "generate",
-    label: "Generating slide content with AI",
+    label: "Generating presentation content",
     icon: <Sparkles className="w-4 h-4" />,
     color: "text-pink-600 dark:text-pink-400",
-    estimatedDuration: 15000,
+    estimatedDuration: 18000, // Initial generation
+  },
+  {
+    id: "refine",
+    label: "Refining quality and specificity",
+    icon: <Sparkles className="w-4 h-4" />,
+    color: "text-indigo-600 dark:text-indigo-400",
+    estimatedDuration: 18000, // Reflection pass
   },
   {
     id: "finalize",
-    label: "Creating professional presentation...",
+    label: "Creating professional slides",
     icon: <Presentation className="w-4 h-4" />,
     color: "text-orange-600 dark:text-orange-400",
-    estimatedDuration: 5000,
+    estimatedDuration: 6000,
   },
 ];
 
@@ -78,10 +85,17 @@ const TEXT_STEPS: ProcessingStep[] = [
   },
   {
     id: "generate",
-    label: "Writing recommendations",
+    label: "Writing comprehensive recommendations",
     icon: <Sparkles className="w-4 h-4" />,
     color: "text-pink-600 dark:text-pink-400",
-    estimatedDuration: 10000,
+    estimatedDuration: 35000, // Initial generation (GPT-4o)
+  },
+  {
+    id: "refine",
+    label: "Refining quality and brand alignment",
+    icon: <Sparkles className="w-4 h-4" />,
+    color: "text-indigo-600 dark:text-indigo-400",
+    estimatedDuration: 30000, // Reflection pass (GPT-4o-mini)
   },
 ];
 
@@ -231,7 +245,10 @@ const ProcessingOverlay = ({ mode }: ProcessingOverlayProps) => {
           className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
         >
           <p className="text-xs text-blue-700 dark:text-blue-300">
-            💡 <strong>Tip:</strong> This usually takes 30-60 seconds
+            💡 <strong>Tip:</strong> This usually takes {mode === "presentation" ? "45-60" : "60-90"} seconds
+          </p>
+          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+            ✨ Our AI reviews and refines its work for maximum quality
           </p>
         </motion.div>
       </motion.div>
