@@ -19,42 +19,42 @@ interface ProcessingOverlayProps {
 const PRESENTATION_STEPS: ProcessingStep[] = [
   {
     id: "parse",
-    label: "Processing brief requirements",
+    label: "Procesando requisitos del brief",
     icon: <FileCheck className="w-4 h-4" />,
     color: "text-green-600 dark:text-green-400",
     estimatedDuration: 3000,
   },
   {
     id: "brand",
-    label: "Looking up brand intelligence",
+    label: "Buscando inteligencia de marca",
     icon: <Brain className="w-4 h-4" />,
     color: "text-blue-600 dark:text-blue-400",
     estimatedDuration: 2000,
   },
   {
     id: "match",
-    label: "Matching influencers to target audience",
+    label: "Emparejando influencers con audiencia objetivo",
     icon: <Target className="w-4 h-4" />,
     color: "text-purple-600 dark:text-purple-400",
     estimatedDuration: 5000,
   },
   {
     id: "generate",
-    label: "Generating presentation content",
+    label: "Generando contenido de presentación",
     icon: <Sparkles className="w-4 h-4" />,
     color: "text-pink-600 dark:text-pink-400",
     estimatedDuration: 18000, // Initial generation
   },
   {
     id: "refine",
-    label: "Refining quality and specificity",
+    label: "Refinando calidad y especificidad",
     icon: <Sparkles className="w-4 h-4" />,
     color: "text-indigo-600 dark:text-indigo-400",
     estimatedDuration: 18000, // Reflection pass
   },
   {
     id: "finalize",
-    label: "Creating professional slides",
+    label: "Creando diapositivas profesionales",
     icon: <Presentation className="w-4 h-4" />,
     color: "text-orange-600 dark:text-orange-400",
     estimatedDuration: 6000,
@@ -64,35 +64,35 @@ const PRESENTATION_STEPS: ProcessingStep[] = [
 const TEXT_STEPS: ProcessingStep[] = [
   {
     id: "parse",
-    label: "Analyzing brief",
+    label: "Analizando brief",
     icon: <FileCheck className="w-4 h-4" />,
     color: "text-green-600 dark:text-green-400",
     estimatedDuration: 2000,
   },
   {
     id: "brand",
-    label: "Looking up brand intelligence",
+    label: "Buscando inteligencia de marca",
     icon: <Brain className="w-4 h-4" />,
     color: "text-blue-600 dark:text-blue-400",
     estimatedDuration: 2000,
   },
   {
     id: "match",
-    label: "Finding perfect influencer matches",
+    label: "Encontrando emparejamientos perfectos de influencers",
     icon: <Target className="w-4 h-4" />,
     color: "text-purple-600 dark:text-purple-400",
     estimatedDuration: 5000,
   },
   {
     id: "generate",
-    label: "Writing comprehensive recommendations",
+    label: "Escribiendo recomendaciones completas",
     icon: <Sparkles className="w-4 h-4" />,
     color: "text-pink-600 dark:text-pink-400",
     estimatedDuration: 35000, // Initial generation (GPT-4o)
   },
   {
     id: "refine",
-    label: "Refining quality and brand alignment",
+    label: "Refinando calidad y alineación de marca",
     icon: <Sparkles className="w-4 h-4" />,
     color: "text-indigo-600 dark:text-indigo-400",
     estimatedDuration: 30000, // Reflection pass (GPT-4o-mini)
@@ -156,21 +156,21 @@ const ProcessingOverlay = ({ mode }: ProcessingOverlayProps) => {
 
         {/* Title */}
         <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-          {mode === "presentation" ? "Generating Your Presentation" : "Creating Your Response"}
+          {mode === "presentation" ? "Generando Tu Presentación" : "Creando Tu Respuesta"}
         </h3>
 
         {/* Subtitle */}
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           {mode === "presentation"
-            ? "Our AI is analyzing your brief, matching influencers, and creating your slides..."
-            : "Our AI is analyzing your brief and finding the perfect influencer matches..."}
+            ? "Nuestra IA está analizando tu brief, emparejando influencers y creando tus diapositivas..."
+            : "Nuestra IA está analizando tu brief y encontrando los emparejamientos perfectos de influencers..."}
         </p>
 
         {/* Progress Bar */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Progress
+              Progreso
             </span>
             <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
               {Math.round(progress)}%
@@ -245,10 +245,10 @@ const ProcessingOverlay = ({ mode }: ProcessingOverlayProps) => {
           className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
         >
           <p className="text-xs text-blue-700 dark:text-blue-300">
-            💡 <strong>Tip:</strong> This usually takes {mode === "presentation" ? "45-60" : "60-90"} seconds
+            💡 <strong>Consejo:</strong> Esto generalmente toma {mode === "presentation" ? "45-60" : "60-90"} segundos
           </p>
           <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-            ✨ Our AI reviews and refines its work for maximum quality
+            ✨ Nuestra IA revisa y refina su trabajo para máxima calidad
           </p>
         </motion.div>
       </motion.div>

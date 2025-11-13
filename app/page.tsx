@@ -32,7 +32,7 @@ const HomePage = () => {
     
     const handleOffline = () => {
       setIsOnline(false);
-      setError('You are currently offline. Please check your internet connection.');
+      setError('Estás actualmente sin conexión. Por favor verifica tu conexión a internet.');
     };
     
     // Check initial state
@@ -75,13 +75,13 @@ const HomePage = () => {
   const handleSubmit = async (brief: ClientBrief, engine: PresentationEngine = "standard") => {
     // Check budget is provided
     if (!brief.budget || brief.budget === 0) {
-      setError('Please enter a campaign budget before generating your presentation.');
+      setError('Por favor ingresa un presupuesto de campaña antes de generar tu presentación.');
       return;
     }
     
     // Check online status
     if (!isOnline) {
-      setError('You are offline. Please check your internet connection and try again.');
+      setError('Estás sin conexión. Por favor verifica tu conexión a internet e intenta nuevamente.');
       return;
     }
     
@@ -116,12 +116,12 @@ const HomePage = () => {
           } else {
             // Presenton failed, fall back to standard
             console.warn("⚠️ Presenton generation failed, falling back to standard generator");
-            setError("Presenton is not available. Using standard generator instead.");
+            setError("Presenton no está disponible. Usando generador estándar en su lugar.");
             // Fall through to standard generator
           }
         } catch (presentonError) {
           console.error("❌ Presenton error:", presentonError);
-          setError("Presenton generation failed. Using standard generator instead.");
+          setError("Generación con Presenton falló. Usando generador estándar en su lugar.");
           // Fall through to standard generator
         }
       }
@@ -195,13 +195,13 @@ const HomePage = () => {
   const handleGenerateTextResponse = async (brief: ClientBrief) => {
     // Check budget is provided
     if (!brief.budget || brief.budget === 0) {
-      setError('Please enter a campaign budget before generating influencer recommendations.');
+      setError('Por favor ingresa un presupuesto de campaña antes de generar recomendaciones de influencers.');
       return;
     }
     
     // Check online status
     if (!isOnline) {
-      setError('You are offline. Please check your internet connection and try again.');
+      setError('Estás sin conexión. Por favor verifica tu conexión a internet e intenta nuevamente.');
       return;
     }
     
@@ -286,13 +286,13 @@ const HomePage = () => {
     <div className="min-h-screen bg-white dark:bg-black">
       {/* Animated Hero Section */}
       <HeroSection
-        title="AI-Powered Presentations"
+        title="Presentaciones con IA"
         subtitle={{
-          regular: "Transform briefs into ",
-          gradient: "stunning presentations",
+          regular: "Transforma briefs en ",
+          gradient: "presentaciones impactantes",
         }}
-        description="Our intelligent platform matches influencers to brands and generates professional, client-ready presentations in minutes using advanced AI technology."
-        ctaText="Create Presentation"
+        description="Nuestra plataforma inteligente conecta influencers con marcas y genera presentaciones profesionales listas para el cliente en minutos usando tecnología avanzada de IA."
+        ctaText="Crear Presentación"
         ctaHref="#brief-section"
         onCtaClick={handleScrollToBrief}
         gridOptions={{
@@ -314,10 +314,10 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Why Choose Pretty Presentations?
+              ¿Por qué Elegir Pretty Presentations?
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Everything you need to create professional presentations with AI
+              Todo lo que necesitas para crear presentaciones profesionales con IA
             </p>
           </div>
           
@@ -326,9 +326,9 @@ const HomePage = () => {
               <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4">
                 <Target className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Smart Matching</h3>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Matching Inteligente</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                AI analyzes thousands of influencers to find the perfect fit for your campaign goals and target audience
+                La IA analiza miles de influencers para encontrar el ajuste perfecto para tus objetivos de campaña y audiencia objetivo
               </p>
             </div>
             
@@ -336,9 +336,9 @@ const HomePage = () => {
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
                 <Zap className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Lightning Fast</h3>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Súper Rápido</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Generate complete, client-ready presentations in minutes instead of spending hours on manual work
+                Genera presentaciones completas listas para el cliente en minutos en lugar de pasar horas en trabajo manual
               </p>
             </div>
             
@@ -346,9 +346,9 @@ const HomePage = () => {
               <div className="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center mb-4">
                 <Sparkles className="w-6 h-6 text-pink-600 dark:text-pink-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Professional Quality</h3>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Calidad Profesional</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Agency-standard presentations with beautiful designs that impress clients every single time
+                Presentaciones de nivel agencia con diseños hermosos que impresionan a los clientes cada vez
               </p>
             </div>
           </div>
@@ -360,10 +360,10 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              How It Works
+              Cómo Funciona
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Three simple steps to create your perfect presentation
+              Tres simples pasos para crear tu presentación perfecta
             </p>
           </div>
           
@@ -372,9 +372,9 @@ const HomePage = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Upload className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">1. Upload Brief</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">1. Sube el Brief</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Upload your client brief or fill out our simple form with campaign details
+                Sube tu brief de cliente o completa nuestro formulario simple con los detalles de campaña
               </p>
             </div>
             
@@ -382,9 +382,9 @@ const HomePage = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FileCheck className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">2. AI Processing</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">2. Procesamiento IA</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Our AI analyzes your brief and matches the perfect influencers automatically
+                Nuestra IA analiza tu brief y encuentra los influencers perfectos automáticamente
               </p>
             </div>
             
@@ -392,9 +392,9 @@ const HomePage = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Presentation className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">3. Get Presentation</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">3. Obtén Presentación</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Receive your professional presentation ready to present or customize further
+                Recibe tu presentación profesional lista para presentar o personalizar más
               </p>
             </div>
           </div>
@@ -407,7 +407,7 @@ const HomePage = () => {
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
             <WifiOff className="w-5 h-5" />
             <p className="font-semibold">
-              You are currently offline. Features requiring internet will not work.
+              Estás actualmente sin conexión. Las funciones que requieren internet no funcionarán.
             </p>
           </div>
         </div>
@@ -419,10 +419,10 @@ const HomePage = () => {
 
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Start Creating Now
+              Comienza a Crear Ahora
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Upload your brief or fill out the form below to generate your presentation
+              Sube tu brief o completa el formulario abajo para generar tu presentación
             </p>
           </div>
 
@@ -451,7 +451,7 @@ const HomePage = () => {
                       ? 'text-orange-900 dark:text-orange-300' 
                       : 'text-red-900 dark:text-red-300'
                   }`}>
-                    {rateLimitResetTime ? 'Rate Limit Reached' : 'Error'}
+                    {rateLimitResetTime ? 'Límite de Tasa Alcanzado' : 'Error'}
                   </h3>
                   <p className={
                     rateLimitResetTime 
@@ -472,11 +472,11 @@ const HomePage = () => {
                             {minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : `${seconds}s`}
                           </p>
                           <p className="text-orange-700 dark:text-orange-400 text-xs mt-1">
-                            Try again in
+                            Intenta de nuevo en
                           </p>
                         </div>
                         <p className="text-sm text-orange-600 dark:text-orange-400">
-                          To prevent abuse, we limit requests to 5 per minute. Your limit will reset shortly.
+                          Para prevenir abusos, limitamos las solicitudes a 5 por minuto. Tu límite se restablecerá pronto.
                         </p>
                       </div>
                     );
@@ -500,35 +500,35 @@ const HomePage = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-green-900 dark:text-green-300 text-lg mb-2">
-                    Brief Parsed Successfully!
+                    ¡Brief Analizado Exitosamente!
                   </h3>
                   <p className="text-green-700 dark:text-green-400 mb-4">
-                    We&apos;ve extracted all the information from your brief and pre-filled the form below.
-                    Review the details and make any adjustments before generating your presentation.
+                    Hemos extraído toda la información de tu brief y prellenado el formulario abajo.
+                    Revisa los detalles y haz los ajustes necesarios antes de generar tu presentación.
                   </p>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                       <span className="text-lg">✓</span>
-                      <span>Client: {parsedBrief.clientName}</span>
+                      <span>Cliente: {parsedBrief.clientName}</span>
                     </div>
                     <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                       <span className="text-lg">✓</span>
-                      <span>Budget: €{parsedBrief.budget.toLocaleString()}</span>
+                      <span>Presupuesto: €{parsedBrief.budget.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                       <span className="text-lg">✓</span>
-                      <span>Goals: {parsedBrief.campaignGoals.length}</span>
+                      <span>Objetivos: {parsedBrief.campaignGoals.length}</span>
                     </div>
                     <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                       <span className="text-lg">✓</span>
-                      <span>Platforms: {parsedBrief.platformPreferences.length}</span>
+                      <span>Plataformas: {parsedBrief.platformPreferences.length}</span>
                     </div>
                   </div>
                   <button
                     onClick={handleResetUpload}
                     className="mt-4 text-sm text-green-700 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 underline transition-colors"
                   >
-                    Upload a different brief
+                    Subir un brief diferente
                   </button>
                 </div>
               </div>
@@ -553,20 +553,20 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="text-center">
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Look After You</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">AI-powered influencer talent agency</p>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">Agencia de talentos influencers impulsada por IA</p>
             <p className="text-sm text-gray-500 dark:text-gray-500">
-              Powered by Firebase Vertex AI & Gemini
+              Impulsado por Firebase Vertex AI y Gemini
             </p>
             <div className="mt-6 flex items-center justify-center gap-6">
               <button
                 onClick={() => router.push("/presentations")}
                 className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
               >
-                My Presentations
+                Mis Presentaciones
               </button>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-500 mt-6">
-              © 2025 Pretty Presentations. All rights reserved.
+              © 2025 Pretty Presentations. Todos los derechos reservados.
             </p>
           </div>
         </div>

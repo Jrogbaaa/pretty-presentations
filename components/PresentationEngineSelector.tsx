@@ -68,7 +68,7 @@ const PresentationEngineSelector = ({
   return (
     <div className="space-y-3">
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-        Presentation Engine
+        Motor de Presentación
       </label>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -107,20 +107,20 @@ const PresentationEngineSelector = ({
             
             <div className="flex-1 text-left">
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                Standard Generator
+                Generador Estándar
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Agency-quality templates with Nano Banana images
+                Plantillas de calidad agencia con imágenes Nano Banana
               </p>
               <div className="flex flex-wrap gap-2 mt-2">
                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                  Brand Intelligence
+                  Inteligencia de Marca
                 </span>
                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                  Custom Templates
+                  Plantillas Personalizadas
                 </span>
                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
-                  AI Images
+                  Imágenes IA
                 </span>
               </div>
             </div>
@@ -166,20 +166,20 @@ const PresentationEngineSelector = ({
             
             <div className="flex-1 text-left">
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                Presenton (AI-Enhanced)
+                Presenton (IA Mejorada)
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Open-source AI engine with dynamic layouts
+                Motor IA de código abierto con diseños dinámicos
               </p>
               <div className="flex flex-wrap gap-2 mt-2">
                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                  Free Images
+                  Imágenes Gratis
                 </span>
                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                  HTML/CSS Templates
+                  Plantillas HTML/CSS
                 </span>
                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
-                  75% Cost Savings
+                  75% Ahorro de Costos
                 </span>
               </div>
             </div>
@@ -196,12 +196,12 @@ const PresentationEngineSelector = ({
             ) : presentonAvailable ? (
               <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
                 <CheckCircle2 className="w-3 h-3" />
-                <span className="hidden sm:inline">Online</span>
+                <span className="hidden sm:inline">En Línea</span>
               </div>
             ) : (
               <div className="flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
                 <XCircle className="w-3 h-3" />
-                <span className="hidden sm:inline">Offline</span>
+                <span className="hidden sm:inline">Fuera de Línea</span>
               </div>
             )}
           </div>
@@ -211,9 +211,9 @@ const PresentationEngineSelector = ({
       {/* Status message */}
       {!checkingStatus && !presentonAvailable && (
         <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-          <p className="font-medium">Presenton is not available</p>
+          <p className="font-medium">Presenton no está disponible</p>
           <p className="text-xs mt-1">
-            To enable: Start the Docker container with{" "}
+            Para habilitar: Inicia el contenedor Docker con{" "}
             <code className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">
               ./scripts/presenton-docker.sh start
             </code>

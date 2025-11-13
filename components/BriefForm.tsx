@@ -123,21 +123,21 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
     ) {
       onSubmit(formData as ClientBrief, selectedEngine);
     } else {
-      alert("Please fill in all required fields");
+      alert("Por favor completa todos los campos requeridos");
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-8 p-8 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800">
       <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Client Brief</h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">Fill in the campaign details to generate your presentation</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Brief del Cliente</h2>
+        <p className="mt-2 text-gray-600 dark:text-gray-400">Completa los detalles de la campaña para generar tu presentación</p>
       </div>
 
       {/* Client Name */}
       <div>
         <label htmlFor="clientName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Client Name *
+          Nombre del Cliente *
         </label>
         <input
           type="text"
@@ -145,7 +145,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
           value={formData.clientName}
           onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
           className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-          placeholder="e.g., Starbucks, Nike, Red Bull"
+          placeholder="ej., Starbucks, Nike, Red Bull"
           required
         />
       </div>
@@ -153,7 +153,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
       {/* Campaign Goals */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Campaign Goals *
+          Objetivos de Campaña *
         </label>
         <div className="flex gap-2 mb-2">
           <input
@@ -167,14 +167,14 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
               }
             }}
             className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-            placeholder="e.g., Increase brand awareness, Drive product sales"
+            placeholder="ej., Aumentar conocimiento de marca, Impulsar ventas de productos"
           />
           <button
             type="button"
             onClick={() => handleAddItem("campaignGoals", currentGoal, setCurrentGoal)}
             className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg hover:shadow-xl"
           >
-            Add
+            Añadir
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -200,7 +200,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
       {/* Budget */}
       <div>
         <label htmlFor="budget" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Budget (€) *
+          Presupuesto (€) *
         </label>
         
         {/* Budget Warning Banner */}
@@ -209,9 +209,9 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
             <div className="flex items-start gap-3">
               <span className="text-amber-600 dark:text-amber-400 text-xl flex-shrink-0">⚠️</span>
               <div>
-                <h4 className="font-semibold text-amber-900 dark:text-amber-300">Budget Required</h4>
+                <h4 className="font-semibold text-amber-900 dark:text-amber-300">Presupuesto Requerido</h4>
                 <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-                  No budget was found in your brief. Please enter a campaign budget below to generate influencer recommendations.
+                  No se encontró presupuesto en tu brief. Por favor ingresa un presupuesto de campaña abajo para generar recomendaciones de influencers.
                 </p>
               </div>
             </div>
@@ -224,7 +224,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
           value={formData.budget || ""}
           onChange={(e) => setFormData({ ...formData, budget: parseFloat(e.target.value) })}
           className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-          placeholder="e.g., 50000"
+          placeholder="ej., 50000"
           min="0"
           step="1000"
           required
@@ -233,12 +233,12 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
 
       {/* Target Demographics */}
       <div className="space-y-4 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Target Demographics *</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Demográficos Objetivo *</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="ageRange" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Age Range
+              Rango de Edad
             </label>
             <input
               type="text"
@@ -254,14 +254,14 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
                 })
               }
               className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-              placeholder="e.g., 18-35"
+              placeholder="ej., 18-35"
               required
             />
           </div>
 
           <div>
             <label htmlFor="gender" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Gender
+              Género
             </label>
             <input
               type="text"
@@ -277,14 +277,14 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
                 })
               }
               className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-              placeholder="e.g., All genders, 60% Female"
+              placeholder="ej., Todos los géneros, 60% Femenino"
             />
           </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Locations
+            Ubicaciones
           </label>
           <div className="flex gap-2 mb-2">
             <input
@@ -298,14 +298,14 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
                 }
               }}
               className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-              placeholder="e.g., Spain, Madrid, Barcelona"
+              placeholder="ej., España, Madrid, Barcelona"
             />
             <button
               type="button"
               onClick={handleAddLocation}
               className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg hover:shadow-xl"
             >
-              Add
+              Añadir
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -340,7 +340,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Interests
+            Intereses
           </label>
           <div className="flex gap-2 mb-2">
             <input
@@ -354,14 +354,14 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
                 }
               }}
               className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-              placeholder="e.g., Fashion, Technology, Sports"
+              placeholder="ej., Moda, Tecnología, Deportes"
             />
             <button
               type="button"
               onClick={handleAddInterest}
               className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg hover:shadow-xl"
             >
-              Add
+              Añadir
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -398,7 +398,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
       {/* Platform Preferences */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-          Platform Preferences *
+          Preferencias de Plataforma *
         </label>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {platforms.map((platform) => (
@@ -421,7 +421,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
       {/* Brand Requirements */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Brand Requirements
+          Requisitos de Marca
         </label>
         <div className="flex gap-2 mb-2">
           <input
@@ -435,14 +435,14 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
               }
             }}
             className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-            placeholder="e.g., No alcohol mention, Family-friendly content"
+            placeholder="ej., Sin mención de alcohol, Contenido familiar"
           />
           <button
             type="button"
             onClick={() => handleAddItem("brandRequirements", currentRequirement, setCurrentRequirement)}
             className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg hover:shadow-xl"
           >
-            Add
+            Añadir
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -468,7 +468,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
       {/* Content Themes */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Content Themes
+          Temas de Contenido
         </label>
         <div className="flex gap-2 mb-2">
           <input
@@ -482,14 +482,14 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
               }
             }}
             className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-            placeholder="e.g., Authenticity, Sustainability, Innovation"
+            placeholder="ej., Autenticidad, Sostenibilidad, Innovación"
           />
           <button
             type="button"
             onClick={() => handleAddItem("contentThemes", currentTheme, setCurrentTheme)}
             className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg hover:shadow-xl"
           >
-            Add
+            Añadir
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -515,10 +515,10 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
       {/* Manual Influencers */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Manually Requested Influencers
+          Influencers Solicitados Manualmente
         </label>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-          Add specific influencer names or Instagram handles you want to include. Formats: "name", "@handle", or "name (@handle)"
+          Añade nombres específicos de influencers o handles de Instagram que quieras incluir. Formatos: "nombre", "@handle", o "nombre (@handle)"
         </p>
         <div className="flex gap-2 mb-2">
           <input
@@ -538,7 +538,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
               }
             }}
             className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-            placeholder="e.g., Maria Garcia, @maria_garcia, or Maria Garcia (@maria_garcia)"
+            placeholder="ej., Maria Garcia, @maria_garcia, o Maria Garcia (@maria_garcia)"
           />
           <button
             type="button"
@@ -553,7 +553,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
             }}
             className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg hover:shadow-xl"
           >
-            Add
+            Añadir
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -586,7 +586,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
       {/* Timeline */}
       <div>
         <label htmlFor="timeline" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Timeline
+          Cronograma
         </label>
         <input
           type="text"
@@ -594,14 +594,14 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
           value={formData.timeline}
           onChange={(e) => setFormData({ ...formData, timeline: e.target.value })}
           className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-          placeholder="e.g., Q1 2025, March-May 2025, 8 weeks"
+          placeholder="ej., Q1 2025, Marzo-Mayo 2025, 8 semanas"
         />
       </div>
 
       {/* Additional Notes */}
       <div>
         <label htmlFor="additionalNotes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Additional Notes
+          Notas Adicionales
         </label>
         <textarea
           id="additionalNotes"
@@ -609,17 +609,17 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
           onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
           rows={4}
           className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-          placeholder="Any additional information or special requirements..."
+          placeholder="Cualquier información adicional o requisitos especiales..."
         />
       </div>
 
       {/* Presentation Template Selection */}
       <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border-2 border-purple-200 dark:border-purple-800">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-          🎨 Presentation Template
+          🎨 Plantilla de Presentación
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Choose a template that matches your campaign style. We&apos;ll auto-recommend based on your brief.
+          Elige una plantilla que coincida con el estilo de tu campaña. Recomendaremos automáticamente según tu brief.
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -663,7 +663,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
         {formData.templateId && (
           <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded-lg border border-purple-200 dark:border-purple-800">
             <p className="text-sm text-gray-700 dark:text-gray-300">
-              <strong>Selected:</strong> {TEMPLATES[formData.templateId as TemplateId].name}
+              <strong>Seleccionada:</strong> {TEMPLATES[formData.templateId as TemplateId].name}
             </p>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
               {TEMPLATES[formData.templateId as TemplateId].mood}
@@ -686,7 +686,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
           onClick={() => window.location.reload()}
           className="px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
         >
-          Reset
+          Reiniciar
         </button>
         
         {onGenerateTextResponse && (
@@ -700,7 +700,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
             disabled={isProcessing}
             className="px-6 py-3 border-2 border-purple-600 dark:border-purple-400 text-purple-600 dark:text-purple-400 bg-white dark:bg-gray-800 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isProcessing ? "Generating..." : "Generate Text Response"}
+            {isProcessing ? "Generando..." : "Generar Respuesta de Texto"}
           </button>
         )}
         
@@ -709,7 +709,7 @@ const BriefForm = ({ onSubmit, onGenerateTextResponse, isProcessing, initialData
           disabled={isProcessing}
           className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isProcessing ? "Generating Presentation..." : "Generate Presentation"}
+          {isProcessing ? "Generando Presentación..." : "Generar Presentación"}
         </button>
       </div>
     </form>

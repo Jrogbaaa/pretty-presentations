@@ -1,5 +1,64 @@
 # Changelog
 
+## [3.3.0] - 2025-11-13 🇪🇸
+
+### 🌍 Major Feature: Complete Spanish Translation
+
+#### Full Spanish Localization
+- **Complete UI Translation**: All user-facing text now in Spanish
+- **AI Content in Spanish**: Text response generation exclusively in Spanish
+- **Maintains Functionality**: All features work identically in Spanish
+- **Professional Quality**: Native-level Spanish translations for marketing context
+
+#### Components Translated
+- **Homepage** (`app/page.tsx`)
+  - Hero section (Presentaciones con IA)
+  - Features section (¿Por qué Elegir Pretty Presentations?)
+  - How It Works (Cómo Funciona)
+  - Footer and all UI elements
+- **BriefForm** (`components/BriefForm.tsx`)
+  - All form labels and placeholders
+  - Budget warnings and validation messages
+  - Template selection interface
+  - Submit buttons
+- **BriefUpload** (`components/BriefUpload.tsx`)
+  - Upload interface and instructions
+  - Brief analysis display
+  - Error messages and button texts
+- **ProcessingOverlay** (`components/ProcessingOverlay.tsx`)
+  - Step-by-step progress indicators
+  - Status messages and timing info
+- **PresentationEngineSelector** (`components/PresentationEngineSelector.tsx`)
+  - Engine selection interface
+  - Feature descriptions and status indicators
+
+#### AI Content Generation
+- **Markdown Response Generator** (`lib/markdown-response-generator.server.ts`)
+  - System prompts explicitly request Spanish output
+  - All hardcoded labels translated (Alcance, Engagement, Plataforma, etc.)
+  - Reflection/refinement system also operates in Spanish
+  - Quality standards and examples in Spanish context
+
+#### API Updates
+- **Error Messages** (`app/api/generate-text-response/route.ts`)
+  - Rate limiting messages
+  - Validation errors
+  - Generic error messages
+
+#### Documentation
+- **SPANISH_TRANSLATION.md**: Complete translation reference
+  - Component-by-component breakdown
+  - AI prompt modifications
+  - Testing procedures
+
+#### Testing
+- Development server tested with Spanish UI
+- All form fields and validation work correctly
+- AI text generation verified to output Spanish
+- Responsive design maintained across translations
+
+---
+
 ## [3.2.0] - 2025-11-13 🐳
 
 ### 🎉 Major Feature: Presenton Docker Integration
