@@ -7,6 +7,7 @@ import { processManualInfluencers } from "./manual-influencer-matcher";
 import { withRetry, RetryPresets } from "./retry";
 import { logInfo, logError, startTimer } from "./logger";
 import { OpenAIError } from "@/types/errors";
+import { calculateTieredMetrics } from "./tiered-cpm-calculator";
 
 /**
  * Generate a comprehensive markdown response for a client brief
@@ -544,22 +545,29 @@ For each theme (expand to 3-4 lines each, add hashtags):
 
 ### 🎯 Estimated Campaign Performance
 
-Based on historical data and the selected influencers' average performance metrics:
+Based on tiered engagement analysis and evidence-based reach rates:
 
 ${(() => {
-  const totalImpressions = Math.round(influencers.reduce((sum, inf) => sum + (inf.followers * 0.4), 0));
-  // CPM is typically around €20
-  const estimatedCPM = 20;
+  const tieredMetrics = calculateTieredMetrics(influencers);
   return `<table>
 <tr>
 <th>Total Impressions</th>
-<th>CPM</th>
+<th>Blended CPM</th>
 </tr>
 <tr>
-<td>${totalImpressions.toLocaleString()}</td>
-<td>€${estimatedCPM.toFixed(2)}</td>
+<td>${tieredMetrics.totalImpressions.toLocaleString()}</td>
+<td>€${tieredMetrics.blendedCPM.toFixed(2)}</td>
 </tr>
-</table>`;
+</table>
+
+**Campaign Breakdown:**
+- **Total Budget (Implied):** €${tieredMetrics.totalBudget.toFixed(2)}
+- **Quality Focus:** ${tieredMetrics.highROIPercentage.toFixed(0)}% of budget in Tier 1 & 2 (conversion-driving influencers)
+
+**Tier Performance:**
+${tieredMetrics.tiers.map(tier => 
+  `- **${tier.tierLabel}:** ${tier.influencers.length} influencers | ${tier.estimatedImpressions.toLocaleString()} impressions | €${tier.strategicCPM.toFixed(2)} CPM`
+).join('\n')}`;
 })()}
 
 ### ✅ Key Performance Indicators

@@ -7,6 +7,7 @@ import type {
 } from "@/types";
 import type { TemplateStyle } from "@/types/templates";
 import { generateId } from "./ai-processor";
+import { calculateTieredMetrics } from "./tiered-cpm-calculator";
 
 interface PresentationContent {
   campaignSummary: {
@@ -544,11 +545,10 @@ const createRecommendedScenarioSlide = (
   template: TemplateStyle,
   createDesign: (overrides?: Partial<SlideDesign>) => SlideDesign
 ): Slide => {
-  // Calculate metrics if not provided
+  // Calculate tiered metrics
+  const tieredMetrics = calculateTieredMetrics(influencers);
   const totalCost = influencers.reduce((sum, inf) => sum + inf.costEstimate, 0);
-  const totalImpressions = influencers.reduce((sum, inf) => sum + inf.estimatedReach, 0);
-  const calculatedCpm = ((totalCost / totalImpressions) * 1000).toFixed(2);
-
+  
   // Calculate budget breakdown for donut chart
   const influencerCost = totalCost * 0.7; // 70% goes to influencers
   const productionCost = totalCost * 0.2; // 20% to production
@@ -582,8 +582,8 @@ const createRecommendedScenarioSlide = (
     title: "Escenario recomendado",
     content: {
       title: "Escenario recomendado",
-      subtitle: "Recommended Influencer Mix & Content Plan",
-      body: `A strategic mix of ${influencers.length} influencers delivering maximum impact across key demographics.`,
+      subtitle: "Tiered Performance Strategy",
+      body: `Strategic ${influencers.length}-influencer campaign with ${tieredMetrics.highROIPercentage.toFixed(0)}% budget in high-value tiers.`,
       customData: {
         recommendedScenario: content.recommendedScenario || {
           influencerMix: {
@@ -595,9 +595,9 @@ const createRecommendedScenarioSlide = (
             stories: influencers.length * 2,
             posts: Math.floor(influencers.length * 0.5),
           },
-          impressions: totalImpressions.toLocaleString(),
+          impressions: tieredMetrics.totalImpressions.toLocaleString(),
           budget: `€${totalCost.toLocaleString()}`,
-          cpm: `€${calculatedCpm}`,
+          cpm: `€${tieredMetrics.blendedCPM.toFixed(2)}`,
         },
         // Budget breakdown for donut chart
         budgetBreakdown: budgetBreakdown,

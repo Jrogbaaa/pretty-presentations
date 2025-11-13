@@ -7,6 +7,12 @@ import { searchInfluencersServer } from "./influencer-service.server";
 import type { ClientBrief, Influencer, SelectedInfluencer } from "@/types";
 import OpenAI from "openai";
 import { matchBrandToInfluencers, getBrandIntelligenceSummary } from "./brand-matcher";
+import { 
+  classifyInfluencerTier, 
+  getStrategicCPM, 
+  getReachRate, 
+  getTierLabel 
+} from "./tiered-cpm-calculator";
 
 // Initialize OpenAI for enrichment
 const openai = new OpenAI({
@@ -710,9 +716,18 @@ const enrichSelectedInfluencers = async (
   const enriched: SelectedInfluencer[] = [];
 
   for (const influencer of influencers) {
-    const costEstimate = (influencer.rateCard.post * 2) + influencer.rateCard.reel + (influencer.rateCard.story * 3);
-    const estimatedReach = influencer.followers * 0.35;
+    // Classify influencer into tier based on engagement
+    const tier = classifyInfluencerTier(influencer.engagement);
+    const tierLabel = getTierLabel(tier);
+    const strategicCPM = getStrategicCPM(tier);
+    const reachRate = getReachRate(tier);
+    
+    // Calculate tier-specific impressions and engagement
+    const tierImpressions = Math.round(influencer.followers * reachRate);
+    const estimatedReach = tierImpressions; // Use tier-specific reach
     const estimatedEngagement = estimatedReach * (influencer.engagement / 100);
+    
+    const costEstimate = (influencer.rateCard.post * 2) + influencer.rateCard.reel + (influencer.rateCard.story * 3);
 
     // Generate a detailed rationale based on available data
     const categoryMatch = influencer.contentCategories.slice(0, 2).join(' and ');
@@ -755,7 +770,13 @@ Keep it professional and specific.`
       estimatedReach,
       estimatedEngagement,
       costEstimate,
-      matchScore: 85
+      matchScore: 85,
+      // Tiered performance metrics
+      tier,
+      tierLabel,
+      strategicCPM,
+      reachRate,
+      tierImpressions,
     });
   }
 

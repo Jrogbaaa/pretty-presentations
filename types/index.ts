@@ -229,6 +229,12 @@ export interface SelectedInfluencer extends Influencer {
   estimatedEngagement: number;
   costEstimate: number;
   matchScore?: number;
+  // Tiered performance metrics
+  tier?: 'tier-1' | 'tier-2' | 'tier-3';
+  tierLabel?: string;
+  strategicCPM?: number;
+  reachRate?: number;
+  tierImpressions?: number;
 }
 
 export interface RateCard {
