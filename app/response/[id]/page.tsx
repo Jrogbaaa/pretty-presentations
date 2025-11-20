@@ -284,7 +284,7 @@ const ResponsePage = () => {
       {/* Content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {isEditing ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div key="editing-mode" className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Editor */}
             <div className="bg-white rounded-3xl shadow-xl p-6">
               <div className="mb-4">
@@ -315,8 +315,14 @@ const ResponsePage = () => {
               </div>
               <div className="response-content prose prose-xl max-w-none overflow-y-auto h-[calc(100vh-300px)]">
                 <ReactMarkdown 
+                  key="preview-markdown"
                   remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeRaw]}
+                  components={{
+                    // Override components to ensure proper React reconciliation
+                    p: ({node, ...props}) => <p {...props} />,
+                    div: ({node, ...props}) => <div {...props} />,
+                  }}
                 >
                   {editedContent}
                 </ReactMarkdown>
@@ -325,13 +331,20 @@ const ResponsePage = () => {
           </div>
         ) : (
           <div 
+            key="view-mode"
             id="response-content"
             className="bg-white rounded-3xl shadow-xl p-10 md:p-16"
           >
             <div className="response-content prose prose-xl max-w-none">
               <ReactMarkdown 
+                key="content-markdown"
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw]}
+                components={{
+                  // Override components to ensure proper React reconciliation
+                  p: ({node, ...props}) => <p {...props} />,
+                  div: ({node, ...props}) => <div {...props} />,
+                }}
               >
                 {response.markdownContent}
               </ReactMarkdown>

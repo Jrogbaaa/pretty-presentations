@@ -2,6 +2,58 @@
 
 ## 🎯 Issues Fixed
 
+### 0. ✅ React DOM Error in Response Page (Fixed: 2025-11-20)
+
+**Problem**: Application crashed with error:
+```
+NotFoundError: Failed to execute 'insertBefore' on 'Node': 
+The node before which the new node is to be inserted is not a child of this node.
+```
+
+**Root Cause**: 
+- ReactMarkdown component using `rehypeRaw` plugin to render raw HTML
+- Conditional rendering between edit and view modes creating different DOM structures
+- React couldn't properly reconcile DOM nodes during re-renders
+- Missing unique keys on conditionally rendered components
+
+**Solution**:
+- **Added unique keys** to top-level conditional containers:
+  ```typescript
+  {isEditing ? (
+    <div key="editing-mode" className="...">
+  ) : (
+    <div key="view-mode" className="...">
+  )}
+  ```
+- **Added unique keys** to ReactMarkdown instances:
+  ```typescript
+  <ReactMarkdown 
+    key="preview-markdown"  // or "content-markdown"
+    remarkPlugins={[remarkGfm]}
+    rehypePlugins={[rehypeRaw]}
+  />
+  ```
+- **Added component overrides** for proper reconciliation:
+  ```typescript
+  components={{
+    p: ({node, ...props}) => <p {...props} />,
+    div: ({node, ...props}) => <div {...props} />,
+  }}
+  ```
+
+**Benefits**:
+- ✅ No more DOM insertion errors
+- ✅ Smooth transitions between edit and view modes
+- ✅ Proper React reconciliation with raw HTML content
+- ✅ Response pages render correctly
+
+**Files Modified**:
+- `app/response/[id]/page.tsx` - Fixed React DOM reconciliation issues
+
+---
+
+## 🎯 Issues Fixed
+
 ### 1. ✅ "Could not generate AI rationale" Warnings
 
 **Problem**: Console was showing warnings like:

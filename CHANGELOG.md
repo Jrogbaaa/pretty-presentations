@@ -1,5 +1,30 @@
 # Changelog
 
+## [3.3.1] - 2025-11-20 🐛
+
+### 🐛 Bug Fixes
+
+#### Fixed React DOM Error in Response Page
+- **Issue:** `NotFoundError: Failed to execute 'insertBefore' on 'Node'` when viewing response pages
+- **Cause:** ReactMarkdown with `rehypeRaw` plugin creating DOM reconciliation conflicts during conditional rendering
+- **Impact:** Response page would crash or fail to render properly, especially when switching between edit and view modes
+- **Fix:** 
+  - Added unique `key` props to conditionally rendered containers (`key="editing-mode"` and `key="view-mode"`)
+  - Added unique `key` props to ReactMarkdown instances to prevent DOM node conflicts
+  - Added component overrides to ensure proper React reconciliation with raw HTML
+  ```typescript
+  components={{
+    p: ({node, ...props}) => <p {...props} />,
+    div: ({node, ...props}) => <div {...props} />,
+  }}
+  ```
+- **Result:** Response pages now render smoothly without DOM errors, edit/view mode transitions work correctly
+
+### 📁 Files Modified
+- `app/response/[id]/page.tsx` - Fixed React reconciliation issues with ReactMarkdown
+
+---
+
 ## [3.3.0] - 2025-11-13 🇪🇸
 
 ### 🌍 Major Feature: Complete Spanish Translation
