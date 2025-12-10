@@ -113,7 +113,8 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
         if (typeof metrics[index] === 'object') {
           metrics[index] = { ...metrics[index], value };
         } else {
-          metrics[index] = value;
+          // Create a proper Metric object when one doesn't exist
+          metrics[index] = { label: '', value };
         }
         currentSlide.content = { ...currentSlide.content, metrics };
       } else if (field.startsWith('metric-label-')) {
