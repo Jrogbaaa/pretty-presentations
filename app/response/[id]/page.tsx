@@ -78,102 +78,90 @@ const ResponsePage = () => {
         return;
       }
 
-      // Force light mode styles for PDF
-      element.classList.add("pdf-export-mode");
+      // Detect if user is in dark mode
+      const isDarkMode = document.documentElement.classList.contains('dark') || 
+                         window.matchMedia('(prefers-color-scheme: dark)').matches;
       
-      // Wait for styles to apply
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Wait a moment for any layout to settle
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Create canvas from the content
+      // Create canvas from the content - preserve current theme
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: "#ffffff",
+        backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
         onclone: (clonedDoc) => {
           const clonedElement = clonedDoc.getElementById("response-content");
           if (clonedElement) {
-            clonedElement.style.backgroundColor = "#ffffff";
+            // Preserve the styling as-is (dark or light)
             clonedElement.style.padding = "40px";
-            // Apply light mode to all elements
-            const allElements = clonedElement.querySelectorAll('*');
-            allElements.forEach((el) => {
-              const htmlEl = el as HTMLElement;
-              if (htmlEl.style) {
-                // Don't override table headers or special colored elements
-                const tagName = htmlEl.tagName.toLowerCase();
-                if (tagName !== 'th' && !htmlEl.classList.contains('bg-purple-600')) {
-                  htmlEl.style.color = "#1f2937";
-                }
-              }
-            });
-            // Fix table headers
-            const tableHeaders = clonedElement.querySelectorAll('th');
-            tableHeaders.forEach((th) => {
-              (th as HTMLElement).style.color = "#ffffff";
-              (th as HTMLElement).style.backgroundColor = "rgb(147, 51, 234)";
-            });
           }
         }
       });
 
-      // Restore original styles
-      element.classList.remove("pdf-export-mode");
-
-      // PDF dimensions
+      // Create PDF
       const pdf = new jsPDF({
         orientation: "portrait",
-        unit: "px",
-        format: "a4",
-        hotfixes: ["px_scaling"]
+        unit: "mm",
+        format: "a4"
       });
 
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 40;
-      const contentWidth = pageWidth - (margin * 2);
+      const pageWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const margin = 10;
+      const usableWidth = pageWidth - (margin * 2);
+      const usableHeight = pageHeight - (margin * 2);
       
-      // Calculate scaled dimensions
-      const imgWidth = contentWidth;
+      // Calculate image dimensions to fit width
+      const imgWidth = usableWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      // Calculate how many pages we need
-      const contentHeight = pageHeight - (margin * 2);
-      const totalPages = Math.ceil(imgHeight / contentHeight);
-      
-      // For each page, create a cropped canvas and add it
-      for (let page = 0; page < totalPages; page++) {
-        if (page > 0) {
-          pdf.addPage();
+      // If image fits on one page, just add it
+      if (imgHeight <= usableHeight) {
+        const imgData = canvas.toDataURL("image/png", 1.0);
+        pdf.addImage(imgData, "PNG", margin, margin, imgWidth, imgHeight);
+      } else {
+        // Multi-page: slice the canvas into page-sized chunks
+        const scaleFactor = canvas.width / imgWidth;
+        const pageCanvasHeight = usableHeight * scaleFactor;
+        const totalPages = Math.ceil(canvas.height / pageCanvasHeight);
+        
+        for (let page = 0; page < totalPages; page++) {
+          if (page > 0) {
+            pdf.addPage();
+          }
+          
+          // Calculate source position
+          const sourceY = page * pageCanvasHeight;
+          const sourceHeight = Math.min(pageCanvasHeight, canvas.height - sourceY);
+          
+          // Create a canvas for this page
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = canvas.width;
+          pageCanvas.height = sourceHeight;
+          
+          const ctx = pageCanvas.getContext('2d');
+          if (ctx) {
+            // Fill with background color
+            ctx.fillStyle = isDarkMode ? "#1f2937" : "#ffffff";
+            ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+            
+            // Draw the slice
+            ctx.drawImage(
+              canvas,
+              0, sourceY,
+              canvas.width, sourceHeight,
+              0, 0,
+              pageCanvas.width, pageCanvas.height
+            );
+          }
+          
+          const pageImgData = pageCanvas.toDataURL("image/png", 1.0);
+          const pageImgHeight = (sourceHeight / scaleFactor);
+          
+          pdf.addImage(pageImgData, "PNG", margin, margin, imgWidth, pageImgHeight);
         }
-        
-        // Calculate source y position in the original canvas
-        const sourceY = page * (canvas.height / totalPages) * (contentHeight / imgHeight) * (canvas.height / imgHeight);
-        const sourceHeight = (contentHeight / imgHeight) * canvas.height;
-        
-        // Create a temporary canvas for this page section
-        const pageCanvas = document.createElement('canvas');
-        pageCanvas.width = canvas.width;
-        pageCanvas.height = Math.min(sourceHeight, canvas.height - (page * sourceHeight));
-        
-        const ctx = pageCanvas.getContext('2d');
-        if (ctx) {
-          // Draw the portion of the original canvas for this page
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-          ctx.drawImage(
-            canvas,
-            0, page * sourceHeight, // Source x, y
-            canvas.width, pageCanvas.height, // Source width, height
-            0, 0, // Destination x, y
-            pageCanvas.width, pageCanvas.height // Destination width, height
-          );
-        }
-        
-        const pageImgData = pageCanvas.toDataURL("image/png", 1.0);
-        const pageImgHeight = (pageCanvas.height * imgWidth) / pageCanvas.width;
-        
-        pdf.addImage(pageImgData, "PNG", margin, margin, imgWidth, pageImgHeight);
       }
 
       // Save with proper filename
