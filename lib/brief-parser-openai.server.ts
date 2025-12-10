@@ -350,17 +350,21 @@ Return ONLY valid JSON, no markdown formatting. Be COMPREHENSIVE - extract every
       // Validation failed - provide defaults for missing required fields
       console.warn('⚠️  Brief validation failed, using defaults for missing fields:', validationResult.errors);
       
+      // Safely extract targetDemographics with proper type checking
+      const targetDemo = sanitized.targetDemographics as Record<string, unknown> | undefined;
+      const demoLocation = targetDemo?.location;
+      
       // Start with sanitized data and fill in missing required fields with defaults
       parsed = {
         ...sanitized,
         campaignGoals: Array.isArray(sanitized.campaignGoals) && sanitized.campaignGoals.length > 0 ? sanitized.campaignGoals : ['Please specify campaign goals'],
         platformPreferences: Array.isArray(sanitized.platformPreferences) && sanitized.platformPreferences.length > 0 ? sanitized.platformPreferences : ['Instagram'],
         targetDemographics: {
-          ageRange: sanitized.targetDemographics?.ageRange || '18-65',
-          gender: sanitized.targetDemographics?.gender || 'All genders',
-          location: Array.isArray(sanitized.targetDemographics?.location) && sanitized.targetDemographics.location.length > 0 ? sanitized.targetDemographics.location : ['Spain'],
-          interests: sanitized.targetDemographics?.interests || [],
-          psychographics: sanitized.targetDemographics?.psychographics || ''
+          ageRange: (targetDemo?.ageRange as string) || '18-65',
+          gender: (targetDemo?.gender as string) || 'All genders',
+          location: Array.isArray(demoLocation) && demoLocation.length > 0 ? demoLocation : ['Spain'],
+          interests: (targetDemo?.interests as string[]) || [],
+          psychographics: (targetDemo?.psychographics as string) || ''
         }
       };
       
