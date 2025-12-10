@@ -353,12 +353,12 @@ Return ONLY valid JSON, no markdown formatting. Be COMPREHENSIVE - extract every
       // Start with sanitized data and fill in missing required fields with defaults
       parsed = {
         ...sanitized,
-        campaignGoals: sanitized.campaignGoals?.length > 0 ? sanitized.campaignGoals : ['Please specify campaign goals'],
-        platformPreferences: sanitized.platformPreferences?.length > 0 ? sanitized.platformPreferences : ['Instagram'],
+        campaignGoals: Array.isArray(sanitized.campaignGoals) && sanitized.campaignGoals.length > 0 ? sanitized.campaignGoals : ['Please specify campaign goals'],
+        platformPreferences: Array.isArray(sanitized.platformPreferences) && sanitized.platformPreferences.length > 0 ? sanitized.platformPreferences : ['Instagram'],
         targetDemographics: {
           ageRange: sanitized.targetDemographics?.ageRange || '18-65',
           gender: sanitized.targetDemographics?.gender || 'All genders',
-          location: sanitized.targetDemographics?.location?.length > 0 ? sanitized.targetDemographics.location : ['Spain'],
+          location: Array.isArray(sanitized.targetDemographics?.location) && sanitized.targetDemographics.location.length > 0 ? sanitized.targetDemographics.location : ['Spain'],
           interests: sanitized.targetDemographics?.interests || [],
           psychographics: sanitized.targetDemographics?.psychographics || ''
         }
