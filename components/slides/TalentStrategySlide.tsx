@@ -3,9 +3,10 @@ import { BarChartComparison, AnimatedNumber } from "@/components/charts";
 
 interface TalentStrategySlideProps {
   slide: Slide;
+  onEdit?: (field: string, value: string) => void;
 }
 
-const TalentStrategySlide = ({ slide }: TalentStrategySlideProps) => {
+const TalentStrategySlide = ({ slide, onEdit }: TalentStrategySlideProps) => {
   const influencerPool = slide.content.customData?.influencerPool;
   const hasRichData = influencerPool && Array.isArray(influencerPool) && influencerPool.length > 0;
 

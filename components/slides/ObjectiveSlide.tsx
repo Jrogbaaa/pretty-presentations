@@ -2,9 +2,10 @@ import type { Slide } from "@/types";
 
 interface ObjectiveSlideProps {
   slide: Slide;
+  onEdit?: (field: string, value: string) => void;
 }
 
-const ObjectiveSlide = ({ slide }: ObjectiveSlideProps) => {
+const ObjectiveSlide = ({ slide, onEdit }: ObjectiveSlideProps) => {
   const hasImage = slide.content.images && slide.content.images.length > 0;
 
   return (
