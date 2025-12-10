@@ -1,10 +1,17 @@
-# Look After You - AI Presentation Generator
+# Look After You - AI Brief Responder
 
-An AI-powered platform that automatically transforms advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching.
+An AI-powered platform that transforms client briefs into comprehensive influencer recommendations with detailed strategy, budget breakdowns, and performance projections.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 3.3.0 | **Language**: 🇪🇸 Spanish | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o-mini 🤖 | **Images**: Nano Banana 🍌✨ | **Charts**: Recharts + React Spring 📊 | **Design**: Stripe-Inspired System 🎨 | **Export**: PPTX + PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
+**Status**: 🟢 **Production-Ready** | **Version**: 4.0.0 | **Language**: 🇬🇧 English | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o 🤖 | **Export**: PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
 
-**Latest**: v3.3.0 **Complete Spanish Translation!** 🇪🇸 The entire platform is now in Spanish - UI, forms, error messages, and AI-generated content. All features work identically with native-level Spanish translations optimized for marketing professionals. See [CHANGELOG.md](./CHANGELOG.md) for details. 🚀✅
+**Latest**: v4.0.0 **Major Refocus - Brief Responder!** 🚀 The platform is now 100% focused on generating professional brief responses with influencer recommendations. Key updates:
+- ✅ All content now in English
+- ✅ Removed presentation generation (streamlined for brief responses)
+- ✅ NEW: Additional Context Upload - upload PDFs, presentations, or text with extra campaign details
+- ✅ Enhanced AI brief parsing with reading comprehension and brand intelligence
+- ✅ Graceful error handling for incomplete briefs
+
+See [CHANGELOG.md](./CHANGELOG.md) for details. 🚀✅
 
 > 📝 **Full Version History**: See [CHANGELOG.md](./CHANGELOG.md) for complete release notes and previous versions.
 
@@ -22,7 +29,21 @@ An AI-powered platform that automatically transforms advertiser briefs into prof
 
 ## 🚀 Features
 
-### 🧠 Brand Intelligence System (v2.4.0+) ⚡ NEW
+### 📄 Additional Context Upload (v4.0.0) ⚡ NEW
+- **Multi-Format Support**: Upload PDFs, text files, or presentations to provide extra campaign context
+- **PDF Text Extraction**: Uses pdfjs-dist to automatically extract text from PDF documents
+- **Manual Text Entry**: Paste additional context directly in the form
+- **AI-Powered Analysis**: All uploaded context is sent to the AI for better-tailored recommendations
+- **Use Cases**:
+  - Client presentations with brand guidelines
+  - Previous campaign reports
+  - Creative direction documents
+  - Brand style guides
+  - Competitor analysis
+- **Graceful Fallbacks**: If text extraction fails, users are prompted to describe content manually
+- **Smart Truncation**: Large documents are automatically truncated to stay within token limits
+
+### 🧠 Brand Intelligence System (v2.4.0+)
 - **218-Brand Database**: Comprehensive CSV database covering Spanish & international brands across 15+ industries
   - Fashion & Retail, Sports & Fitness, Food & Beverage, Beauty & Cosmetics
   - Technology, Home & Decor, Automotive, Entertainment, Travel, Banking

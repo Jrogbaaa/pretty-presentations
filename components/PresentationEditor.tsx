@@ -90,6 +90,54 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
     }
   };
 
+  const handleSlideEdit = (field: string, value: string) => {
+    setPresentationState((prev) => {
+      const updatedSlides = [...prev.slides];
+      const currentSlide = { ...updatedSlides[currentSlideIndex] };
+      
+      // Handle different field types
+      if (field === 'title') {
+        currentSlide.content = { ...currentSlide.content, title: value };
+      } else if (field === 'subtitle') {
+        currentSlide.content = { ...currentSlide.content, subtitle: value };
+      } else if (field === 'body') {
+        currentSlide.content = { ...currentSlide.content, body: value };
+      } else if (field.startsWith('bullet-')) {
+        const index = parseInt(field.split('-')[1]);
+        const bullets = [...(currentSlide.content.bullets || [])];
+        bullets[index] = value;
+        currentSlide.content = { ...currentSlide.content, bullets };
+      } else if (field.startsWith('metric-value-')) {
+        const index = parseInt(field.split('-')[2]);
+        const metrics = [...(currentSlide.content.metrics || [])];
+        if (typeof metrics[index] === 'object') {
+          metrics[index] = { ...metrics[index], value };
+        } else {
+          metrics[index] = value;
+        }
+        currentSlide.content = { ...currentSlide.content, metrics };
+      } else if (field.startsWith('metric-label-')) {
+        const index = parseInt(field.split('-')[2]);
+        const metrics = [...(currentSlide.content.metrics || [])];
+        if (typeof metrics[index] === 'object') {
+          metrics[index] = { ...metrics[index], label: value };
+        }
+        currentSlide.content = { ...currentSlide.content, metrics };
+      }
+      
+      updatedSlides[currentSlideIndex] = currentSlide;
+      
+      const updatedPresentation = { ...prev, slides: updatedSlides };
+      
+      // Notify parent of changes
+      if (onSave) {
+        onSave(updatedPresentation);
+      }
+      
+      return updatedPresentation;
+    });
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft") {
       handlePrevSlide();
@@ -314,7 +362,7 @@ const PresentationEditor = ({ presentation, onSave, onExport }: PresentationEdit
             >
               {/* Slide Container with shadow */}
               <div className="bg-background-surface rounded-lg shadow-subtle" style={{ pointerEvents: 'auto' }}>
-                <SlideRenderer slide={currentSlide} scale={zoom} />
+                <SlideRenderer slide={currentSlide} scale={zoom} onEdit={handleSlideEdit} />
               </div>
             </div>
           </div>

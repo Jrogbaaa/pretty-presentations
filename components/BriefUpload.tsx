@@ -37,7 +37,7 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
 
   const handleParse = async () => {
     if (!briefText.trim()) {
-      setError("Por favor ingresa o pega un brief primero");
+      setError("Please enter or paste a brief first");
       return;
     }
 
@@ -49,7 +49,7 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
       onParsed(parsed);
     } catch (err) {
       console.error("Parse error:", err);
-      setError(err instanceof Error ? err.message : "Error al analizar el brief");
+      setError(err instanceof Error ? err.message : "Error analyzing brief");
     } finally {
       setIsParsing(false);
     }
@@ -74,7 +74,7 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
       onParsed(parsed);
     } catch (err) {
       console.error("Error generating/parsing sample brief:", err);
-      setError(err instanceof Error ? err.message : "Error al generar brief de muestra");
+      setError(err instanceof Error ? err.message : "Error generating sample brief");
     } finally {
       setIsParsing(false);
     }
@@ -89,10 +89,10 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
           </div>
           <div>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Subir Documento de Brief
+              Paste Your Brief
             </h3>
             <p className="text-gray-600 dark:text-gray-400 text-sm">
-              Pega tu texto de brief abajo. Funciona con briefs en inglés, español o lenguaje mixto.
+              Paste your client brief below. Works with English, Spanish or mixed language briefs.
             </p>
           </div>
         </div>
@@ -103,7 +103,7 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
         <textarea
           value={briefText}
           onChange={(e) => handleTextChange(e.target.value)}
-          placeholder="Pega tu brief aquí... (ej., briefs de cliente en español o inglés)"
+          placeholder="Paste your brief here... (e.g., client briefs in Spanish or English)"
           rows={12}
           className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 font-mono text-sm transition-colors"
         />
@@ -114,24 +114,24 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
         <div className="mb-6 p-5 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-            <h4 className="font-semibold text-purple-900 dark:text-purple-300">Análisis del Brief</h4>
+            <h4 className="font-semibold text-purple-900 dark:text-purple-300">Brief Analysis</h4>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mb-4">
             <div className={`flex items-center gap-2 ${summary.hasClient ? "text-green-700 dark:text-green-400" : "text-gray-500 dark:text-gray-500"}`}>
               <span className="text-lg">{summary.hasClient ? "✓" : "○"}</span>
-              <span>Info Cliente</span>
+              <span>Client Info</span>
             </div>
             <div className={`flex items-center gap-2 ${summary.hasBudget ? "text-green-700 dark:text-green-400" : "text-gray-500 dark:text-gray-500"}`}>
               <span className="text-lg">{summary.hasBudget ? "✓" : "○"}</span>
-              <span>Presupuesto</span>
+              <span>Budget</span>
             </div>
             <div className={`flex items-center gap-2 ${summary.hasTarget ? "text-green-700 dark:text-green-400" : "text-gray-500 dark:text-gray-500"}`}>
               <span className="text-lg">{summary.hasTarget ? "✓" : "○"}</span>
-              <span>Audiencia</span>
+              <span>Target Audience</span>
             </div>
             <div className={`flex items-center gap-2 ${summary.hasTimeline ? "text-green-700 dark:text-green-400" : "text-gray-500 dark:text-gray-500"}`}>
               <span className="text-lg">{summary.hasTimeline ? "✓" : "○"}</span>
-              <span>Cronograma</span>
+              <span>Timeline</span>
             </div>
           </div>
           <div>
@@ -143,7 +143,7 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
                 />
               </div>
               <span className="text-sm font-semibold text-purple-900 dark:text-purple-300 min-w-[80px] text-right">
-                {summary.confidence}% Completo
+                {summary.confidence}% Complete
               </span>
             </div>
           </div>
@@ -158,7 +158,7 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
               <span className="text-xl">⚠️</span>
             </div>
             <div>
-              <h4 className="font-semibold text-red-900 dark:text-red-300 mb-1">Error de Análisis</h4>
+              <h4 className="font-semibold text-red-900 dark:text-red-300 mb-1">Analysis Error</h4>
               <p className="text-red-700 dark:text-red-400 text-sm">{error}</p>
             </div>
           </div>
@@ -175,12 +175,12 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
           {isParsing ? (
             <span className="flex items-center justify-center gap-2">
               <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-              Analizando con IA...
+              Analyzing with AI...
             </span>
           ) : (
             <span className="flex items-center justify-center gap-2">
               <Sparkles className="w-5 h-5" />
-              Analizar Brief y Auto-Completar Formulario
+              Analyze Brief & Auto-Fill Form
             </span>
           )}
         </button>
@@ -189,10 +189,10 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
           onClick={handleLoadSample}
           disabled={isParsing}
           className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg transition-all font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Genera un brief de muestra aleatorio de nuestra base de datos de 218 marcas"
+          title="Generate a random sample brief from our database of 218 brands"
         >
           <Shuffle className="w-5 h-5" />
-          {isParsing ? "Generando..." : "Muestra Aleatoria"}
+          {isParsing ? "Generating..." : "Random Sample"}
         </button>
 
         {briefText && (
@@ -203,9 +203,9 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
               setError(null);
             }}
             className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium"
-            aria-label="Limpiar"
+            aria-label="Clear"
           >
-            Limpiar
+            Clear
           </button>
         )}
       </div>
@@ -213,11 +213,11 @@ const BriefUpload = ({ onParsed }: BriefUploadProps) => {
       {/* Help Text */}
       <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 rounded-xl border border-blue-200 dark:border-blue-900">
         <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
-          <strong className="text-blue-600 dark:text-blue-400">💡 Consejo:</strong> Nuestra IA puede analizar briefs en cualquier formato. Solo pega el texto y extraeremos:
-          nombre del cliente, presupuesto, demográficos objetivo, objetivos de campaña, cronograma y más.
+          <strong className="text-blue-600 dark:text-blue-400">💡 Tip:</strong> Our AI can analyze briefs in any format. Just paste the text and we'll extract:
+          client name, budget, target demographics, campaign goals, timeline and more.
         </p>
         <p className="text-sm text-gray-700 dark:text-gray-300">
-          <strong className="text-purple-600 dark:text-purple-400">🎲 Muestra Aleatoria:</strong> ¡Cada clic genera un brief único de nuestra base de datos de 218 marcas españolas e internacionales en más de 15 industrias!
+          <strong className="text-purple-600 dark:text-purple-400">🎲 Random Sample:</strong> Each click generates a unique brief from our database of 218 Spanish and international brands across 15+ industries!
         </p>
       </div>
     </div>

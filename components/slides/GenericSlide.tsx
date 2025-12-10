@@ -9,6 +9,12 @@ const GenericSlide = ({ slide, onEdit }: GenericSlideProps) => {
   const hasContent = slide.content.bullets || slide.content.metrics || slide.content.timeline;
   const hasImage = slide.content.images && slide.content.images.length > 0;
 
+  const handleContentEdit = (field: string, value: string) => {
+    if (onEdit) {
+      onEdit(field, value);
+    }
+  };
+
   return (
     <div
       className="w-full h-full flex flex-col p-16"
@@ -43,11 +49,35 @@ const GenericSlide = ({ slide, onEdit }: GenericSlideProps) => {
 
       {/* Header */}
       <div className="mb-12 relative z-10">
-        <h1 className="text-6xl font-black tracking-tight mb-4">
+        <h1 
+          className="text-6xl font-black tracking-tight mb-4 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 -ml-2"
+          contentEditable={!!onEdit}
+          suppressContentEditableWarning
+          onBlur={(e) => handleContentEdit('title', e.currentTarget.textContent || '')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              e.currentTarget.blur();
+            }
+          }}
+        >
           {slide.content.title || slide.title}
         </h1>
         {slide.content.subtitle && (
-          <p className="text-2xl opacity-80">{String(slide.content.subtitle)}</p>
+          <p 
+            className="text-2xl opacity-80 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 -ml-2"
+            contentEditable={!!onEdit}
+            suppressContentEditableWarning
+            onBlur={(e) => handleContentEdit('subtitle', e.currentTarget.textContent || '')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                e.currentTarget.blur();
+              }
+            }}
+          >
+            {String(slide.content.subtitle)}
+          </p>
         )}
       </div>
 
@@ -62,7 +92,14 @@ const GenericSlide = ({ slide, onEdit }: GenericSlideProps) => {
                   className="w-4 h-4 rounded-full mt-3 flex-shrink-0"
                   style={{ backgroundColor: slide.design.accentColor }}
                 />
-                <p className="text-3xl leading-relaxed">{String(bullet)}</p>
+                <p 
+                  className="text-3xl leading-relaxed outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 -ml-2"
+                  contentEditable={!!onEdit}
+                  suppressContentEditableWarning
+                  onBlur={(e) => handleContentEdit(`bullet-${index}`, e.currentTarget.textContent || '')}
+                >
+                  {String(bullet)}
+                </p>
               </div>
             ))}
           </div>
@@ -77,10 +114,33 @@ const GenericSlide = ({ slide, onEdit }: GenericSlideProps) => {
                 className="p-8 rounded-2xl"
                 style={{ backgroundColor: slide.design.accentColor + "20" }}
               >
-                <div className="text-5xl font-black mb-2" style={{ color: slide.design.accentColor }}>
+                <div 
+                  className="text-5xl font-black mb-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 -ml-2" 
+                  style={{ color: slide.design.accentColor }}
+                  contentEditable={!!onEdit}
+                  suppressContentEditableWarning
+                  onBlur={(e) => handleContentEdit(`metric-value-${index}`, e.currentTarget.textContent || '')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      e.currentTarget.blur();
+                    }
+                  }}
+                >
                   {typeof metric === 'object' && metric && 'value' in metric ? String(metric.value) : String(metric)}
                 </div>
-                <div className="text-xl opacity-70">
+                <div 
+                  className="text-xl opacity-70 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 -ml-2"
+                  contentEditable={!!onEdit}
+                  suppressContentEditableWarning
+                  onBlur={(e) => handleContentEdit(`metric-label-${index}`, e.currentTarget.textContent || '')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      e.currentTarget.blur();
+                    }
+                  }}
+                >
                   {typeof metric === 'object' && metric && 'label' in metric ? String(metric.label) : ''}
                 </div>
               </div>
@@ -114,7 +174,14 @@ const GenericSlide = ({ slide, onEdit }: GenericSlideProps) => {
 
         {/* Body Text */}
         {slide.content.body && !hasContent && (
-          <p className="text-3xl leading-relaxed">{String(slide.content.body)}</p>
+          <p 
+            className="text-3xl leading-relaxed outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 -ml-2"
+            contentEditable={!!onEdit}
+            suppressContentEditableWarning
+            onBlur={(e) => handleContentEdit('body', e.currentTarget.textContent || '')}
+          >
+            {String(slide.content.body)}
+          </p>
         )}
       </div>
 

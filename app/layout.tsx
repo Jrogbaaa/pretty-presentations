@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Look After You - AI Presentation Generator",
-  description: "Transform advertiser briefs into professional, client-ready presentations with intelligent influencer-brand matching",
+  title: "Look After You - AI Brief Responder",
+  description: "Transform client briefs into professional influencer recommendations with intelligent influencer-brand matching",
 };
 
 const RootLayout = ({

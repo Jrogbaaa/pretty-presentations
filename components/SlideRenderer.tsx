@@ -9,27 +9,28 @@ import GenericSlide from "./slides/GenericSlide";
 interface SlideRendererProps {
   slide: Slide;
   scale?: number;
+  onEdit?: (field: string, value: string) => void;
 }
 
-const SlideRenderer = ({ slide, scale = 1 }: SlideRendererProps) => {
+const SlideRenderer = ({ slide, scale = 1, onEdit }: SlideRendererProps) => {
   const renderSlide = () => {
     switch (slide.type) {
       case "cover":
-        return <CoverSlide slide={slide} />;
+        return <CoverSlide slide={slide} onEdit={onEdit} />;
       case "index":
-        return <IndexSlide slide={slide} />;
+        return <IndexSlide slide={slide} onEdit={onEdit} />;
       case "objective":
-        return <ObjectiveSlide slide={slide} />;
+        return <ObjectiveSlide slide={slide} onEdit={onEdit} />;
       case "talent-strategy":
-        return <TalentStrategySlide slide={slide} />;
+        return <TalentStrategySlide slide={slide} onEdit={onEdit} />;
       case "brief-summary":
         // Check if this is a recommended scenario slide
         if (slide.content.customData?.recommendedScenario) {
-          return <RecommendedScenarioSlide slide={slide} />;
+          return <RecommendedScenarioSlide slide={slide} onEdit={onEdit} />;
         }
-        return <GenericSlide slide={slide} />;
+        return <GenericSlide slide={slide} onEdit={onEdit} />;
       default:
-        return <GenericSlide slide={slide} />;
+        return <GenericSlide slide={slide} onEdit={onEdit} />;
     }
   };
 

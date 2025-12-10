@@ -70,7 +70,17 @@ export const parseBriefDocument = async (
   const apiKey = process.env.OPENAI_API_KEY!;
   const openai = new OpenAI({ apiKey });
   
-  const prompt = `You are an expert at parsing client briefs for influencer marketing campaigns, including complex multi-phase campaigns, budget scenarios, and special constraints.
+  const prompt = `You are an expert at parsing client briefs for influencer marketing campaigns, with advanced reading comprehension and brand intelligence capabilities.
+
+**CRITICAL: Use your knowledge of well-known brands (IKEA, Nike, Starbucks, Zara, McDonald's, etc.) to identify the client name even if not explicitly labeled. Look for brand names anywhere in the text.**
+
+**CRITICAL: Use reading comprehension to INFER campaign goals from context:**
+- Product launches → "Launch new product", "Drive awareness of [product]"
+- Events → "Event promotion", "Drive attendance"
+- Seasonal campaigns → "Holiday sales", "Back-to-school awareness"
+- Brand partnerships → "Build brand awareness", "Strengthen brand positioning"
+- New collections → "Showcase new collection", "Drive pre-orders"
+- Even if goals aren't explicitly stated, INFER them from the campaign context, deliverables, and content themes
 
 Parse this brief into a structured format. The brief may be in Spanish, English, or mixed languages.
 
@@ -79,8 +89,8 @@ ${briefText}
 
 Extract and return JSON with this exact structure:
 {
-  "clientName": "string (brand or company name)",
-  "campaignGoals": ["goal1", "goal2", ...] (specific objectives),
+  "clientName": "string (USE BRAND INTELLIGENCE: identify well-known brand names like IKEA, Nike, Zara, etc. even if not labeled as 'client'. Look throughout the entire text.)",
+  "campaignGoals": ["goal1", "goal2", ...] (USE READING COMPREHENSION: extract explicit goals AND infer implicit goals from campaign context, product mentions, events, deliverables, and content themes. NEVER leave this empty - always infer at least 1-2 goals.),
   "budget": number (PRIMARY budget in euros, extract number only. If no budget mentioned, use 0),
   "targetDemographics": {
     "ageRange": "string (e.g., 25-65+, 18-35)",
@@ -123,6 +133,19 @@ Extract and return JSON with this exact structure:
     "requirePublicSpeaking": boolean (true if must speak at events like Square)
   } (ONLY include fields that are explicitly mentioned),
   
+  "influencerRequirements": [
+    {
+      "tier": "macro|mid-tier|micro",
+      "totalCount": number (total number needed for this tier),
+      "femaleCount": number (OMIT if not specified),
+      "maleCount": number (OMIT if not specified),
+      "genderNotes": "string (e.g., '50/50 split', 'mostly female')",
+      "deliverables": ["1 Reel", "1 Story", "TikTok replica"] (what each influencer in this tier will create),
+      "schedule": "string (e.g., 'alternating months', 'March, May, July')",
+      "notes": "string (any additional requirements for this tier)"
+    }
+  ] (ONLY include if influencer breakdown by tier/gender is specified, like Celsius: 2 macros (1F+1M) + 6 mids (3F+3M)),
+  
   "geographicDistribution": {
     "cities": ["city1", "city2"] (specific cities required, e.g., Madrid, Barcelona, Sevilla, Valencia),
     "coreCities": ["city1"] (priority cities if mentioned, e.g., Madrid and Barcelona as core),
@@ -160,61 +183,94 @@ Extract and return JSON with this exact structure:
 
 CRITICAL PARSING INSTRUCTIONS:
 
-0. OPTIONAL FIELDS - IMPORTANT:
+0. BRAND INTELLIGENCE & READING COMPREHENSION:
+   - **Brand Recognition:** Use your knowledge of well-known brands to identify clients. If you see "IKEA", "Nike", "Starbucks", "Zara", "McDonald's", etc. in the text, that's likely the client even if not explicitly labeled
+   - **Goal Inference:** Campaign goals are often IMPLIED, not explicitly stated. Look for:
+     * Product names → infer "Launch [product]" or "Drive awareness of [product]"
+     * Event mentions → infer "Promote [event]" or "Drive attendance"
+     * New collections → infer "Showcase [collection]"
+     * Seasonal timing → infer seasonal goals (e.g., "Halloween campaign" → "Drive Halloween sales")
+     * Deliverables → infer goals from what's being created (e.g., "Reels + Stories" → "Increase social engagement")
+   - **Context Clues:** Read between the lines. A brief about a new furniture collection launch clearly has goals even if not labeled "objectives"
+   - **NEVER leave campaignGoals empty** - always extract or infer at least 1-3 goals from the brief
+
+1. OPTIONAL FIELDS - IMPORTANT:
    - ONLY include optional complex fields (campaignHistory, geographicDistribution, budgetScenarios, phases, constraints) when EXPLICITLY mentioned in the brief
    - Do NOT include these fields with default/empty values if they're not in the brief
    - When in doubt, OMIT the field rather than guessing
    - Missing fields will be prompted in the UI if needed
+   - **EXCEPTION:** campaignGoals must ALWAYS be filled - infer from context if not explicit
 
-1. MULTI-PHASE CAMPAIGNS (like IKEA GREJSIMOJS):
+2. MULTI-PHASE CAMPAIGNS (like IKEA GREJSIMOJS):
    - Look for phrases: "Phase 1", "Phase 2", "Fase 1", "oleada", "wave"
    - Extract budget percentages (e.g., "20% Phase 1, 40% Phase 2, 40% Phase 3")
    - Extract phase names (e.g., "El Rumor", "La Revelación", "El Rush Final")
    - Extract phase-specific strategies and creator requirements
    - Note any phase constraints (e.g., "embargo: no products shown in Phase 1")
 
-2. BUDGET SCENARIOS (like IKEA):
+3. BUDGET SCENARIOS (like IKEA):
    - Look for: "hagamos dos escenarios", "two scenarios", "€30k and €50k"
    - Extract all budget amounts mentioned as alternatives
    - Use PRIMARY budget as main "budget" field
 
-3. HARD CONSTRAINTS:
+4. HARD CONSTRAINTS:
    - CPM limits: "máximo CPM de €20", "max CPM €20 per talent" → maxCPM: 20
    - Category restrictions: "willing to work with spirits", "no alcohol brands"
    - Event attendance: "asistencia a la academia", "attend OT academy" → requireEventAttendance: true
    - Public speaking: "dar una charla", "speaker at events" → requirePublicSpeaking: true
 
-4. GEOGRAPHIC DISTRIBUTION (like Square):
+5. INFLUENCER REQUIREMENTS WITH GENDER BREAKDOWN (like Celsius):
+   - Look for specific tier + gender requirements: "2 macros (una chica y un chico)", "6 mids (3 chicas y 3 chicos)"
+   - Extract: tier, total count, female count, male count
+   - Example: "2 macros (1 female + 1 male)" → {tier: "macro", totalCount: 2, femaleCount: 1, maleCount: 1}
+   - Example: "6 mids (3 girls + 3 boys)" → {tier: "mid-tier", totalCount: 6, femaleCount: 3, maleCount: 3}
+   - Include schedule if alternating: "macros publish March, May, July" vs "mids publish April, June, August"
+   - Spanish: "chica/chico" = female/male, "mujer/hombre" = woman/man
+
+6. GEOGRAPHIC DISTRIBUTION (like Square):
    - Look for: "distributed across", "repartidos en Madrid, Barcelona, Sevilla"
    - Extract city lists and identify priority/core cities
    - Set requireDistribution: true if distribution is important
+   - Look for percentages: "50% Barcelona, 50% Madrid" → equal distribution
 
-5. DELIVERABLES:
-   - Social: "1 Reel + 3 Stories", "2 posts"
-   - Event: "Academy attendance", "Asistencia Evento"
+8. DELIVERABLES:
+   - Social: "1 Reel + 3 Stories", "2 posts", "réplica en TikTok" (TikTok replica/repost)
+   - Event: "Academy attendance", "Asistencia Evento", "asistencia a dos eventos" (2 events)
    - Speaking: "dar una charla", "speaker talks"
    - Brand Integration: "brand integration at OT"
+   - Rights: "derechos de imagen para paid" (image rights for paid media), note max spend per content
 
-6. FOLLOW-UP CAMPAIGNS (like Puerto de Indias Wave 2):
+9. FOLLOW-UP CAMPAIGNS (like Puerto de Indias Wave 2):
    - Look for: "Wave 2", "oleada 2", "repeat well-performing creators"
    - Extract mentions of previous campaign performance
    - Note if certain influencers should be repeated
 
-7. B2B vs B2C:
+10. B2B vs B2C:
    - B2B if targeting: "emprendedores", "business owners", "restaurateurs"
    - B2C if targeting: consumers, general public
 
-8. MANUAL INFLUENCERS:
+11. MANUAL INFLUENCERS:
    - Extract ALL mentioned names: "Laura Escanes", "Violeta Mangriyan", "@dyanbay"
    - Include question marks: "¿Las podemos meter?" still means they're requested
    - Include rejected options with note: "Dabiz Muñoz (said no)"
+   - Note: "proponer talento nuevo" (propose new talent) means client wants fresh suggestions beyond examples
 
-9. For Spanish briefs: 
+12. CAMPAIGN GOAL INFERENCE EXAMPLES:
+   - "Launch GREJSIMOJS collection" + "3 phases" → ["Launch GREJSIMOJS collection", "Build anticipation and buzz", "Drive sales and conversions"]
+   - "Halloween event" + "OT academy" → ["Drive event attendance", "Increase brand awareness", "Generate social buzz"]
+   - "New gin flavor" + "testimonials" → ["Launch new product", "Build product credibility", "Drive trial and purchase"]
+   - "Furniture collection" + "lifestyle content" → ["Showcase new collection", "Drive store traffic", "Increase online sales"]
+   - Use this logic to ALWAYS infer meaningful goals from campaign context
+
+13. For Spanish briefs: 
    - "Presupuesto" = budget
    - "Territorio" = content themes
    - "Target" = demographics
    - "PDM" = presentation deadline
    - "PTE" = pending/TBD
+   - "una chica y un chico" = a girl and a boy (1 female + 1 male)
+   - "repartidos 50% y 50%" = split 50/50
+   - "un mes sí y un mes no" = alternating months (one month yes, one month no)
 
 Return ONLY valid JSON, no markdown formatting. Be COMPREHENSIVE - extract every detail mentioned in the brief.`;
 
@@ -282,13 +338,44 @@ Return ONLY valid JSON, no markdown formatting. Be COMPREHENSIVE - extract every
       console.log(`🎯 [PARSER] Multi-budget scenarios detected: ${rawParsed.budgetScenarios.length} scenarios`);
     }
 
-    // Validate with Zod schema
-    const { validateClientBrief, sanitizeBriefData } = await import('./validation');
+    // Validate with Zod schema (use safe validation to avoid throwing errors)
+    const { safeValidateClientBrief, sanitizeBriefData } = await import('./validation');
     const sanitized = sanitizeBriefData(rawParsed);
-    const parsed = validateClientBrief(sanitized);
+    const validationResult = safeValidateClientBrief(sanitized);
+
+    let parsed: any;
+    const suggestions: string[] = [];
+    
+    if (!validationResult.success) {
+      // Validation failed - provide defaults for missing required fields
+      console.warn('⚠️  Brief validation failed, using defaults for missing fields:', validationResult.errors);
+      
+      // Start with sanitized data and fill in missing required fields with defaults
+      parsed = {
+        ...sanitized,
+        campaignGoals: sanitized.campaignGoals?.length > 0 ? sanitized.campaignGoals : ['Please specify campaign goals'],
+        platformPreferences: sanitized.platformPreferences?.length > 0 ? sanitized.platformPreferences : ['Instagram'],
+        targetDemographics: {
+          ageRange: sanitized.targetDemographics?.ageRange || '18-65',
+          gender: sanitized.targetDemographics?.gender || 'All genders',
+          location: sanitized.targetDemographics?.location?.length > 0 ? sanitized.targetDemographics.location : ['Spain'],
+          interests: sanitized.targetDemographics?.interests || [],
+          psychographics: sanitized.targetDemographics?.psychographics || ''
+        }
+      };
+      
+      // Add warnings for missing fields
+      if (validationResult.errors) {
+        suggestions.push('⚠️  Some required fields could not be extracted from the brief. Please review and update:');
+        validationResult.errors.forEach(error => {
+          suggestions.push(`   • ${error}`);
+        });
+      }
+    } else {
+      parsed = validationResult.data;
+    }
 
     // Add helpful suggestions if demographics are missing
-    const suggestions: string[] = [];
     if (!parsed.targetDemographics.interests || parsed.targetDemographics.interests.length === 0) {
       suggestions.push('💡 TIP: Add target audience interests for more accurate influencer matching and better results.');
     }
@@ -300,7 +387,7 @@ Return ONLY valid JSON, no markdown formatting. Be COMPREHENSIVE - extract every
     if (suggestions.length > 0) {
       const suggestionText = '\n\n' + suggestions.join('\n');
       parsed.additionalNotes = (parsed.additionalNotes || '') + suggestionText;
-      console.log('ℹ️  Demographics suggestions added to brief');
+      console.log('ℹ️  Suggestions added to brief');
     }
 
     // Cache the result

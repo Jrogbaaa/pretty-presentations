@@ -1,5 +1,54 @@
 # Changelog
 
+## [4.0.0] - 2025-12-10 🚀
+
+### 🎯 Major Refocus: Brief Responder
+
+This release refocuses the platform from presentation generation to brief response generation, with several quality-of-life improvements.
+
+#### 🌍 English-First Platform
+- **Complete English Localization**: All UI, forms, error messages, and AI-generated content now in English
+- **AI Prompts Updated**: Generation prompts explicitly request English output
+- **User-Facing Text**: All components updated with English text
+
+#### 🎨 Presentation Feature Removed
+- **Simplified Focus**: Platform now exclusively generates text brief responses
+- **Removed Components**: PresentationEditor, PresentationEngineSelector, slide components
+- **Cleaner UX**: Single "Generate Brief Response" button instead of multiple options
+- **Streamlined Form**: Removed template selection (was for presentation styling)
+
+#### 📄 Additional Context Upload (NEW)
+- **Multi-Format Support**: Upload PDFs, text files, or presentations
+- **PDF Text Extraction**: Uses pdfjs-dist to automatically extract text from PDFs
+- **Manual Text Entry**: Paste additional context directly in form
+- **AI Integration**: All uploaded context sent to AI for better recommendations
+- **Use Cases**: Client presentations, brand guidelines, previous campaigns, creative briefs
+
+#### 🧠 Enhanced Brief Parser
+- **Reading Comprehension**: AI now infers campaign goals from context (product launches, events, etc.)
+- **Brand Intelligence**: Recognizes well-known brands (IKEA, Nike, etc.) even if not labeled
+- **Influencer Gender Breakdown**: Extracts tier-specific gender requirements (e.g., "2 macros: 1F + 1M")
+- **Graceful Error Handling**: Provides defaults for missing required fields instead of failing
+- **Spanish Phrase Support**: Better extraction of Spanish brief terminology
+
+#### 🛠️ Technical Changes
+- Added `pdfjs-dist` dependency for PDF text extraction
+- Added `additionalContext` field to `ClientBrief` type
+- Updated `ProcessingOverlay` to single mode (brief response only)
+- Removed presentation-related imports and code paths
+
+### 📁 Files Modified
+- `app/page.tsx` - Complete refocus to brief responses
+- `app/layout.tsx` - Updated metadata
+- `components/BriefForm.tsx` - Added additional context upload, removed presentation options
+- `components/BriefUpload.tsx` - Updated terminology
+- `components/ProcessingOverlay.tsx` - Simplified to single mode
+- `lib/brief-parser-openai.server.ts` - Enhanced AI parsing with reading comprehension
+- `lib/markdown-response-generator.server.ts` - Added additional context to prompts
+- `types/index.ts` - Added additionalContext type
+
+---
+
 ## [3.3.1] - 2025-11-20 🐛
 
 ### 🐛 Bug Fixes

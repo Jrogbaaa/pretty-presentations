@@ -109,6 +109,14 @@ export interface ClientBrief {
     description?: string;
   }>;
   
+  // Additional context from uploaded files (PDFs, presentations, etc.)
+  additionalContext?: Array<{
+    id: string;
+    name: string;
+    type: "pdf" | "text" | "presentation";
+    content: string; // Extracted text content
+  }>;
+  
   // ENHANCED FIELDS for complex briefs
   isMultiPhase?: boolean;
   phases?: CampaignPhase[];

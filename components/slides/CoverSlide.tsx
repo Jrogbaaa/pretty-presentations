@@ -13,6 +13,12 @@ const CoverSlide = ({ slide, onEdit }: CoverSlideProps) => {
   // Check if we have a background image
   const hasBackgroundImage = slide.content.images && slide.content.images.length > 0;
 
+  const handleContentEdit = (field: string, value: string) => {
+    if (onEdit) {
+      onEdit(field, value);
+    }
+  };
+
   return (
     <div
       className="w-full h-full flex flex-col relative p-20"
@@ -50,11 +56,20 @@ const CoverSlide = ({ slide, onEdit }: CoverSlideProps) => {
         {slide.content.subtitle && (
           <div className="mb-8">
             <div 
-              className="inline-block px-6 py-3 text-lg font-bold tracking-widest uppercase rounded-lg"
+              className="inline-block px-6 py-3 text-lg font-bold tracking-widest uppercase rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
               style={{
                 backgroundColor: accentColor + '30',
                 color: accentColor,
                 border: `2px solid ${accentColor}`,
+              }}
+              contentEditable={!!onEdit}
+              suppressContentEditableWarning
+              onBlur={(e) => handleContentEdit('subtitle', e.currentTarget.textContent || '')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  e.currentTarget.blur();
+                }
               }}
             >
               {slide.content.subtitle}
@@ -64,9 +79,18 @@ const CoverSlide = ({ slide, onEdit }: CoverSlideProps) => {
 
         {/* Main Title - Extra Large with Shadow for Visibility */}
         <h1 
-          className="text-9xl font-black leading-none mb-10 tracking-tight"
+          className="text-9xl font-black leading-none mb-10 tracking-tight outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 -ml-2"
           style={{
             textShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          }}
+          contentEditable={!!onEdit}
+          suppressContentEditableWarning
+          onBlur={(e) => handleContentEdit('title', e.currentTarget.textContent || '')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              e.currentTarget.blur();
+            }
           }}
         >
           {slide.content.title}
@@ -74,7 +98,12 @@ const CoverSlide = ({ slide, onEdit }: CoverSlideProps) => {
 
         {/* Body/Description */}
         {slide.content.body && (
-          <div className="text-3xl font-light leading-relaxed opacity-90 max-w-3xl">
+          <div 
+            className="text-3xl font-light leading-relaxed opacity-90 max-w-3xl outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 -ml-2"
+            contentEditable={!!onEdit}
+            suppressContentEditableWarning
+            onBlur={(e) => handleContentEdit('body', e.currentTarget.textContent || '')}
+          >
             {slide.content.body}
           </div>
         )}

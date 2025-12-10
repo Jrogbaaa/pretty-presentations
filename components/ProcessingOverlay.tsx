@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, FileCheck, Target, Brain, Presentation, CheckCircle } from "lucide-react";
+import { Sparkles, FileCheck, Target, Brain, FileText, CheckCircle } from "lucide-react";
 
 interface ProcessingStep {
   id: string;
@@ -12,95 +12,53 @@ interface ProcessingStep {
   estimatedDuration?: number; // in ms
 }
 
-interface ProcessingOverlayProps {
-  mode: "presentation" | "text";
-}
-
-const PRESENTATION_STEPS: ProcessingStep[] = [
+const BRIEF_RESPONSE_STEPS: ProcessingStep[] = [
   {
     id: "parse",
-    label: "Procesando requisitos del brief",
+    label: "Analyzing brief requirements",
     icon: <FileCheck className="w-4 h-4" />,
     color: "text-green-600 dark:text-green-400",
-    estimatedDuration: 3000,
+    estimatedDuration: 2000,
   },
   {
     id: "brand",
-    label: "Buscando inteligencia de marca",
+    label: "Searching brand intelligence",
     icon: <Brain className="w-4 h-4" />,
     color: "text-blue-600 dark:text-blue-400",
     estimatedDuration: 2000,
   },
   {
     id: "match",
-    label: "Emparejando influencers con audiencia objetivo",
+    label: "Finding perfect influencer matches",
     icon: <Target className="w-4 h-4" />,
     color: "text-purple-600 dark:text-purple-400",
     estimatedDuration: 5000,
   },
   {
     id: "generate",
-    label: "Generando contenido de presentación",
+    label: "Writing comprehensive recommendations",
     icon: <Sparkles className="w-4 h-4" />,
     color: "text-pink-600 dark:text-pink-400",
-    estimatedDuration: 18000, // Initial generation
+    estimatedDuration: 35000,
   },
   {
     id: "refine",
-    label: "Refinando calidad y especificidad",
+    label: "Refining quality and brand alignment",
     icon: <Sparkles className="w-4 h-4" />,
     color: "text-indigo-600 dark:text-indigo-400",
-    estimatedDuration: 18000, // Reflection pass
+    estimatedDuration: 30000,
   },
   {
     id: "finalize",
-    label: "Creando diapositivas profesionales",
-    icon: <Presentation className="w-4 h-4" />,
+    label: "Formatting final response",
+    icon: <FileText className="w-4 h-4" />,
     color: "text-orange-600 dark:text-orange-400",
-    estimatedDuration: 6000,
+    estimatedDuration: 3000,
   },
 ];
 
-const TEXT_STEPS: ProcessingStep[] = [
-  {
-    id: "parse",
-    label: "Analizando brief",
-    icon: <FileCheck className="w-4 h-4" />,
-    color: "text-green-600 dark:text-green-400",
-    estimatedDuration: 2000,
-  },
-  {
-    id: "brand",
-    label: "Buscando inteligencia de marca",
-    icon: <Brain className="w-4 h-4" />,
-    color: "text-blue-600 dark:text-blue-400",
-    estimatedDuration: 2000,
-  },
-  {
-    id: "match",
-    label: "Encontrando emparejamientos perfectos de influencers",
-    icon: <Target className="w-4 h-4" />,
-    color: "text-purple-600 dark:text-purple-400",
-    estimatedDuration: 5000,
-  },
-  {
-    id: "generate",
-    label: "Escribiendo recomendaciones completas",
-    icon: <Sparkles className="w-4 h-4" />,
-    color: "text-pink-600 dark:text-pink-400",
-    estimatedDuration: 35000, // Initial generation (GPT-4o)
-  },
-  {
-    id: "refine",
-    label: "Refinando calidad y alineación de marca",
-    icon: <Sparkles className="w-4 h-4" />,
-    color: "text-indigo-600 dark:text-indigo-400",
-    estimatedDuration: 30000, // Reflection pass (GPT-4o-mini)
-  },
-];
-
-const ProcessingOverlay = ({ mode }: ProcessingOverlayProps) => {
-  const steps = mode === "presentation" ? PRESENTATION_STEPS : TEXT_STEPS;
+const ProcessingOverlay = () => {
+  const steps = BRIEF_RESPONSE_STEPS;
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
   const [progress, setProgress] = useState(0);
@@ -156,21 +114,19 @@ const ProcessingOverlay = ({ mode }: ProcessingOverlayProps) => {
 
         {/* Title */}
         <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-          {mode === "presentation" ? "Generando Tu Presentación" : "Creando Tu Respuesta"}
+          Creating Your Brief Response
         </h3>
 
         {/* Subtitle */}
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          {mode === "presentation"
-            ? "Nuestra IA está analizando tu brief, emparejando influencers y creando tus diapositivas..."
-            : "Nuestra IA está analizando tu brief y encontrando los emparejamientos perfectos de influencers..."}
+          Our AI is analyzing your brief and finding the perfect influencer matches...
         </p>
 
         {/* Progress Bar */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Progreso
+              Progress
             </span>
             <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
               {Math.round(progress)}%
@@ -192,7 +148,6 @@ const ProcessingOverlay = ({ mode }: ProcessingOverlayProps) => {
             {steps.map((step, index) => {
               const isCompleted = completedSteps.has(step.id);
               const isCurrent = index === currentStepIndex;
-              const isPending = index > currentStepIndex;
 
               return (
                 <motion.div
@@ -245,10 +200,10 @@ const ProcessingOverlay = ({ mode }: ProcessingOverlayProps) => {
           className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
         >
           <p className="text-xs text-blue-700 dark:text-blue-300">
-            💡 <strong>Consejo:</strong> Esto generalmente toma {mode === "presentation" ? "45-60" : "60-90"} segundos
+            💡 <strong>Tip:</strong> This usually takes 60-90 seconds
           </p>
           <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-            ✨ Nuestra IA revisa y refina su trabajo para máxima calidad
+            ✨ Our AI reviews and refines its work for maximum quality
           </p>
         </motion.div>
       </motion.div>
@@ -257,4 +212,3 @@ const ProcessingOverlay = ({ mode }: ProcessingOverlayProps) => {
 };
 
 export default ProcessingOverlay;
-

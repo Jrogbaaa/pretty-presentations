@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       const resetDate = new Date(rateLimitResult.resetTime);
       return NextResponse.json(
         { 
-          error: 'Límite de tasa excedido. Por favor intenta más tarde.',
+          error: 'Rate limit exceeded. Please try again later.',
           resetTime: rateLimitResult.resetTime,
           resetTimeFormatted: resetDate.toLocaleTimeString()
         },
@@ -119,14 +119,14 @@ export async function POST(request: NextRequest) {
     // Validate sanitized brief
     if (!brief.budget || brief.budget === 0) {
       return NextResponse.json(
-        { error: "El presupuesto es requerido y debe ser mayor a 0" },
+        { error: "Budget is required and must be greater than 0" },
         { status: 400 }
       );
     }
 
     if (!brief.clientName || !brief.campaignGoals?.length) {
       return NextResponse.json(
-        { error: "El nombre del cliente y al menos un objetivo de campaña son requeridos" },
+        { error: "Client name and at least one campaign goal are required" },
         { status: 400 }
       );
     }
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
     // Don't leak internal error details
     return NextResponse.json(
       { 
-        error: "No se pudo generar la respuesta. Por favor verifica tu entrada e intenta nuevamente." 
+        error: "Could not generate response. Please check your input and try again." 
       },
       { status: 500 }
     );

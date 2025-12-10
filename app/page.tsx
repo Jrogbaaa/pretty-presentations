@@ -5,17 +5,14 @@ import { useRouter } from "next/navigation";
 import BriefForm from "@/components/BriefForm";
 import BriefUpload from "@/components/BriefUpload";
 import ProcessingOverlay from "@/components/ProcessingOverlay";
-import { processBrief } from "@/lib/ai-processor-openai";
-import { ShuffleHero } from "@/components/ui/shuffle-grid";
 import { HeroSection } from "@/components/ui/hero-section-dark";
-import { Target, Zap, Sparkles, Upload, FileCheck, Presentation, WifiOff } from "lucide-react";
+import { ShuffleHero } from "@/components/ui/shuffle-grid";
+import { Target, Zap, Sparkles, Upload, FileCheck, FileText, WifiOff } from "lucide-react";
 import type { ClientBrief } from "@/types";
 import { getUserFriendlyError } from "@/types/errors";
-import type { PresentationEngine } from "@/components/PresentationEngineSelector";
 
 const HomePage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [processingMode, setProcessingMode] = useState<"presentation" | "text">("presentation");
   const [error, setError] = useState<string | null>(null);
   const [rateLimitResetTime, setRateLimitResetTime] = useState<number | null>(null);
   const [parsedBrief, setParsedBrief] = useState<ClientBrief | null>(null);
@@ -32,7 +29,7 @@ const HomePage = () => {
     
     const handleOffline = () => {
       setIsOnline(false);
-      setError('Estás actualmente sin conexión. Por favor verifica tu conexión a internet.');
+      setError('You are currently offline. Please check your internet connection.');
     };
     
     // Check initial state
@@ -72,140 +69,19 @@ const HomePage = () => {
     setError(null);
   };
 
-  const handleSubmit = async (brief: ClientBrief, engine: PresentationEngine = "standard") => {
+  const handleGenerateBriefResponse = async (brief: ClientBrief) => {
     // Check budget is provided
     if (!brief.budget || brief.budget === 0) {
-      setError('Por favor ingresa un presupuesto de campaña antes de generar tu presentación.');
+      setError('Please enter a campaign budget before generating your brief response.');
       return;
     }
     
     // Check online status
     if (!isOnline) {
-      setError('Estás sin conexión. Por favor verifica tu conexión a internet e intenta nuevamente.');
+      setError('You are offline. Please check your internet connection and try again.');
       return;
     }
     
-    setProcessingMode("presentation");
-    setIsProcessing(true);
-    setError(null);
-
-    try {
-      // Check if Presenton was selected
-      if (engine === "presenton") {
-        console.log("🚀 Using Presenton engine...");
-        
-        try {
-          // Call Presenton generation API
-          const response = await fetch("/api/presenton/generate", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(brief),
-          });
-          
-          const data = await response.json();
-          
-          if (response.ok && data.success) {
-            console.log("✅ Presenton generation successful!", data);
-            
-            alert(`Presentation generated successfully with Presenton!\n\nPresentation ID: ${data.presentationId}\n\nYou can download it from the Presenton container's app_data directory.`);
-            
-            setIsProcessing(false);
-            return;
-          } else {
-            // Presenton failed, fall back to standard
-            console.warn("⚠️ Presenton generation failed, falling back to standard generator");
-            setError("Presenton no está disponible. Usando generador estándar en su lugar.");
-            // Fall through to standard generator
-          }
-        } catch (presentonError) {
-          console.error("❌ Presenton error:", presentonError);
-          setError("Generación con Presenton falló. Usando generador estándar en su lugar.");
-          // Fall through to standard generator
-        }
-      }
-      
-      // Standard generator (or fallback from Presenton)
-      console.log("🎯 Using standard generator...");
-      
-      // Process the brief and generate presentation
-      // Pass empty array to fetch real influencers from Firestore database (~3k Spanish influencers)
-      // Will automatically fall back to mockInfluencers if Firestore is unavailable
-      const result = await processBrief(brief, []);
-
-      if (result.warnings.length > 0 && result.confidence < 50) {
-        setError(`Unable to process brief: ${result.warnings.join(", ")}`);
-        setIsProcessing(false);
-        return;
-      }
-
-      // Upload images to Firebase Storage and replace base64 with URLs
-      let presentationToSave = result.presentation;
-      try {
-        const { uploadSlideImages } = await import("@/lib/storage-service");
-        const updatedSlides = await uploadSlideImages(
-          result.presentation.slides,
-          result.presentation.id
-        );
-        presentationToSave = {
-          ...result.presentation,
-          slides: updatedSlides,
-        };
-      } catch (uploadError) {
-        console.error("Error uploading images to Storage:", uploadError);
-        // Continue with base64 images if upload fails
-      }
-
-      // Save presentation to Firestore
-      try {
-        await fetch("/api/presentations", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(presentationToSave),
-        });
-      } catch (saveError) {
-        console.error("Error saving presentation:", saveError);
-        // Continue anyway - presentation is in memory
-      }
-
-      // Store presentation in sessionStorage for immediate display
-      // This allows the editor to show images immediately while Firestore loads
-      try {
-        sessionStorage.setItem(
-          `presentation-${result.presentation.id}`,
-          JSON.stringify(result.presentation)
-        );
-      } catch (storageError) {
-        console.warn("Could not store presentation in sessionStorage:", storageError);
-      }
-
-      // Navigate to editor
-      router.push(`/editor/${result.presentation.id}`);
-    } catch (err) {
-      console.error("Error processing brief:", err);
-      const friendlyError = getUserFriendlyError(err);
-      setError(friendlyError);
-      setIsProcessing(false);
-    }
-  };
-
-  const handleGenerateTextResponse = async (brief: ClientBrief) => {
-    // Check budget is provided
-    if (!brief.budget || brief.budget === 0) {
-      setError('Por favor ingresa un presupuesto de campaña antes de generar recomendaciones de influencers.');
-      return;
-    }
-    
-    // Check online status
-    if (!isOnline) {
-      setError('Estás sin conexión. Por favor verifica tu conexión a internet e intenta nuevamente.');
-      return;
-    }
-    
-    setProcessingMode("text");
     setIsProcessing(true);
     setError(null);
     setRateLimitResetTime(null);
@@ -262,7 +138,7 @@ const HomePage = () => {
       // Navigate to response page
       router.push(`/response/${response.id}`);
     } catch (err) {
-      console.error("Error generating text response:", err);
+      console.error("Error generating brief response:", err);
       const friendlyError = getUserFriendlyError(err);
       setError(friendlyError);
       setIsProcessing(false);
@@ -286,13 +162,13 @@ const HomePage = () => {
     <div className="min-h-screen bg-white dark:bg-black">
       {/* Animated Hero Section */}
       <HeroSection
-        title="Presentaciones con IA"
+        title="AI Brief Responder"
         subtitle={{
-          regular: "Transforma briefs en ",
-          gradient: "presentaciones impactantes",
+          regular: "Transform briefs into ",
+          gradient: "strategic recommendations",
         }}
-        description="Nuestra plataforma inteligente conecta influencers con marcas y genera presentaciones profesionales listas para el cliente en minutos usando tecnología avanzada de IA."
-        ctaText="Crear Presentación"
+        description="Our intelligent platform analyzes your client briefs and generates comprehensive influencer recommendations with detailed strategy, budget breakdowns, and performance projections."
+        ctaText="Respond to Brief"
         ctaHref="#brief-section"
         onCtaClick={handleScrollToBrief}
         gridOptions={{
@@ -314,10 +190,10 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              ¿Por qué Elegir Pretty Presentations?
+              Why Choose Our Brief Responder?
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Todo lo que necesitas para crear presentaciones profesionales con IA
+              Everything you need to create professional influencer recommendations
             </p>
           </div>
           
@@ -326,9 +202,9 @@ const HomePage = () => {
               <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4">
                 <Target className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Matching Inteligente</h3>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Smart Matching</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                La IA analiza miles de influencers para encontrar el ajuste perfecto para tus objetivos de campaña y audiencia objetivo
+                AI analyzes thousands of influencers to find the perfect fit for your campaign goals and target audience
               </p>
             </div>
             
@@ -336,9 +212,9 @@ const HomePage = () => {
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
                 <Zap className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Súper Rápido</h3>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Super Fast</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Genera presentaciones completas listas para el cliente en minutos en lugar de pasar horas en trabajo manual
+                Generate complete client-ready brief responses in minutes instead of spending hours on manual work
               </p>
             </div>
             
@@ -346,9 +222,9 @@ const HomePage = () => {
               <div className="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center mb-4">
                 <Sparkles className="w-6 h-6 text-pink-600 dark:text-pink-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Calidad Profesional</h3>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Professional Quality</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Presentaciones de nivel agencia con diseños hermosos que impresionan a los clientes cada vez
+                Agency-level recommendations with detailed strategy, budgets, and KPI projections that impress clients
               </p>
             </div>
           </div>
@@ -360,10 +236,10 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Cómo Funciona
+              How It Works
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Tres simples pasos para crear tu presentación perfecta
+              Three simple steps to respond to your client brief
             </p>
           </div>
           
@@ -372,9 +248,9 @@ const HomePage = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Upload className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">1. Sube el Brief</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">1. Upload Brief</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Sube tu brief de cliente o completa nuestro formulario simple con los detalles de campaña
+                Paste your client brief or fill out our simple form with campaign details
               </p>
             </div>
             
@@ -382,19 +258,19 @@ const HomePage = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FileCheck className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">2. Procesamiento IA</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">2. AI Analysis</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Nuestra IA analiza tu brief y encuentra los influencers perfectos automáticamente
+                Our AI analyzes your brief and matches the perfect influencers automatically
               </p>
             </div>
             
             <div className="text-center">
               <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Presentation className="w-10 h-10 text-white" />
+                <FileText className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">3. Obtén Presentación</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">3. Get Response</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Recibe tu presentación profesional lista para presentar o personalizar más
+                Receive your detailed brief response with influencer recommendations and strategy
               </p>
             </div>
           </div>
@@ -407,7 +283,7 @@ const HomePage = () => {
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
             <WifiOff className="w-5 h-5" />
             <p className="font-semibold">
-              Estás actualmente sin conexión. Las funciones que requieren internet no funcionarán.
+              You are currently offline. Features that require internet will not work.
             </p>
           </div>
         </div>
@@ -419,10 +295,10 @@ const HomePage = () => {
 
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Comienza a Crear Ahora
+              Respond to Your Brief
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Sube tu brief o completa el formulario abajo para generar tu presentación
+              Upload your brief or fill out the form below to generate your influencer recommendations
             </p>
           </div>
 
@@ -451,7 +327,7 @@ const HomePage = () => {
                       ? 'text-orange-900 dark:text-orange-300' 
                       : 'text-red-900 dark:text-red-300'
                   }`}>
-                    {rateLimitResetTime ? 'Límite de Tasa Alcanzado' : 'Error'}
+                    {rateLimitResetTime ? 'Rate Limit Reached' : 'Error'}
                   </h3>
                   <p className={
                     rateLimitResetTime 
@@ -472,11 +348,11 @@ const HomePage = () => {
                             {minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : `${seconds}s`}
                           </p>
                           <p className="text-orange-700 dark:text-orange-400 text-xs mt-1">
-                            Intenta de nuevo en
+                            Try again in
                           </p>
                         </div>
                         <p className="text-sm text-orange-600 dark:text-orange-400">
-                          Para prevenir abusos, limitamos las solicitudes a 5 por minuto. Tu límite se restablecerá pronto.
+                          To prevent abuse, we limit requests to 5 per minute. Your limit will reset soon.
                         </p>
                       </div>
                     );
@@ -500,35 +376,35 @@ const HomePage = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-green-900 dark:text-green-300 text-lg mb-2">
-                    ¡Brief Analizado Exitosamente!
+                    Brief Successfully Analyzed!
                   </h3>
                   <p className="text-green-700 dark:text-green-400 mb-4">
-                    Hemos extraído toda la información de tu brief y prellenado el formulario abajo.
-                    Revisa los detalles y haz los ajustes necesarios antes de generar tu presentación.
+                    We've extracted all the information from your brief and pre-filled the form below.
+                    Review the details and make any necessary adjustments before generating your response.
                   </p>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                       <span className="text-lg">✓</span>
-                      <span>Cliente: {parsedBrief.clientName}</span>
+                      <span>Client: {parsedBrief.clientName}</span>
                     </div>
                     <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                       <span className="text-lg">✓</span>
-                      <span>Presupuesto: €{parsedBrief.budget.toLocaleString()}</span>
+                      <span>Budget: €{parsedBrief.budget.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                       <span className="text-lg">✓</span>
-                      <span>Objetivos: {parsedBrief.campaignGoals.length}</span>
+                      <span>Goals: {parsedBrief.campaignGoals.length}</span>
                     </div>
                     <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                       <span className="text-lg">✓</span>
-                      <span>Plataformas: {parsedBrief.platformPreferences.length}</span>
+                      <span>Platforms: {parsedBrief.platformPreferences.length}</span>
                     </div>
                   </div>
                   <button
                     onClick={handleResetUpload}
                     className="mt-4 text-sm text-green-700 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 underline transition-colors"
                   >
-                    Subir un brief diferente
+                    Upload a different brief
                   </button>
                 </div>
               </div>
@@ -537,14 +413,13 @@ const HomePage = () => {
 
           {/* Brief Form */}
           <BriefForm 
-            onSubmit={handleSubmit}
-            onGenerateTextResponse={handleGenerateTextResponse}
+            onGenerateBriefResponse={handleGenerateBriefResponse}
             isProcessing={isProcessing}
             initialData={parsedBrief || undefined}
           />
 
           {/* Processing Overlay */}
-          {isProcessing && <ProcessingOverlay mode={processingMode} />}
+          {isProcessing && <ProcessingOverlay />}
         </div>
       </section>
 
@@ -553,20 +428,12 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="text-center">
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Look After You</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">Agencia de talentos influencers impulsada por IA</p>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">AI-powered influencer talent agency</p>
             <p className="text-sm text-gray-500 dark:text-gray-500">
-              Impulsado por Firebase Vertex AI y Gemini
+              Powered by OpenAI
             </p>
-            <div className="mt-6 flex items-center justify-center gap-6">
-              <button
-                onClick={() => router.push("/presentations")}
-                className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
-              >
-                Mis Presentaciones
-              </button>
-            </div>
             <p className="text-sm text-gray-500 dark:text-gray-500 mt-6">
-              © 2025 Pretty Presentations. Todos los derechos reservados.
+              © 2025 Brief Responder. All rights reserved.
             </p>
           </div>
         </div>
