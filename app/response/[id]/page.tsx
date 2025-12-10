@@ -82,20 +82,89 @@ const ResponsePage = () => {
       const isDarkMode = document.documentElement.classList.contains('dark') || 
                          window.matchMedia('(prefers-color-scheme: dark)').matches;
       
+      // Colors for PDF (html2canvas doesn't support lab/oklch colors)
+      const bgColor = isDarkMode ? "#1f2937" : "#ffffff";
+      const textColor = isDarkMode ? "#f3f4f6" : "#1f2937";
+      const headingColor = isDarkMode ? "#ffffff" : "#000000";
+      const accentColor = "#9333ea"; // Purple
+      
       // Wait a moment for any layout to settle
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Create canvas from the content - preserve current theme
+      // Create canvas from the content
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
+        backgroundColor: bgColor,
         onclone: (clonedDoc) => {
           const clonedElement = clonedDoc.getElementById("response-content");
           if (clonedElement) {
-            // Preserve the styling as-is (dark or light)
             clonedElement.style.padding = "40px";
+            clonedElement.style.backgroundColor = bgColor;
+            
+            // Convert all modern CSS colors to simple hex colors
+            // This fixes html2canvas "unsupported color function" errors
+            const allElements = clonedElement.querySelectorAll('*');
+            allElements.forEach((el) => {
+              const htmlEl = el as HTMLElement;
+              const computed = window.getComputedStyle(htmlEl);
+              
+              // Force simple colors for all elements
+              htmlEl.style.color = textColor;
+              htmlEl.style.backgroundColor = "transparent";
+              htmlEl.style.borderColor = isDarkMode ? "#374151" : "#e5e7eb";
+            });
+            
+            // Style headings
+            clonedElement.querySelectorAll('h1, h2, h3, h4').forEach((el) => {
+              (el as HTMLElement).style.color = headingColor;
+            });
+            
+            // Style h3 with accent color
+            clonedElement.querySelectorAll('h3').forEach((el) => {
+              (el as HTMLElement).style.color = accentColor;
+            });
+            
+            // Style links
+            clonedElement.querySelectorAll('a').forEach((el) => {
+              (el as HTMLElement).style.color = accentColor;
+            });
+            
+            // Style table headers
+            clonedElement.querySelectorAll('th').forEach((el) => {
+              const th = el as HTMLElement;
+              th.style.backgroundColor = accentColor;
+              th.style.color = "#ffffff";
+            });
+            
+            // Style table cells
+            clonedElement.querySelectorAll('td').forEach((el) => {
+              const td = el as HTMLElement;
+              td.style.backgroundColor = isDarkMode ? "#374151" : "#f9fafb";
+              td.style.color = textColor;
+              td.style.borderColor = isDarkMode ? "#4b5563" : "#e5e7eb";
+            });
+            
+            // Style blockquotes
+            clonedElement.querySelectorAll('blockquote').forEach((el) => {
+              const bq = el as HTMLElement;
+              bq.style.backgroundColor = isDarkMode ? "#374151" : "#f3e8ff";
+              bq.style.borderLeftColor = accentColor;
+              bq.style.color = textColor;
+            });
+            
+            // Style code blocks
+            clonedElement.querySelectorAll('code, pre').forEach((el) => {
+              const code = el as HTMLElement;
+              code.style.backgroundColor = isDarkMode ? "#111827" : "#f3f4f6";
+              code.style.color = textColor;
+            });
+            
+            // Style horizontal rules
+            clonedElement.querySelectorAll('hr').forEach((el) => {
+              (el as HTMLElement).style.borderColor = isDarkMode ? "#374151" : "#e5e7eb";
+            });
           }
         }
       });
@@ -144,7 +213,7 @@ const ResponsePage = () => {
           const ctx = pageCanvas.getContext('2d');
           if (ctx) {
             // Fill with background color
-            ctx.fillStyle = isDarkMode ? "#1f2937" : "#ffffff";
+            ctx.fillStyle = bgColor;
             ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
             
             // Draw the slice
