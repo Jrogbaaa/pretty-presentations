@@ -1,10 +1,6 @@
 import type { Brand, BrandProfile } from '@/types';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
 import path from 'path';
-
-// Initialize Gemini AI (using non-public env var for server-side security)
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
 
 // In-memory cache for brands
 let brandsCache: Brand[] | null = null;
@@ -95,7 +91,8 @@ export async function searchBrandByName(brandName: string): Promise<Brand | null
 }
 
 /**
- * Find similar brands using AI
+ * Find similar brands using text-based matching
+ * Matches based on industry, interests, and content themes
  */
 export async function findSimilarBrands(
   brandName: string,
@@ -103,75 +100,75 @@ export async function findSimilarBrands(
 ): Promise<BrandProfile[]> {
   const brands = await loadBrands();
   
-  try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  // Extract keywords from brand name and context
+  const searchTerms = [
+    ...brandName.toLowerCase().split(/\s+/),
+    ...(briefContext?.toLowerCase().split(/\s+/) || [])
+  ].filter(term => term.length > 2);
+  
+  // Score each brand based on keyword matches
+  const scoredBrands = brands.map(brand => {
+    let score = 0;
+    const matchReasons: string[] = [];
     
-    const prompt = `You are a brand intelligence expert. Analyze the following brand and find similar brands from our database.
-
-Brand to Analyze: "${brandName}"
-${briefContext ? `Context: ${briefContext}` : ''}
-
-Available Brands Database (name, industry, description):
-${brands.map(b => `- ${b.name} (${b.industry}): ${b.description}`).join('\n')}
-
-Task: Find the TOP 5 most similar brands from the database that match the characteristics of "${brandName}".
-
-Consider:
-1. Industry/sector similarity
-2. Target demographic overlap
-3. Brand positioning and values
-4. Product/service type
-5. Market segment
-
-Return ONLY a JSON array with this exact structure:
-[
-  {
-    "brandName": "exact brand name from database",
-    "matchScore": 95,
-    "reason": "brief explanation why this brand is similar"
-  }
-]
-
-Return ONLY valid JSON, no other text.`;
-
-    const result = await model.generateContent(prompt);
-    const response = result.response.text();
-    
-    // Extract JSON from response
-    const jsonMatch = response.match(/\[\s*{[\s\S]*}\s*\]/);
-    if (!jsonMatch) {
-      console.error('No JSON found in AI response:', response);
-      return [];
-    }
-    
-    const similarBrandsData = JSON.parse(jsonMatch[0]);
-    
-    // Enrich with full brand data
-    const similarBrands: BrandProfile[] = [];
-    
-    for (const item of similarBrandsData) {
-      const brand = brands.find(b => 
-        b.name.toLowerCase() === item.brandName.toLowerCase()
-      );
-      
-      if (brand) {
-        similarBrands.push({
-          ...brand,
-          matchScore: item.matchScore,
-          matchReason: item.reason,
-        });
+    // Check industry match
+    for (const term of searchTerms) {
+      if (brand.industry.toLowerCase().includes(term)) {
+        score += 30;
+        matchReasons.push(`Industry: ${brand.industry}`);
+        break;
       }
     }
     
-    return similarBrands;
-  } catch (error) {
-    console.error('Error finding similar brands:', error);
-    return [];
-  }
+    // Check description match
+    for (const term of searchTerms) {
+      if (brand.description.toLowerCase().includes(term)) {
+        score += 20;
+        matchReasons.push('Description match');
+        break;
+      }
+    }
+    
+    // Check interests match
+    const matchingInterests = brand.targetInterests.filter(interest =>
+      searchTerms.some(term => interest.toLowerCase().includes(term))
+    );
+    if (matchingInterests.length > 0) {
+      score += matchingInterests.length * 10;
+      matchReasons.push(`Interests: ${matchingInterests.join(', ')}`);
+    }
+    
+    // Check content themes match
+    const matchingThemes = brand.contentThemes.filter(theme =>
+      searchTerms.some(term => theme.toLowerCase().includes(term))
+    );
+    if (matchingThemes.length > 0) {
+      score += matchingThemes.length * 10;
+      matchReasons.push(`Themes: ${matchingThemes.join(', ')}`);
+    }
+    
+    return {
+      brand,
+      score,
+      reason: matchReasons.join('; ') || 'General match'
+    };
+  });
+  
+  // Sort by score and take top 5
+  const topBrands = scoredBrands
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
+  
+  return topBrands.map(item => ({
+    ...item.brand,
+    matchScore: Math.min(item.score, 100),
+    matchReason: item.reason,
+  }));
 }
 
 /**
- * Get brand profile with AI-enhanced classification
+ * Get brand profile with classification
  */
 export async function getBrandProfile(
   brandName: string,
@@ -262,4 +259,3 @@ export async function searchBrands(criteria: {
 export function clearBrandsCache(): void {
   brandsCache = null;
 }
-

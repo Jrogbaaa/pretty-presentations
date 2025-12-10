@@ -550,11 +550,13 @@ See **[PRESENTON_INTEGRATION.md](./PRESENTON_INTEGRATION.md)** for:
 
 ## 🔧 Environment Variables
 
-> 🔒 **Security Notice (v2.5.3)**: Environment variable structure updated for improved security. `GOOGLE_AI_API_KEY` is now required for server-side operations. See [CHANGELOG.md](./CHANGELOG.md) for migration guide.
-
 Create a `.env.local` file with the following variables:
 
 ```env
+# OpenAI Configuration (Required for brief parsing and response generation)
+# Get your API key from: https://platform.openai.com/api-keys
+OPENAI_API_KEY=sk-proj-your-key-here
+
 # Firebase Configuration (Required)
 NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
@@ -570,14 +572,6 @@ FIREBASE_ADMIN_PROJECT_ID=your_project_id
 FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk@your_project.iam.gserviceaccount.com
 FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 
-# OpenAI Configuration (Required for response generation)
-OPENAI_API_KEY=sk-proj-your-key-here
-
-# Google AI Configuration (Required for server-side operations)
-# Get key from: https://aistudio.google.com/app/apikey
-GOOGLE_AI_API_KEY=your_google_ai_api_key_here
-GOOGLE_AI_MODEL=gemini-2.5-flash
-
 # Image Generation (Optional - for Nano Banana via Replicate)
 REPLICATE_API_TOKEN=your_replicate_token
 NEXT_PUBLIC_ENABLE_IMAGE_GENERATION=true
@@ -585,8 +579,7 @@ NEXT_PUBLIC_ENABLE_IMAGE_GENERATION=true
 
 **⚠️ Important Security Notes:**
 - **Never use `NEXT_PUBLIC_` prefix for server-side API keys** - these are exposed to the browser
-- **`GOOGLE_AI_API_KEY`** (no NEXT_PUBLIC_) is used for server-side brief parsing and brand matching
-- **`OPENAI_API_KEY`** is used for response generation with GPT-4o
+- **`OPENAI_API_KEY`** is used for brief parsing and response generation with GPT-4o
 - Rate limiting is active: 5 requests/minute for text responses, 10 req/min for images
 
 **See `env.example` for complete template with all optional variables**

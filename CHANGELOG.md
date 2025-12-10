@@ -1,5 +1,38 @@
 # Changelog
 
+## [4.2.0] - 2025-12-10 🔧
+
+### 🗑️ Removed Google AI Dependency
+
+This release removes the Google AI (Gemini) API dependency, simplifying the codebase and environment configuration.
+
+#### Changes
+
+**Removed:**
+- `GOOGLE_AI_API_KEY` environment variable - no longer required
+- `lib/brief-parser.server.ts` - Google AI-based brief parser (unused)
+- Google AI dependency from `brand-service.ts`
+
+**Updated:**
+- `lib/brand-service.ts` - Now uses text-based matching instead of AI for finding similar brands
+- `lib/env-validation.ts` - Removed `GOOGLE_AI_API_KEY` from required variables
+- `env.example` - Removed server-side Google AI configuration
+- `README.md` - Updated environment variables documentation
+
+**Kept:**
+- OpenAI via `OPENAI_API_KEY` for brief parsing and response generation
+- Optional client-side Google AI (`NEXT_PUBLIC_GOOGLE_AI_API_KEY`) for image features
+
+#### Why?
+- Simplifies deployment by reducing required API keys
+- OpenAI provides more reliable brief parsing via `brief-parser-openai.server.ts`
+- Brand matching works fine with text-based approach
+
+#### Migration
+If you have `GOOGLE_AI_API_KEY` in your environment, you can safely remove it. Only `OPENAI_API_KEY` is required for core functionality.
+
+---
+
 ## [4.1.0] - 2025-12-10 🎨
 
 ### 🎯 Major Features: Enhanced Editor & Influencer Requirements

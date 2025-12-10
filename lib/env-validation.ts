@@ -13,13 +13,10 @@ interface EnvValidationResult {
  * Required environment variables for the application
  */
 const REQUIRED_ENV_VARS = {
-  // OpenAI (for text processing)
+  // OpenAI (for text processing and brief parsing)
   openai: ['OPENAI_API_KEY'],
   
-  // Google AI (for server-side operations)
-  googleAI: ['GOOGLE_AI_API_KEY'],
-  
-  // Firebase (for Vertex AI, Firestore, etc.)
+  // Firebase (for Firestore, etc.)
   firebase: [
     'NEXT_PUBLIC_FIREBASE_API_KEY',
     'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
@@ -46,8 +43,7 @@ const OPTIONAL_ENV_VARS = {
   ],
   
   googleAI: [
-    'GOOGLE_AI_MODEL',
-    'NEXT_PUBLIC_GOOGLE_AI_API_KEY', // Client-side usage
+    'NEXT_PUBLIC_GOOGLE_AI_API_KEY', // Client-side usage (optional)
     'NEXT_PUBLIC_GOOGLE_AI_MODEL'
   ],
   
@@ -162,7 +158,6 @@ export const validateEnvOrThrow = (): void => {
  */
 export const getEnvStatus = () => {
   const openaiStatus = validateGroup('openai', REQUIRED_ENV_VARS.openai);
-  const googleAIStatus = validateGroup('googleAI', REQUIRED_ENV_VARS.googleAI);
   const firebaseStatus = validateGroup('firebase', REQUIRED_ENV_VARS.firebase);
   const vertexAIStatus = validateGroup('vertexAI', REQUIRED_ENV_VARS.vertexAI);
   
@@ -170,10 +165,6 @@ export const getEnvStatus = () => {
     openai: {
       configured: openaiStatus.missing.length === 0,
       missing: openaiStatus.missing
-    },
-    googleAI: {
-      configured: googleAIStatus.missing.length === 0,
-      missing: googleAIStatus.missing
     },
     firebase: {
       configured: firebaseStatus.missing.length === 0,
@@ -185,7 +176,6 @@ export const getEnvStatus = () => {
     },
     allConfigured: 
       openaiStatus.missing.length === 0 &&
-      googleAIStatus.missing.length === 0 &&
       firebaseStatus.missing.length === 0
   };
 };
@@ -201,11 +191,6 @@ export const printEnvStatus = (): void => {
   console.log(`OpenAI: ${status.openai.configured ? '✅' : '❌'}`);
   if (!status.openai.configured) {
     console.log(`  Missing: ${status.openai.missing.join(', ')}`);
-  }
-  
-  console.log(`Google AI: ${status.googleAI.configured ? '✅' : '❌'}`);
-  if (!status.googleAI.configured) {
-    console.log(`  Missing: ${status.googleAI.missing.join(', ')}`);
   }
   
   console.log(`Firebase: ${status.firebase.configured ? '✅' : '❌'}`);
@@ -231,7 +216,7 @@ export const printEnvStatus = (): void => {
  * Validate specific service environment variables
  */
 export const validateServiceEnv = (
-  service: 'openai' | 'googleAI' | 'firebase' | 'vertexAI'
+  service: 'openai' | 'firebase' | 'vertexAI'
 ): boolean => {
   const variables = REQUIRED_ENV_VARS[service];
   const { missing } = validateGroup(service, variables);
@@ -253,9 +238,6 @@ export const getEnvSetupInstructions = (missingVars: string[]): string => {
     if (varName === 'OPENAI_API_KEY') {
       instructions.push(`   ${varName}=<your-key>`);
       instructions.push('   Get one at: https://platform.openai.com/api-keys\n');
-    } else if (varName === 'GOOGLE_AI_API_KEY') {
-      instructions.push(`   ${varName}=<your-key>`);
-      instructions.push('   Get one at: https://aistudio.google.com/app/apikey\n');
     } else if (varName.startsWith('NEXT_PUBLIC_FIREBASE_')) {
       instructions.push(`   ${varName}=<your-value>`);
       instructions.push('   Get from: Firebase Console > Project Settings\n');
