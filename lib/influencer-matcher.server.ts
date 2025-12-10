@@ -4,7 +4,7 @@
  */
 
 import { searchInfluencersServer } from "./influencer-service.server";
-import type { ClientBrief, Influencer, SelectedInfluencer } from "@/types";
+import type { ClientBrief, Influencer, SelectedInfluencer, InfluencerRequirements, InfluencerTierRequirement } from "@/types";
 import OpenAI from "openai";
 import { matchBrandToInfluencers, getBrandIntelligenceSummary } from "./brand-matcher";
 import { 
@@ -105,12 +105,33 @@ export const matchInfluencersServer = async (
       return await handleMultiPhaseCampaign(brief, ranked);
     }
 
-    // Step 4: Select optimal mix based on campaign strategy (macro/micro/nano)
-    const strategy = detectCampaignStrategy(brief);
-    console.log(`🎯 [SERVER] Detected campaign strategy: ${strategy.goalType} (nano: ${(strategy.nanoWeight * 100).toFixed(0)}%, micro: ${(strategy.microWeight * 100).toFixed(0)}%, macro: ${(strategy.macroWeight * 100).toFixed(0)}%)`);
-    
-    let selected = selectOptimalMixWithStrategy(ranked, brief.budget, strategy);
-    console.log(`🎯 [SERVER] After strategy-based mix selection: ${selected.length} influencers`);
+    // Step 3.5: If explicit influencer requirements exist, use requirements-based selection
+    // This takes priority over strategy-based selection
+    let selected: Influencer[];
+
+    // Debug: Log what we received
+    console.log(`🔍 [SERVER] Checking for influencer requirements...`);
+    console.log(`   brief.influencerRequirements exists: ${!!brief.influencerRequirements}`);
+    if (brief.influencerRequirements) {
+      console.log(`   totalCount: ${brief.influencerRequirements.totalCount}`);
+      console.log(`   breakdown: ${JSON.stringify(brief.influencerRequirements.breakdown)}`);
+    }
+
+    if (brief.influencerRequirements &&
+        (brief.influencerRequirements.totalCount ||
+         (brief.influencerRequirements.breakdown && brief.influencerRequirements.breakdown.length > 0))) {
+      console.log(`📋 [SERVER] ✅ Explicit influencer requirements detected!`);
+      console.log(`   Requested: ${brief.influencerRequirements.totalCount} influencers`);
+      selected = selectByRequirements(ranked, brief.influencerRequirements, brief.budget, brief);
+      console.log(`📋 [SERVER] After requirements-based selection: ${selected.length} influencers`);
+    } else {
+      // Step 4: Select optimal mix based on campaign strategy (macro/micro/nano)
+      const strategy = detectCampaignStrategy(brief);
+      console.log(`🎯 [SERVER] Detected campaign strategy: ${strategy.goalType} (nano: ${(strategy.nanoWeight * 100).toFixed(0)}%, micro: ${(strategy.microWeight * 100).toFixed(0)}%, macro: ${(strategy.macroWeight * 100).toFixed(0)}%)`);
+      
+      selected = selectOptimalMixWithStrategy(ranked, brief.budget, strategy);
+      console.log(`🎯 [SERVER] After strategy-based mix selection: ${selected.length} influencers`);
+    }
 
     // Step 5: Ensure geographic distribution if required (Square style)
     if (brief.geographicDistribution?.requireDistribution) {
@@ -849,6 +870,169 @@ const selectOptimalMix = (
   console.log(`✅ [SERVER] Selected ${uniqueSelected.length} unique influencers (target: min 3)`);
 
   return uniqueSelected;
+};
+
+/**
+ * Select influencers based on explicit requirements from the brief
+ * e.g., "2 macros (1 girl, 1 guy) + 6 mids (3 girls, 3 guys)"
+ * 
+ * This function prioritizes meeting the exact count requirements
+ * over budget optimization, while still respecting budget limits.
+ */
+const selectByRequirements = (
+  ranked: Influencer[],
+  requirements: InfluencerRequirements,
+  budget: number,
+  brief: ClientBrief
+): Influencer[] => {
+  console.log(`📋 [SERVER] Selecting influencers by EXPLICIT REQUIREMENTS`);
+  console.log(`   Total requested: ${requirements.totalCount || 'not specified'}`);
+  
+  if (requirements.breakdown) {
+    requirements.breakdown.forEach(tier => {
+      const genderInfo = tier.gender 
+        ? ` (${tier.gender.female} female, ${tier.gender.male} male)` 
+        : '';
+      console.log(`   - ${tier.tier}: ${tier.count}${genderInfo}`);
+    });
+  }
+  
+  if (requirements.locationDistribution) {
+    console.log(`   Location distribution: ${requirements.locationDistribution.map(l => `${l.city}: ${l.percentage}%`).join(', ')}`);
+  }
+
+  const selected: Influencer[] = [];
+  const selectedIds = new Set<string>();
+  let totalSpent = 0;
+
+  // Helper to check if influencer is in a specific city
+  const isInCity = (inf: Influencer, city: string): boolean => {
+    return inf.demographics.location.some(loc =>
+      loc.toLowerCase().includes(city.toLowerCase()) ||
+      city.toLowerCase().includes(loc.toLowerCase())
+    );
+  };
+
+  // Helper to get influencer tier
+  const getInfluencerTier = (inf: Influencer): 'macro' | 'mid' | 'micro' | 'nano' => {
+    if (inf.followers >= 500000) return 'macro';
+    if (inf.followers >= 100000) return 'mid';
+    if (inf.followers >= 10000) return 'micro';
+    return 'nano';
+  };
+
+  // Process each tier requirement
+  if (requirements.breakdown && requirements.breakdown.length > 0) {
+    for (const tierReq of requirements.breakdown) {
+      console.log(`\n🎯 [SERVER] Selecting ${tierReq.count} ${tierReq.tier} influencers...`);
+      
+      // Filter pool by tier
+      const tierPool = ranked.filter(inf => {
+        if (selectedIds.has(inf.id)) return false;
+        return getInfluencerTier(inf) === tierReq.tier;
+      });
+      
+      console.log(`   Available ${tierReq.tier} pool: ${tierPool.length} influencers`);
+
+      // If gender requirements exist, separate by gender
+      if (tierReq.gender && (tierReq.gender.male > 0 || tierReq.gender.female > 0)) {
+        // Note: We don't have gender data in our influencer model currently
+        // For now, we'll select based on count only and log that gender wasn't applied
+        console.log(`   ⚠️ Gender requirements specified (${tierReq.gender.female}F, ${tierReq.gender.male}M) but gender data not available in database`);
+      }
+
+      // If location distribution exists, try to respect it
+      if (requirements.locationDistribution && requirements.locationDistribution.length > 0) {
+        const totalForTier = tierReq.count;
+        
+        for (const locReq of requirements.locationDistribution) {
+          const countForCity = Math.round((locReq.percentage / 100) * totalForTier);
+          const cityPool = tierPool.filter(inf => 
+            !selectedIds.has(inf.id) && isInCity(inf, locReq.city)
+          );
+          
+          console.log(`   📍 ${locReq.city}: need ${countForCity}, available ${cityPool.length}`);
+          
+          let addedForCity = 0;
+          for (const inf of cityPool) {
+            if (addedForCity >= countForCity) break;
+            if (selectedIds.has(inf.id)) continue;
+            
+            const cost = inf.rateCard.post * 3;
+            if (budget > 0 && totalSpent + cost > budget) {
+              console.log(`      ⚠️ Skipping ${inf.name} - would exceed budget`);
+              continue;
+            }
+            
+            selected.push(inf);
+            selectedIds.add(inf.id);
+            totalSpent += cost;
+            addedForCity++;
+            console.log(`      + Added ${inf.name} (@${inf.handle}, ${inf.followers.toLocaleString()} followers, ${locReq.city})`);
+          }
+        }
+      } else {
+        // No location distribution - just select by count
+        let addedForTier = 0;
+        for (const inf of tierPool) {
+          if (addedForTier >= tierReq.count) break;
+          if (selectedIds.has(inf.id)) continue;
+          
+          const cost = inf.rateCard.post * 3;
+          if (budget > 0 && totalSpent + cost > budget) {
+            console.log(`      ⚠️ Skipping ${inf.name} - would exceed budget`);
+            continue;
+          }
+          
+          selected.push(inf);
+          selectedIds.add(inf.id);
+          totalSpent += cost;
+          addedForTier++;
+          console.log(`      + Added ${inf.name} (@${inf.handle}, ${inf.followers.toLocaleString()} followers)`);
+        }
+        
+        console.log(`   ✅ Selected ${addedForTier}/${tierReq.count} ${tierReq.tier} influencers`);
+      }
+    }
+  } else if (requirements.totalCount) {
+    // No breakdown specified, just a total count
+    console.log(`\n🎯 [SERVER] Selecting ${requirements.totalCount} influencers (no tier breakdown specified)`);
+    
+    let added = 0;
+    for (const inf of ranked) {
+      if (added >= requirements.totalCount) break;
+      if (selectedIds.has(inf.id)) continue;
+      
+      const cost = inf.rateCard.post * 3;
+      if (budget > 0 && totalSpent + cost > budget) continue;
+      
+      selected.push(inf);
+      selectedIds.add(inf.id);
+      totalSpent += cost;
+      added++;
+    }
+    
+    console.log(`   ✅ Selected ${added}/${requirements.totalCount} influencers`);
+  }
+
+  // Log final summary
+  const macroCount = selected.filter(s => s.followers >= 500000).length;
+  const midCount = selected.filter(s => s.followers >= 100000 && s.followers < 500000).length;
+  const microCount = selected.filter(s => s.followers >= 10000 && s.followers < 100000).length;
+  const nanoCount = selected.filter(s => s.followers < 10000).length;
+
+  console.log(`\n✅ [SERVER] REQUIREMENTS-BASED SELECTION COMPLETE:`);
+  console.log(`   Total selected: ${selected.length}/${requirements.totalCount || 'N/A'}`);
+  console.log(`   Breakdown: ${macroCount} macro, ${midCount} mid, ${microCount} micro, ${nanoCount} nano`);
+  console.log(`   Total budget used: €${totalSpent.toFixed(0)} / €${budget.toFixed(0)} (${budget > 0 ? ((totalSpent/budget)*100).toFixed(1) : 'N/A'}%)`);
+
+  // If we couldn't meet requirements, log a warning
+  if (requirements.totalCount && selected.length < requirements.totalCount) {
+    console.log(`   ⚠️ WARNING: Could only find ${selected.length} of ${requirements.totalCount} requested influencers`);
+    console.log(`   💡 Consider broadening location/category criteria or increasing budget`);
+  }
+
+  return selected;
 };
 
 const enrichSelectedInfluencers = async (

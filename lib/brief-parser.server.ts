@@ -1,7 +1,7 @@
 "use server";
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import type { ClientBrief } from "@/types";
+import type { ClientBrief, InfluencerRequirements } from "@/types";
 
 /**
  * Parse unstructured brief text into structured ClientBrief format using Google AI (Gemini)
@@ -61,7 +61,22 @@ Extract and return JSON with this exact structure:
   "platformPreferences": ["Instagram", "TikTok", ...] (if not specified, suggest based on target)",
   "contentThemes": ["theme1", "theme2", ...] (creative direction, topics)",
   "manualInfluencers": ["name1", "@handle1", "name2 (@handle2)", ...] (extract any influencer names, Instagram handles, or creator mentions from the brief. If no influencers mentioned, use empty array []),
-  "additionalNotes": "string (urgency, special considerations, specific creator names, previous campaign references, multi-phase details, event components, budget scenarios)"
+  "additionalNotes": "string (urgency, special considerations, specific creator names, previous campaign references, multi-phase details, event components, budget scenarios)",
+  "influencerRequirements": {
+    "totalCount": number (total influencers needed, sum of all tiers. If not specified, use null),
+    "breakdown": [
+      {
+        "tier": "macro" | "mid" | "micro" | "nano",
+        "count": number,
+        "gender": { "male": number, "female": number } (if specified, otherwise null)
+      }
+    ] (array of tier requirements. If no breakdown specified, use null),
+    "locationDistribution": [
+      { "city": "string", "percentage": number }
+    ] (if location split specified like "50% Barcelona, 50% Madrid", otherwise null),
+    "proposedMultiplier": number (if they ask for proposals of double/triple the needed count, e.g., 2 for "propose double". Otherwise null),
+    "notes": "string (any special requirements about influencer selection not captured above)"
+  }
 }
 
 CRITICAL PARSING RULES:
@@ -139,6 +154,40 @@ CRITICAL PARSING RULES:
     - Template references
     - Reference to attached files/links
 
+11. INFLUENCER REQUIREMENTS EXTRACTION (CRITICAL):
+    This is one of the MOST IMPORTANT sections. Carefully extract:
+    
+    A. TIER BREAKDOWN:
+       - "macros" / "macro influencers" = tier "macro" (500k+ followers)
+       - "mids" / "mid-tier" / "medios" = tier "mid" (100k-500k followers)
+       - "micros" / "micro influencers" = tier "micro" (10k-100k followers)
+       - "nanos" / "nano influencers" = tier "nano" (1k-10k followers)
+       
+    B. COUNT EXTRACTION EXAMPLES:
+       - "2 macros" = { tier: "macro", count: 2 }
+       - "6 mids" = { tier: "mid", count: 6 }
+       - "Necesitamos 6 mids (3 chicas y 3 chicos)" = { tier: "mid", count: 6, gender: { male: 3, female: 3 } }
+       - "2 macros (una chica y un chico)" = { tier: "macro", count: 2, gender: { male: 1, female: 1 } }
+       
+    C. GENDER TERMINOLOGY (Spanish):
+       - "chica/chicas" = female
+       - "chico/chicos" = male
+       - "una chica y un chico" = { male: 1, female: 1 }
+       - "3 chicas y 3 chicos" = { male: 3, female: 3 }
+       
+    D. LOCATION DISTRIBUTION:
+       - "repartidos 50% y 50% Barcelona/Madrid" = [{ city: "Barcelona", percentage: 50 }, { city: "Madrid", percentage: 50 }]
+       - "deben vivir en Barcelona o Madrid, repartidos 50% y 50%" = same as above
+       
+    E. PROPOSAL MULTIPLIER:
+       - "proponer el doble de lo que necesitamos" = proposedMultiplier: 2
+       - "4-6 macros y 6-12 mids" when only 2 macros and 6 mids needed = proposedMultiplier: 2
+       - If no multiplier mentioned, use null
+       
+    F. TOTAL COUNT:
+       - Sum all tier counts: 2 macros + 6 mids = totalCount: 8
+       - If specific counts aren't given but a total is ("necesitamos 10 influencers"), use that
+
 Be comprehensive but accurate. Extract signal from noise. If information is missing, acknowledge it - don't invent it.
 `;
 
@@ -160,6 +209,48 @@ Be comprehensive but accurate. Extract signal from noise. If information is miss
     if (!parsed.contentThemes) parsed.contentThemes = [];
     if (!parsed.brandRequirements) parsed.brandRequirements = [];
     if (!parsed.manualInfluencers) parsed.manualInfluencers = [];
+    
+    // Process influencer requirements
+    if (parsed.influencerRequirements) {
+      console.log(`📋 [PARSER] Raw influencer requirements extracted:`, JSON.stringify(parsed.influencerRequirements, null, 2));
+      
+      // Clean up null values in breakdown
+      if (parsed.influencerRequirements.breakdown) {
+        parsed.influencerRequirements.breakdown = parsed.influencerRequirements.breakdown.filter(
+          (item: { tier?: string; count?: number }) => item && item.tier && item.count && item.count > 0
+        );
+        // Calculate total if not provided
+        if (!parsed.influencerRequirements.totalCount && parsed.influencerRequirements.breakdown.length > 0) {
+          parsed.influencerRequirements.totalCount = parsed.influencerRequirements.breakdown.reduce(
+            (sum: number, item: { count?: number }) => sum + (item.count || 0), 0
+          );
+        }
+      }
+      // Clean up null location distribution
+      if (parsed.influencerRequirements.locationDistribution) {
+        parsed.influencerRequirements.locationDistribution = parsed.influencerRequirements.locationDistribution.filter(
+          (item: { city?: string; percentage?: number }) => item && item.city && item.percentage
+        );
+        if (parsed.influencerRequirements.locationDistribution.length === 0) {
+          parsed.influencerRequirements.locationDistribution = undefined;
+        }
+      }
+      // Remove empty influencerRequirements object
+      if (!parsed.influencerRequirements.totalCount &&
+          (!parsed.influencerRequirements.breakdown || parsed.influencerRequirements.breakdown.length === 0)) {
+        console.log(`⚠️ [PARSER] Influencer requirements removed (empty or no count)`);
+        parsed.influencerRequirements = undefined;
+      } else {
+        console.log(`✅ [PARSER] Final influencer requirements: ${parsed.influencerRequirements.totalCount} total influencers`);
+        if (parsed.influencerRequirements.breakdown) {
+          parsed.influencerRequirements.breakdown.forEach(tier => {
+            console.log(`   - ${tier.tier}: ${tier.count} ${tier.gender ? `(${tier.gender.female}F/${tier.gender.male}M)` : ''}`);
+          });
+        }
+      }
+    } else {
+      console.log(`⚠️ [PARSER] No influencer requirements extracted from brief`);
+    }
 
     return parsed;
   } catch (error) {

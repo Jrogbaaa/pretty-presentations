@@ -69,6 +69,39 @@ const sanitizeBrief = (input: any): ClientBrief => {
     psychographics: sanitizeString(input.targetDemographics?.psychographics || "", 500)
   };
   
+  // Sanitize influencer requirements if present
+  let influencerRequirements = undefined;
+  if (input.influencerRequirements) {
+    const req = input.influencerRequirements;
+    influencerRequirements = {
+      totalCount: typeof req.totalCount === 'number' ? Math.min(Math.max(0, req.totalCount), 100) : undefined,
+      breakdown: Array.isArray(req.breakdown) ? req.breakdown
+        .filter((b: any) => b && typeof b.tier === 'string' && typeof b.count === 'number')
+        .map((b: any) => ({
+          tier: ['macro', 'mid', 'micro', 'nano'].includes(b.tier) ? b.tier : 'micro',
+          count: Math.min(Math.max(0, b.count), 50),
+          gender: b.gender && typeof b.gender.male === 'number' && typeof b.gender.female === 'number'
+            ? { male: Math.max(0, b.gender.male), female: Math.max(0, b.gender.female) }
+            : undefined
+        })) : undefined,
+      locationDistribution: Array.isArray(req.locationDistribution) ? req.locationDistribution
+        .filter((l: any) => l && typeof l.city === 'string' && typeof l.percentage === 'number')
+        .map((l: any) => ({
+          city: sanitizeString(l.city, 100),
+          percentage: Math.min(Math.max(0, l.percentage), 100)
+        })) : undefined,
+      proposedMultiplier: typeof req.proposedMultiplier === 'number' 
+        ? Math.min(Math.max(1, req.proposedMultiplier), 5) 
+        : undefined,
+      notes: req.notes ? sanitizeString(req.notes, 500) : undefined
+    };
+    
+    // Clean up empty object
+    if (!influencerRequirements.totalCount && !influencerRequirements.breakdown?.length) {
+      influencerRequirements = undefined;
+    }
+  }
+
   return {
     clientName,
     campaignGoals,
@@ -80,7 +113,8 @@ const sanitizeBrief = (input: any): ClientBrief => {
     contentThemes,
     additionalNotes,
     manualInfluencers: sanitizeArray(input.manualInfluencers),
-    templateId: input.templateId || "modern"
+    templateId: input.templateId || "modern",
+    influencerRequirements
   };
 };
 
@@ -113,8 +147,21 @@ export async function POST(request: NextRequest) {
     
     const rawInput = await request.json();
     
+    // Log what we received
+    console.log(`📥 [API] Received brief for: ${rawInput.clientName}`);
+    if (rawInput.influencerRequirements) {
+      console.log(`📋 [API] Influencer requirements in request:`, JSON.stringify(rawInput.influencerRequirements, null, 2));
+    } else {
+      console.log(`⚠️ [API] No influencer requirements in request`);
+    }
+    
     // Sanitize and validate input
     const brief = sanitizeBrief(rawInput);
+    
+    // Log after sanitization
+    if (brief.influencerRequirements) {
+      console.log(`✅ [API] Requirements after sanitization: ${brief.influencerRequirements.totalCount} total`);
+    }
 
     // Validate sanitized brief
     if (!brief.budget || brief.budget === 0) {

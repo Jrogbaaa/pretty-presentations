@@ -1,4 +1,6 @@
 /* Force large font sizes for markdown response */
+
+/* ===== LIGHT MODE (default) ===== */
 .response-content h1 {
   font-size: 3.5rem !important;
   line-height: 1.1 !important;
@@ -52,13 +54,6 @@
   color: #000000 !important;
 }
 
-.response-content h1,
-.response-content h2,
-.response-content h3,
-.response-content h4 {
-  color: #000000 !important;
-}
-
 .response-content ul {
   margin-top: 1rem !important;
   margin-bottom: 1rem !important;
@@ -95,6 +90,7 @@
   font-size: 1rem !important;
   border: 1px solid rgb(229 231 235) !important;
   color: #000000 !important;
+  background-color: white !important;
 }
 
 .response-content tr:hover {
@@ -122,3 +118,287 @@
   color: inherit !important;
 }
 
+/* Links */
+.response-content a {
+  color: #7c3aed !important;
+  text-decoration: underline !important;
+}
+
+.response-content a:hover {
+  color: #6d28d9 !important;
+}
+
+/* Code blocks */
+.response-content code {
+  background-color: rgb(243 244 246) !important;
+  padding: 0.125rem 0.375rem !important;
+  border-radius: 0.25rem !important;
+  font-size: 0.875rem !important;
+  color: #1f2937 !important;
+}
+
+.response-content pre {
+  background-color: rgb(31 41 55) !important;
+  padding: 1rem !important;
+  border-radius: 0.5rem !important;
+  overflow-x: auto !important;
+}
+
+.response-content pre code {
+  background-color: transparent !important;
+  color: rgb(229 231 235) !important;
+  padding: 0 !important;
+}
+
+/* ===== DARK MODE ===== */
+@media (prefers-color-scheme: dark) {
+  .response-content h1 {
+    color: #ffffff !important;
+    border-bottom-color: rgb(168 85 247) !important;
+  }
+
+  .response-content h2 {
+    color: #ffffff !important;
+    border-bottom-color: rgb(75 85 99) !important;
+  }
+
+  .response-content h3 {
+    color: #c084fc !important;
+  }
+
+  .response-content h4 {
+    color: #ffffff !important;
+  }
+
+  .response-content p {
+    color: #e5e7eb !important;
+  }
+
+  .response-content li {
+    color: #e5e7eb !important;
+  }
+
+  .response-content strong {
+    color: #ffffff !important;
+  }
+
+  .response-content table {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .response-content th {
+    background: linear-gradient(to bottom right, rgb(88 28 135), rgb(107 33 168)) !important;
+    color: #ffffff !important;
+  }
+
+  .response-content td {
+    border-color: rgb(55 65 81) !important;
+    color: #e5e7eb !important;
+    background-color: rgb(31 41 55) !important;
+  }
+
+  .response-content tr:hover {
+    background-color: rgb(55 65 81) !important;
+  }
+
+  .response-content tr:hover td {
+    background-color: rgb(55 65 81) !important;
+  }
+
+  .response-content blockquote {
+    background: linear-gradient(to right, rgba(88, 28, 135, 0.3), rgba(126, 34, 206, 0.2)) !important;
+    color: #e5e7eb !important;
+  }
+
+  .response-content hr {
+    border-top-color: rgb(75 85 99) !important;
+  }
+
+  .response-content a {
+    color: #a78bfa !important;
+  }
+
+  .response-content a:hover {
+    color: #c4b5fd !important;
+  }
+
+  .response-content code {
+    background-color: rgb(55 65 81) !important;
+    color: #e5e7eb !important;
+  }
+
+  .response-content pre {
+    background-color: rgb(17 24 39) !important;
+  }
+
+  .response-content pre code {
+    color: rgb(229 231 235) !important;
+  }
+}
+
+/* ===== TAILWIND DARK MODE CLASS SUPPORT ===== */
+/* For systems using class-based dark mode (.dark class on html/body) */
+.dark .response-content h1 {
+  color: #ffffff !important;
+  border-bottom-color: rgb(168 85 247) !important;
+}
+
+.dark .response-content h2 {
+  color: #ffffff !important;
+  border-bottom-color: rgb(75 85 99) !important;
+}
+
+.dark .response-content h3 {
+  color: #c084fc !important;
+}
+
+.dark .response-content h4 {
+  color: #ffffff !important;
+}
+
+.dark .response-content p {
+  color: #e5e7eb !important;
+}
+
+.dark .response-content li {
+  color: #e5e7eb !important;
+}
+
+.dark .response-content strong {
+  color: #ffffff !important;
+}
+
+.dark .response-content table {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .response-content th {
+  background: linear-gradient(to bottom right, rgb(88 28 135), rgb(107 33 168)) !important;
+  color: #ffffff !important;
+}
+
+.dark .response-content td {
+  border-color: rgb(55 65 81) !important;
+  color: #e5e7eb !important;
+  background-color: rgb(31 41 55) !important;
+}
+
+.dark .response-content tr:hover {
+  background-color: rgb(55 65 81) !important;
+}
+
+.dark .response-content tr:hover td {
+  background-color: rgb(55 65 81) !important;
+}
+
+.dark .response-content blockquote {
+  background: linear-gradient(to right, rgba(88, 28, 135, 0.3), rgba(126, 34, 206, 0.2)) !important;
+  color: #e5e7eb !important;
+}
+
+.dark .response-content hr {
+  border-top-color: rgb(75 85 99) !important;
+}
+
+.dark .response-content a {
+  color: #a78bfa !important;
+}
+
+.dark .response-content a:hover {
+  color: #c4b5fd !important;
+}
+
+.dark .response-content code {
+  background-color: rgb(55 65 81) !important;
+  color: #e5e7eb !important;
+}
+
+.dark .response-content pre {
+  background-color: rgb(17 24 39) !important;
+}
+
+.dark .response-content pre code {
+  color: rgb(229 231 235) !important;
+}
+
+/* ===== EDITABLE MARKDOWN STYLES ===== */
+.editable-markdown .response-content > div {
+  transition: all 0.2s ease;
+}
+
+/* Editing state indicators */
+.editable-markdown textarea {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Dark mode for editable sections */
+.dark .editable-markdown textarea {
+  background-color: rgb(31 41 55) !important;
+  border-color: rgb(168 85 247) !important;
+  color: #e5e7eb !important;
+}
+
+.dark .editable-markdown textarea::placeholder {
+  color: rgb(156 163 175) !important;
+}
+
+/* Hover states for editable blocks */
+.editable-markdown [role="button"]:hover {
+  background-color: rgba(168, 85, 247, 0.05);
+}
+
+.dark .editable-markdown [role="button"]:hover {
+  background-color: rgba(168, 85, 247, 0.15);
+}
+
+/* Focus states */
+.editable-markdown [role="button"]:focus-visible {
+  outline: 2px solid rgb(168 85 247);
+  outline-offset: 2px;
+}
+
+/* ===== PDF EXPORT MODE ===== */
+/* Force light mode styles when exporting to PDF */
+.pdf-export-mode,
+.pdf-export-mode * {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+.pdf-export-mode .response-content h1 {
+  color: #000000 !important;
+}
+
+.pdf-export-mode .response-content h2 {
+  color: #000000 !important;
+}
+
+.pdf-export-mode .response-content h3 {
+  color: #6B21A8 !important;
+}
+
+.pdf-export-mode .response-content h4 {
+  color: #000000 !important;
+}
+
+.pdf-export-mode .response-content p,
+.pdf-export-mode .response-content li,
+.pdf-export-mode .response-content td,
+.pdf-export-mode .response-content th {
+  color: #1f2937 !important;
+}
+
+.pdf-export-mode .response-content table {
+  border-color: #e5e7eb !important;
+}
+
+.pdf-export-mode .response-content th {
+  background-color: rgb(147 51 234) !important;
+  color: #ffffff !important;
+}
+
+.pdf-export-mode .response-content blockquote {
+  background-color: rgb(243 232 255) !important;
+  border-left-color: rgb(147 51 234) !important;
+  color: #1f2937 !important;
+}

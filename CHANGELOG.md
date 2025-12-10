@@ -1,5 +1,80 @@
 # Changelog
 
+## [4.1.0] - 2025-12-10 🎨
+
+### 🎯 Major Features: Enhanced Editor & Influencer Requirements
+
+This release adds significant improvements to the editing experience, PDF export, and influencer requirements parsing.
+
+#### ✏️ Inline Editing Improvements
+
+**Table Editor:**
+- **Click-to-Edit Tables:** Tables now open in a proper cell-based editor instead of raw HTML
+- **Editable Header Cells:** Click directly into table headers to edit
+- **Editable Data Cells:** Click into any table cell to modify values
+- **Add/Remove Rows:** Buttons to add new rows or delete existing ones
+- **Visual Feedback:** Purple-themed headers, hover states, and clear save/cancel actions
+
+**General Editing:**
+- **Notion-Style Blocks:** Content is parsed into editable blocks
+- **Dark Mode Support:** Editor works properly in dark mode
+- **Visual Indicators:** "Click to edit" badges on hover
+
+#### 📄 PDF Export Fixes
+
+- **Fixed Duplicate Content:** Multi-page PDFs no longer show overlapping/repeated content
+- **Proper Page Slicing:** Content is properly sliced into separate pages
+- **Loading State:** "Exporting..." spinner with disabled button during export
+- **Light Mode Export:** PDF always exports with light background for readability
+- **No More MD Fallback:** Removed fallback to markdown download on error
+
+#### 👥 Influencer Requirements System
+
+**Form Fields:**
+- **New "Influencer Requirements" Section:** Purple-highlighted form section
+- **Total Influencers Field:** Manual input to specify exact count needed
+- **Parsed Requirements Display:** Shows extracted tier breakdown from brief
+- **Location Distribution:** Visual badges for city percentages
+- **Special Requirements Notes:** Free-text field for additional specifications
+
+**Parser Improvements:**
+- **Detailed Extraction Logging:** Console shows exactly what was parsed
+- **Tier Breakdown:** Extracts macro/mid/micro/nano counts
+- **Gender Distribution:** Parses Spanish gender terms (chica/chico)
+- **Location Split:** Extracts percentage-based city distribution
+- **Proposal Multiplier:** Detects "propose double/triple" requirements
+
+**Matcher Improvements:**
+- **Requirements-Based Selection:** Prioritizes explicit influencer requirements over budget-based selection
+- **Debug Logging:** Shows whether requirements or strategy-based selection was used
+- **All Influencers Output:** AI prompted to include ALL matched influencers (no truncation)
+
+#### 🛠️ Technical Changes
+
+**Files Created:**
+- `components/EditableMarkdown.tsx` - Enhanced with table editor component
+- `tests/brief-parser.test.ts` - Unit tests for brief parsing
+
+**Files Modified:**
+- `app/response/[id]/page.tsx` - Fixed PDF export, added loading state
+- `app/response/[id]/response-styles.css` - Added PDF export mode styles
+- `app/api/generate-text-response/route.ts` - Pass through influencer requirements
+- `components/BriefForm.tsx` - Added influencer requirements form section
+- `lib/brief-parser.server.ts` - Enhanced logging for requirements extraction
+- `lib/influencer-matcher.server.ts` - Added requirements-based selection
+- `lib/markdown-response-generator.server.ts` - Increased max_tokens, explicit instructions for all influencers
+- `types/index.ts` - Added InfluencerRequirements interfaces
+
+#### 📊 Impact
+
+- ✅ Tables editable without seeing raw HTML
+- ✅ PDF exports properly paginated
+- ✅ Explicit influencer counts respected
+- ✅ Spanish brief terminology parsed correctly
+- ✅ Clear logging for debugging parser issues
+
+---
+
 ## [4.0.0] - 2025-12-10 🚀
 
 ### 🎯 Major Refocus: Brief Responder

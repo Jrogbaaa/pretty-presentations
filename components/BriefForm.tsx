@@ -335,6 +335,94 @@ const BriefForm = ({ onGenerateBriefResponse, isProcessing, initialData }: Brief
         />
       </div>
 
+      {/* Influencer Requirements */}
+      <div className="space-y-4 p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+          <span>👥</span> Influencer Requirements
+          {formData.influencerRequirements?.totalCount && (
+            <span className="ml-2 px-3 py-1 bg-purple-600 text-white text-sm rounded-full">
+              {formData.influencerRequirements.totalCount} requested
+            </span>
+          )}
+        </h3>
+        
+        {/* Show parsed requirements if available */}
+        {formData.influencerRequirements?.breakdown && formData.influencerRequirements.breakdown.length > 0 && (
+          <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-purple-200 dark:border-purple-700">
+            <p className="text-sm font-medium text-purple-700 dark:text-purple-300 mb-2">Parsed from brief:</p>
+            <div className="flex flex-wrap gap-2">
+              {formData.influencerRequirements.breakdown.map((tier, idx) => (
+                <span key={idx} className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full text-sm">
+                  {tier.count} {tier.tier}
+                  {tier.gender && ` (${tier.gender.female}F/${tier.gender.male}M)`}
+                </span>
+              ))}
+            </div>
+            {formData.influencerRequirements.locationDistribution && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {formData.influencerRequirements.locationDistribution.map((loc, idx) => (
+                  <span key={idx} className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm">
+                    {loc.percentage}% {loc.city}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="totalInfluencers" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Total Influencers Needed
+            </label>
+            <input
+              type="number"
+              id="totalInfluencers"
+              value={formData.influencerRequirements?.totalCount || ""}
+              onChange={(e) => {
+                const count = parseInt(e.target.value) || undefined;
+                setFormData({
+                  ...formData,
+                  influencerRequirements: {
+                    ...formData.influencerRequirements,
+                    totalCount: count,
+                  },
+                });
+              }}
+              className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+              placeholder="e.g., 8 (leave empty for automatic selection)"
+              min="1"
+              max="50"
+            />
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Override the parsed count or set manually
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="influencerNotes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Special Requirements
+            </label>
+            <input
+              type="text"
+              id="influencerNotes"
+              value={formData.influencerRequirements?.notes || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  influencerRequirements: {
+                    ...formData.influencerRequirements,
+                    notes: e.target.value,
+                  },
+                });
+              }}
+              className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+              placeholder="e.g., 50% macro, 50% micro"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Target Demographics */}
       <div className="space-y-4 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Target Demographics</h3>

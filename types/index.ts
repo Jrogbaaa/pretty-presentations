@@ -90,6 +90,31 @@ export interface CampaignHistory {
   }>;
 }
 
+// Influencer requirements extracted from brief
+// e.g., "2 macros (1 chica, 1 chico) + 6 mids (3 chicas, 3 chicos)"
+export interface InfluencerTierRequirement {
+  tier: "macro" | "mid" | "micro" | "nano";
+  count: number;
+  gender?: {
+    male: number;
+    female: number;
+  };
+}
+
+export interface LocationDistribution {
+  city: string;
+  percentage: number;
+}
+
+export interface InfluencerRequirements {
+  totalCount?: number;
+  breakdown?: InfluencerTierRequirement[];
+  locationDistribution?: LocationDistribution[];
+  // Additional requirements
+  proposedMultiplier?: number; // e.g., "propose double" = 2x
+  notes?: string; // Any special requirements not captured above
+}
+
 export interface ClientBrief {
   clientName: string;
   campaignGoals: string[];
@@ -127,6 +152,9 @@ export interface ClientBrief {
   campaignHistory?: CampaignHistory;
   targetAudienceType?: "B2C" | "B2B" | "D2C";
   campaignType?: string; // e.g., "Product Launch", "Brand Awareness", "Event-based"
+  
+  // Influencer requirements extracted from brief
+  influencerRequirements?: InfluencerRequirements;
 }
 
 export interface Demographics {

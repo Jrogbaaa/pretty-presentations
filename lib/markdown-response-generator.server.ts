@@ -481,6 +481,12 @@ ${hasSalesGoal ? '- **PRIMARY OBJECTIVE:** Generate sales and revenue (not just 
 - **Brand-Specific:** ${brief.clientName} should be mentioned frequently with context-specific tactics
 ${hasSalesGoal ? '- **ROIS Clarity:** If this is a sales campaign, ROIS and revenue projections must be front and center' : ''}
 
+**CRITICAL - DO NOT TRUNCATE:**
+- You MUST include ALL ${influencers.length} influencers in your response
+- Do NOT summarize or skip any influencer profiles
+- Each influencer section must be preserved in full
+- If the proposal has ${influencers.length} influencers, your refined version must also have ${influencers.length} influencers
+
 Return the COMPLETE improved proposal in markdown format. If a section is already excellent, keep it exactly as is.`;
 
   try {
@@ -500,7 +506,7 @@ Return the COMPLETE improved proposal in markdown format. If a section is alread
           }
         ],
         temperature: 0.6, // Slightly lower for more focused refinement
-        max_tokens: 5000 // Allow for comprehensive refinement
+        max_tokens: 8000 // Increased to prevent truncation with many influencers
       }),
       RetryPresets.STANDARD
     );
@@ -595,7 +601,13 @@ ${idx + 1}. **${inf.name}** (@${inf.handle})
    - Rationale: ${inf.rationale || 'Excellent fit based on audience alignment'}
 `).join('\n')}
 
-**CRITICAL:** After each influencer section in the document, you MUST generate 2-3 SPECIFIC and UNIQUE content pillars tailored to that influencer's profile. Look at their Content Focus, engagement style, and follower count to create unique recommendations. DO NOT use generic phrases like "Authenticity and personal storytelling" or "Visual appeal aligned with brand aesthetic". Each influencer must have different pillars based on their unique content style.
+**CRITICAL - INFLUENCER REQUIREMENTS:**
+1. You MUST include ALL ${influencers.length} influencers listed above in your response - DO NOT skip or summarize any
+2. After each influencer section, you MUST generate 2-3 SPECIFIC and UNIQUE content pillars tailored to that influencer's profile
+3. Look at their Content Focus, engagement style, and follower count to create unique recommendations
+4. DO NOT use generic phrases like "Authenticity and personal storytelling" or "Visual appeal aligned with brand aesthetic"
+5. Each influencer must have different pillars based on their unique content style
+6. The final document MUST have exactly ${influencers.length} complete influencer profiles
 
 **INSTRUCTIONS:**
 Create a complete, beautifully formatted markdown document with exceptional visual hierarchy and clear sections:
@@ -904,7 +916,7 @@ Return ONLY the markdown content, without additional comments or wrapper text.`;
           }
         ],
         temperature: 0.7,
-        max_tokens: 4000
+        max_tokens: 8000 // Increased to handle many influencers without truncation
       }),
       RetryPresets.STANDARD
     );

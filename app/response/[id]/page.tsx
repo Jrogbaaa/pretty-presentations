@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Download, Copy, ArrowLeft, Check, FileText, Edit, Save, X } from "lucide-react";
+import { Download, Copy, ArrowLeft, Check, FileText, Edit, Save, X, Pencil } from "lucide-react";
 import type { BriefResponse } from "@/types";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import EditableMarkdown from "@/components/EditableMarkdown";
 import "./response-styles.css";
 
 const ResponsePage = () => {
@@ -18,6 +19,8 @@ const ResponsePage = () => {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState("");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     const loadResponse = async () => {
@@ -59,7 +62,9 @@ const ResponsePage = () => {
   }, [params.id]);
 
   const handleDownload = async () => {
-    if (!response) return;
+    if (!response || isExporting) return;
+
+    setIsExporting(true);
 
     try {
       // Dynamically import jsPDF and html2canvas
@@ -67,53 +72,120 @@ const ResponsePage = () => {
       const html2canvas = (await import("html2canvas")).default;
       
       const element = document.getElementById("response-content");
-      if (!element) return;
+      if (!element) {
+        console.error("Could not find response-content element");
+        setIsExporting(false);
+        return;
+      }
+
+      // Force light mode styles for PDF
+      element.classList.add("pdf-export-mode");
+      
+      // Wait for styles to apply
+      await new Promise(resolve => setTimeout(resolve, 200));
 
       // Create canvas from the content
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: "#ffffff"
+        backgroundColor: "#ffffff",
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById("response-content");
+          if (clonedElement) {
+            clonedElement.style.backgroundColor = "#ffffff";
+            clonedElement.style.padding = "40px";
+            // Apply light mode to all elements
+            const allElements = clonedElement.querySelectorAll('*');
+            allElements.forEach((el) => {
+              const htmlEl = el as HTMLElement;
+              if (htmlEl.style) {
+                // Don't override table headers or special colored elements
+                const tagName = htmlEl.tagName.toLowerCase();
+                if (tagName !== 'th' && !htmlEl.classList.contains('bg-purple-600')) {
+                  htmlEl.style.color = "#1f2937";
+                }
+              }
+            });
+            // Fix table headers
+            const tableHeaders = clonedElement.querySelectorAll('th');
+            tableHeaders.forEach((th) => {
+              (th as HTMLElement).style.color = "#ffffff";
+              (th as HTMLElement).style.backgroundColor = "rgb(147, 51, 234)";
+            });
+          }
+        }
       });
 
-      const imgData = canvas.toDataURL("image/png");
+      // Restore original styles
+      element.classList.remove("pdf-export-mode");
+
+      // PDF dimensions
       const pdf = new jsPDF({
         orientation: "portrait",
-        unit: "mm",
-        format: "a4"
+        unit: "px",
+        format: "a4",
+        hotfixes: ["px_scaling"]
       });
 
-      const imgWidth = 210; // A4 width in mm
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 40;
+      const contentWidth = pageWidth - (margin * 2);
+      
+      // Calculate scaled dimensions
+      const imgWidth = contentWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      // Add first page
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= 297; // A4 height in mm
-
-      // Add additional pages if needed
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= 297;
+      
+      // Calculate how many pages we need
+      const contentHeight = pageHeight - (margin * 2);
+      const totalPages = Math.ceil(imgHeight / contentHeight);
+      
+      // For each page, create a cropped canvas and add it
+      for (let page = 0; page < totalPages; page++) {
+        if (page > 0) {
+          pdf.addPage();
+        }
+        
+        // Calculate source y position in the original canvas
+        const sourceY = page * (canvas.height / totalPages) * (contentHeight / imgHeight) * (canvas.height / imgHeight);
+        const sourceHeight = (contentHeight / imgHeight) * canvas.height;
+        
+        // Create a temporary canvas for this page section
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = Math.min(sourceHeight, canvas.height - (page * sourceHeight));
+        
+        const ctx = pageCanvas.getContext('2d');
+        if (ctx) {
+          // Draw the portion of the original canvas for this page
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+          ctx.drawImage(
+            canvas,
+            0, page * sourceHeight, // Source x, y
+            canvas.width, pageCanvas.height, // Source width, height
+            0, 0, // Destination x, y
+            pageCanvas.width, pageCanvas.height // Destination width, height
+          );
+        }
+        
+        const pageImgData = pageCanvas.toDataURL("image/png", 1.0);
+        const pageImgHeight = (pageCanvas.height * imgWidth) / pageCanvas.width;
+        
+        pdf.addImage(pageImgData, "PNG", margin, margin, imgWidth, pageImgHeight);
       }
 
-      pdf.save(`${response.clientName.replace(/\s+/g, "-")}-influencer-recommendations.pdf`);
+      // Save with proper filename
+      const filename = `${response.clientName.replace(/\s+/g, "-")}-influencer-recommendations.pdf`;
+      pdf.save(filename);
+      
+      console.log(`✅ PDF exported successfully: ${filename}`);
     } catch (error) {
       console.error("Error generating PDF:", error);
-      // Fallback to markdown download if PDF fails
-      const blob = new Blob([response.markdownContent], { type: "text/markdown" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${response.clientName.replace(/\s+/g, "-")}-influencer-recommendations.md`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      alert("There was an issue generating the PDF. Please try again or use the copy function to copy the content.");
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -136,9 +208,15 @@ const ResponsePage = () => {
   const handleEdit = () => {
     setIsEditing(true);
     setEditedContent(response?.markdownContent || "");
+    setHasUnsavedChanges(false);
   };
 
-  const handleSave = () => {
+  const handleContentChange = useCallback((newContent: string) => {
+    setEditedContent(newContent);
+    setHasUnsavedChanges(true);
+  }, []);
+
+  const handleSave = useCallback(() => {
     if (!response) return;
     
     // Update the response object with edited content
@@ -156,12 +234,18 @@ const ResponsePage = () => {
     }
     
     setIsEditing(false);
-  };
+    setHasUnsavedChanges(false);
+  }, [response, editedContent, params.id]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
+    if (hasUnsavedChanges) {
+      const confirmed = window.confirm("You have unsaved changes. Are you sure you want to discard them?");
+      if (!confirmed) return;
+    }
     setEditedContent(response?.markdownContent || "");
     setIsEditing(false);
-  };
+    setHasUnsavedChanges(false);
+  }, [hasUnsavedChanges, response?.markdownContent]);
 
   if (loading) {
     return (
@@ -269,10 +353,24 @@ const ResponsePage = () => {
                   </button>
                   <button
                     onClick={handleDownload}
-                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                    disabled={isExporting}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors font-medium ${
+                      isExporting 
+                        ? 'bg-purple-400 cursor-not-allowed' 
+                        : 'bg-purple-600 hover:bg-purple-700'
+                    } text-white`}
                   >
-                    <Download className="w-4 h-4" />
-                    Export PDF
+                    {isExporting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Exporting...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4" />
+                        Export PDF
+                      </>
+                    )}
                   </button>
                 </>
               )}
@@ -283,65 +381,48 @@ const ResponsePage = () => {
 
       {/* Content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {isEditing ? (
-          <div key="editing-mode" className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Editor */}
-            <div className="bg-white rounded-3xl shadow-xl p-6">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Edit Markdown
+        {/* Editing Mode Banner */}
+        {isEditing && (
+          <div className="mb-6 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                <Pencil className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-purple-900 dark:text-purple-100">
+                  Editing Mode Active
                 </h3>
-                <p className="text-sm text-gray-600">
-                  Make changes to the content. Markdown formatting is supported.
+                <p className="text-sm text-purple-700 dark:text-purple-300">
+                  Click on any section below to edit it directly. Changes are highlighted with a purple border.
                 </p>
               </div>
-              <textarea
-                value={editedContent}
-                onChange={(e) => setEditedContent(e.target.value)}
-                className="w-full h-[calc(100vh-300px)] p-4 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Enter markdown content..."
-              />
-            </div>
-            
-            {/* Preview */}
-            <div className="bg-white rounded-3xl shadow-xl p-10">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Live Preview
-                </h3>
-                <p className="text-sm text-gray-600">
-                  See how your changes will look
-                </p>
-              </div>
-              <div className="response-content prose prose-xl max-w-none overflow-y-auto h-[calc(100vh-300px)]">
-                <ReactMarkdown 
-                  key="preview-markdown"
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeRaw]}
-                  components={{
-                    // Override components to ensure proper React reconciliation
-                    p: ({node, ...props}) => <p {...props} />,
-                    div: ({node, ...props}) => <div {...props} />,
-                  }}
-                >
-                  {editedContent}
-                </ReactMarkdown>
-              </div>
+              {hasUnsavedChanges && (
+                <span className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-sm font-medium rounded-full">
+                  Unsaved changes
+                </span>
+              )}
             </div>
           </div>
-        ) : (
-          <div 
-            key="view-mode"
-            id="response-content"
-            className="bg-white rounded-3xl shadow-xl p-10 md:p-16"
-          >
-            <div className="response-content prose prose-xl max-w-none">
+        )}
+
+        <div 
+          id="response-content"
+          className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-10 md:p-16"
+        >
+          {isEditing ? (
+            <EditableMarkdown
+              content={editedContent}
+              onChange={handleContentChange}
+              onSave={handleSave}
+              className="min-h-[60vh]"
+            />
+          ) : (
+            <div className="response-content prose prose-xl max-w-none dark:prose-invert">
               <ReactMarkdown 
                 key="content-markdown"
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw]}
                 components={{
-                  // Override components to ensure proper React reconciliation
                   p: ({node, ...props}) => <p {...props} />,
                   div: ({node, ...props}) => <div {...props} />,
                 }}
@@ -349,8 +430,8 @@ const ResponsePage = () => {
                 {response.markdownContent}
               </ReactMarkdown>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Footer Info */}
         <div className="mt-8 text-center">
