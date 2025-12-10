@@ -2,14 +2,15 @@
 
 An AI-powered platform that transforms client briefs into comprehensive influencer recommendations with detailed strategy, budget breakdowns, and performance projections.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 4.0.0 | **Language**: 🇬🇧 English | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o 🤖 | **Export**: PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
+**Status**: 🟢 **Production-Ready** | **Version**: 4.1.0 | **Language**: 🇬🇧 English | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o 🤖 | **Export**: PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
 
-**Latest**: v4.0.0 **Major Refocus - Brief Responder!** 🚀 The platform is now 100% focused on generating professional brief responses with influencer recommendations. Key updates:
-- ✅ All content now in English
-- ✅ Removed presentation generation (streamlined for brief responses)
-- ✅ NEW: Additional Context Upload - upload PDFs, presentations, or text with extra campaign details
-- ✅ Enhanced AI brief parsing with reading comprehension and brand intelligence
-- ✅ Graceful error handling for incomplete briefs
+**Latest**: v4.1.0 **Enhanced Editor & Influencer Requirements!** 🎨 Major improvements to editing and PDF export:
+- ✅ Click-to-edit table cells (no more raw HTML)
+- ✅ Dark mode PDF export with proper styling
+- ✅ Fixed html2canvas color compatibility (lab/oklch → hex)
+- ✅ NEW: Influencer Requirements form section - specify exact counts, tiers, gender, and locations
+- ✅ Requirements-based selection prioritizes explicit influencer counts over budget optimization
+- ✅ All 8 influencers now appear when requested (fixed AI truncation)
 
 See [CHANGELOG.md](./CHANGELOG.md) for details. 🚀✅
 

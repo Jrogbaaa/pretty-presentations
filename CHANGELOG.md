@@ -23,10 +23,12 @@ This release adds significant improvements to the editing experience, PDF export
 #### 📄 PDF Export Fixes
 
 - **Fixed Duplicate Content:** Multi-page PDFs no longer show overlapping/repeated content
-- **Proper Page Slicing:** Content is properly sliced into separate pages
+- **Proper Page Slicing:** Content is properly sliced into separate pages using correct scale factor math
 - **Loading State:** "Exporting..." spinner with disabled button during export
-- **Light Mode Export:** PDF always exports with light background for readability
-- **No More MD Fallback:** Removed fallback to markdown download on error
+- **Dark Mode Support:** PDF preserves dark theme (dark background, light text) when user is in dark mode
+- **html2canvas Color Fix:** Converts modern CSS colors (lab, oklch, lch) to hex for compatibility
+- **Styled Elements:** Properly styles headings, tables, blockquotes, code blocks, and links in exported PDF
+- **No More MD Fallback:** Shows error alert instead of silently downloading markdown file
 
 #### 👥 Influencer Requirements System
 
