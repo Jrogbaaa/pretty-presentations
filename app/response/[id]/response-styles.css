@@ -357,48 +357,420 @@
   outline-offset: 2px;
 }
 
-/* ===== PDF EXPORT MODE ===== */
-/* Force light mode styles when exporting to PDF */
-.pdf-export-mode,
-.pdf-export-mode * {
+/* ===== PDF EXPORT MODE - PROFESSIONAL CORPORATE LIGHT THEME ===== */
+/* Inspired by premium resume designs - clean, elegant, corporate-ready */
+
+/* Main PDF container - Light professional background */
+.pdf-export-mode {
   background-color: #ffffff !important;
-  color: #1f2937 !important;
+  padding: 0 !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
+/* Decorative wave/stripe element on left side - like the resume */
+.pdf-accent-stripe {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 12px !important;
+  background: linear-gradient(180deg, #5eead4 0%, #14b8a6 30%, #0d9488 70%, #115e59 100%) !important;
+}
+
+/* Decorative wave pattern overlay */
+.pdf-wave-pattern {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 80px !important;
+  height: 100% !important;
+  background: 
+    radial-gradient(ellipse 60% 40% at 0% 30%, rgba(94, 234, 212, 0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 0% 70%, rgba(20, 184, 166, 0.1) 0%, transparent 60%) !important;
+  pointer-events: none !important;
+}
+
+/* PDF Header Section - Clean corporate style */
+.pdf-document-header {
+  padding: 48px 56px 40px 56px !important;
+  margin-left: 12px !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+  position: relative !important;
+}
+
+.pdf-brand-mark {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 3px !important;
+  text-transform: uppercase !important;
+  color: #14b8a6 !important;
+  margin-bottom: 24px !important;
+  display: inline-block !important;
+  padding: 6px 12px !important;
+  background-color: rgba(20, 184, 166, 0.08) !important;
+  border-radius: 4px !important;
+}
+
+.pdf-client-title {
+  font-size: 36px !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  margin-bottom: 8px !important;
+  line-height: 1.1 !important;
+  letter-spacing: -1px !important;
+}
+
+.pdf-campaign-subtitle {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: #6b7280 !important;
+  margin-bottom: 16px !important;
+}
+
+.pdf-generated-date {
+  font-size: 11px !important;
+  color: #9ca3af !important;
+  font-weight: 500 !important;
+}
+
+/* Info badge row */
+.pdf-info-badges {
+  display: flex !important;
+  gap: 12px !important;
+  margin-top: 20px !important;
+  flex-wrap: wrap !important;
+}
+
+.pdf-info-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 8px 14px !important;
+  background-color: #f0fdfa !important;
+  border: 1px solid #99f6e4 !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  color: #0f766e !important;
+  font-weight: 500 !important;
+}
+
+/* Main content area */
+.pdf-export-mode .response-content {
+  padding: 40px 56px 56px 56px !important;
+  margin-left: 12px !important;
+}
+
+/* Section headers - Elegant uppercase style like resume */
 .pdf-export-mode .response-content h1 {
-  color: #000000 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #0d9488 !important;
+  margin-top: 40px !important;
+  margin-bottom: 20px !important;
+  padding-bottom: 12px !important;
+  border-bottom: 2px solid #14b8a6 !important;
+  letter-spacing: 3px !important;
+  text-transform: uppercase !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
 }
 
 .pdf-export-mode .response-content h2 {
-  color: #000000 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #0d9488 !important;
+  margin-top: 32px !important;
+  margin-bottom: 16px !important;
+  padding-bottom: 8px !important;
+  border-bottom: 1px solid #d1d5db !important;
+  letter-spacing: 2.5px !important;
+  text-transform: uppercase !important;
 }
 
 .pdf-export-mode .response-content h3 {
-  color: #6B21A8 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  margin-top: 24px !important;
+  margin-bottom: 10px !important;
+  letter-spacing: -0.2px !important;
+  text-transform: none !important;
 }
 
 .pdf-export-mode .response-content h4 {
-  color: #000000 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+  margin-top: 18px !important;
+  margin-bottom: 8px !important;
 }
 
-.pdf-export-mode .response-content p,
-.pdf-export-mode .response-content li,
-.pdf-export-mode .response-content td,
-.pdf-export-mode .response-content th {
-  color: #1f2937 !important;
+/* Body text - Professional readable typography */
+.pdf-export-mode .response-content p {
+  font-size: 12px !important;
+  line-height: 1.8 !important;
+  color: #4b5563 !important;
+  margin-bottom: 14px !important;
 }
 
+.pdf-export-mode .response-content li {
+  font-size: 12px !important;
+  line-height: 1.8 !important;
+  color: #4b5563 !important;
+  margin-bottom: 8px !important;
+  position: relative !important;
+  padding-left: 4px !important;
+}
+
+.pdf-export-mode .response-content strong {
+  font-weight: 700 !important;
+  color: #111827 !important;
+}
+
+/* Lists with accent bullets */
+.pdf-export-mode .response-content ul {
+  margin: 14px 0 !important;
+  padding-left: 20px !important;
+  list-style-type: none !important;
+}
+
+.pdf-export-mode .response-content ul li::before {
+  content: '•' !important;
+  color: #14b8a6 !important;
+  font-weight: bold !important;
+  display: inline-block !important;
+  width: 16px !important;
+  margin-left: -16px !important;
+  font-size: 14px !important;
+}
+
+.pdf-export-mode .response-content ol {
+  margin: 14px 0 !important;
+  padding-left: 24px !important;
+}
+
+.pdf-export-mode .response-content ol li::marker {
+  color: #14b8a6 !important;
+  font-weight: 600 !important;
+}
+
+/* Tables - Clean professional white style */
 .pdf-export-mode .response-content table {
-  border-color: #e5e7eb !important;
+  width: 100% !important;
+  margin: 24px 0 !important;
+  border-collapse: collapse !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.03) !important;
 }
 
 .pdf-export-mode .response-content th {
-  background-color: rgb(147 51 234) !important;
+  background-color: #14b8a6 !important;
   color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 10px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  padding: 14px 18px !important;
+  text-align: left !important;
+  border-bottom: none !important;
 }
 
+.pdf-export-mode .response-content td {
+  padding: 14px 18px !important;
+  font-size: 12px !important;
+  color: #374151 !important;
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+}
+
+.pdf-export-mode .response-content tr:nth-child(even) td {
+  background-color: #f9fafb !important;
+}
+
+.pdf-export-mode .response-content tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* Blockquotes - Elegant accent styled */
 .pdf-export-mode .response-content blockquote {
-  background-color: rgb(243 232 255) !important;
-  border-left-color: rgb(147 51 234) !important;
-  color: #1f2937 !important;
+  background-color: #f0fdfa !important;
+  border-left: 4px solid #14b8a6 !important;
+  border-radius: 0 8px 8px 0 !important;
+  padding: 16px 20px !important;
+  margin: 20px 0 !important;
+  color: #0f766e !important;
+  font-style: italic !important;
+}
+
+.pdf-export-mode .response-content blockquote p {
+  color: #0f766e !important;
+  margin-bottom: 0 !important;
+}
+
+/* Horizontal Rules - Subtle dividers */
+.pdf-export-mode .response-content hr {
+  border: none !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, #14b8a6 0%, #e5e7eb 30%, transparent 100%) !important;
+  margin: 32px 0 !important;
+}
+
+/* Links */
+.pdf-export-mode .response-content a {
+  color: #0d9488 !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+}
+
+/* Code blocks */
+.pdf-export-mode .response-content code {
+  background-color: #f3f4f6 !important;
+  color: #0d9488 !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  font-size: 11px !important;
+  font-family: 'SF Mono', Monaco, Consolas, monospace !important;
+}
+
+.pdf-export-mode .response-content pre {
+  background-color: #f8fafc !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  padding: 16px !important;
+  overflow-x: auto !important;
+  margin: 20px 0 !important;
+}
+
+.pdf-export-mode .response-content pre code {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  color: #374151 !important;
+}
+
+/* PDF Footer - Clean corporate */
+.pdf-document-footer {
+  padding: 24px 56px !important;
+  margin-left: 12px !important;
+  border-top: 1px solid #e5e7eb !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  background-color: #f9fafb !important;
+}
+
+.pdf-footer-brand {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+  color: #14b8a6 !important;
+}
+
+.pdf-page-number {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #6b7280 !important;
+}
+
+.pdf-confidential-notice {
+  font-size: 10px !important;
+  font-style: italic !important;
+  color: #9ca3af !important;
+}
+
+/* Metric/Stat cards styling */
+.pdf-stat-card {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ffffff 100%) !important;
+  border: 1px solid #99f6e4 !important;
+  border-radius: 8px !important;
+  padding: 16px 20px !important;
+  margin: 8px 0 !important;
+}
+
+.pdf-stat-value {
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  color: #0d9488 !important;
+  line-height: 1 !important;
+}
+
+.pdf-stat-label {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: #6b7280 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  margin-top: 4px !important;
+}
+
+/* Skills/Tags section styling */
+.pdf-skills-container {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin: 14px 0 !important;
+}
+
+.pdf-skill-tag {
+  background-color: #f0fdfa !important;
+  color: #0f766e !important;
+  padding: 6px 12px !important;
+  border-radius: 20px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  border: 1px solid #99f6e4 !important;
+}
+
+/* Highlight box for key information */
+.pdf-highlight-box {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ecfdf5 100%) !important;
+  border: 1px solid #a7f3d0 !important;
+  border-radius: 12px !important;
+  padding: 20px 24px !important;
+  margin: 20px 0 !important;
+}
+
+.pdf-highlight-title {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  color: #059669 !important;
+  margin-bottom: 8px !important;
+}
+
+/* Section divider with icon */
+.pdf-section-divider {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 32px 0 24px 0 !important;
+}
+
+.pdf-section-icon {
+  width: 32px !important;
+  height: 32px !important;
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%) !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+}
+
+.pdf-section-line {
+  flex: 1 !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, #14b8a6 0%, #e5e7eb 50%, transparent 100%) !important;
 }

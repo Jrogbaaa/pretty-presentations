@@ -2,15 +2,15 @@
 
 An AI-powered platform that transforms client briefs into comprehensive influencer recommendations with detailed strategy, budget breakdowns, and performance projections.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 4.1.0 | **Language**: 🇬🇧 English | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o 🤖 | **Export**: PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
+**Status**: 🟢 **Production-Ready** | **Version**: 4.3.0 | **Language**: 🇬🇧/🇪🇸 English/Spanish | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o 🤖 | **Export**: PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
 
-**Latest**: v4.1.0 **Enhanced Editor & Influencer Requirements!** 🎨 Major improvements to editing and PDF export:
-- ✅ Click-to-edit table cells (no more raw HTML)
-- ✅ Dark mode PDF export with proper styling
-- ✅ Fixed html2canvas color compatibility (lab/oklch → hex)
-- ✅ NEW: Influencer Requirements form section - specify exact counts, tiers, gender, and locations
-- ✅ Requirements-based selection prioritizes explicit influencer counts over budget optimization
-- ✅ All 8 influencers now appear when requested (fixed AI truncation)
+**Latest**: v4.3.0 **Corporate Brochure PDF Design + Language Switching!** 🎨 Major PDF redesign and i18n:
+- ✅ NEW: Corporate brochure/annual report PDF design with split title page layout
+- ✅ Numbered section headers (01, 02, 03...) with bold typography
+- ✅ Royal purple accent color scheme on warm cream background
+- ✅ Professional tables, blockquotes, and footer matching corporate aesthetic
+- ✅ NEW: English/Spanish language toggle with full UI translation
+- ✅ NEW: Email-style brief samples (casual, varied, realistic)
 
 See [CHANGELOG.md](./CHANGELOG.md) for details. 🚀✅
 
@@ -194,40 +194,49 @@ See [CHANGELOG.md](./CHANGELOG.md) for details. 🚀✅
 - **UI Selection**: Choose engine per presentation in the brief form
 - **Complete Documentation**: See [PRESENTON_INTEGRATION.md](./PRESENTON_INTEGRATION.md) for full setup guide
 
-### 📄 Text Response PDF Export (v2.4.0+) ⚡ ENHANCED
+### 📄 Text Response PDF Export (v4.3.0) ⚡ ENHANCED
+- **Corporate Brochure PDF Design (v4.3.0)**: ⚡ NEW
+  - **Split Title Page Layout**: 40% purple sidebar + 60% cream content area (annual report style)
+  - **Purple Sidebar Features**: Vertical text, brand mark, large year display, decorative shapes
+  - **Content Area Features**: Document type label, large client name, campaign subtitle, stats row
+  - **Numbered Section Headers**: 01, 02, 03... with bold typography and purple underlines
+  - **Color Scheme**: Royal purple (`#4c1d95`) on warm cream (`#f5f3ef`)
+  - **Professional Tables**: Purple headers with white text, alternating row backgrounds
+  - **Blockquotes**: Purple callout boxes for highlighting key insights
+  - **Matching Footer**: Split design with brand mark and confidential notice
 - **Professional PDF Generation**:
   - One-click export of text responses as formatted PDFs
   - Preserves all styling, tables, and typography
   - Uses jsPDF for client-side PDF generation
-  - Replaces basic markdown download
   - Generates professional documents ready for clients
   - File naming: `ClientName-influencer-recommendations.pdf`
-- **Inline Text Editing (v2.5.7)**: ⚡ NEW
+- **Inline Text Editing (v2.5.7)**:
   - Edit response content directly before exporting
   - Split-screen editor with live markdown preview
   - Full markdown support (headers, lists, tables, formatting)
   - Changes persist in sessionStorage during session
   - PDF export uses your edited content
   - Perfect for making quick tweaks before sending to clients
-- **Consistent Display (v2.5.7)**: ⚡ NEW
-  - Responses always display in light mode (white background, black text)
-  - Ensures readability regardless of user's system theme
-  - Better PDF export quality with consistent styling
-  - Professional document appearance
 - **HTML Table Rendering Fixed**:
   - Custom ReactMarkdown components with inline styles
   - rehype-raw plugin for proper HTML parsing
   - Tables display with borders and proper formatting
   - No more raw `<table>`, `<tr>`, `<td>` text
-- **Enhanced Text Visibility**:
-  - Fixed blockquote text contrast (light on light issue)
-  - Pure black text colors for maximum readability
-  - Font-medium weight for emphasis
-  - All text elements properly visible in all modes
 - **Proper Architecture**:
   - Created `/api/generate-text-response` API route
   - Fixed client/server boundary violations
   - Proper Next.js 16 patterns
+
+### 🌐 Language Switching (v4.3.0) ⚡ NEW
+- **Multi-Language Support**: Full English/Spanish toggle across entire UI
+- **Language Context System**: React Context for global language state management
+- **Translated Components**:
+  - Hero section, features, how-it-works
+  - Brief upload area and form fields
+  - All labels, placeholders, buttons, and tips
+  - Error messages and notifications
+- **Persistence**: Language preference saved to localStorage
+- **Toggle Button**: Easy-to-use language switch in the header
 
 ### 📝 Enhanced Response Formatting (v2.3.0)
 - **Large, Beautiful Typography**:

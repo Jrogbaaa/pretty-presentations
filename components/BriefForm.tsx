@@ -77,8 +77,9 @@ const BriefForm = ({ onGenerateBriefResponse, isProcessing, initialData }: Brief
           const arrayBuffer = await file.arrayBuffer();
           const pdfjsLib = await import("pdfjs-dist");
           
-          // Set worker source
-          pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+          // Set worker source - use local copy from public folder for reliability
+          // The worker file is copied from node_modules/pdfjs-dist/build/pdf.worker.min.mjs
+          pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
           
           const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
           const textParts: string[] = [];

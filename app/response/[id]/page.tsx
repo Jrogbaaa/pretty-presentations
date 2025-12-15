@@ -78,15 +78,21 @@ const ResponsePage = () => {
         return;
       }
 
-      // Detect if user is in dark mode
-      const isDarkMode = document.documentElement.classList.contains('dark') || 
-                         window.matchMedia('(prefers-color-scheme: dark)').matches;
-      
-      // Colors for PDF (html2canvas doesn't support lab/oklch colors)
-      const bgColor = isDarkMode ? "#1f2937" : "#ffffff";
-      const textColor = isDarkMode ? "#f3f4f6" : "#1f2937";
-      const headingColor = isDarkMode ? "#ffffff" : "#000000";
-      const accentColor = "#9333ea"; // Purple
+      // Corporate Brochure Style - Royal Purple with Cream
+      const colors = {
+        bgCream: "#f5f3ef",         // Warm cream background
+        bgWhite: "#ffffff",          // Pure white
+        bgPurple: "#4c1d95",         // Deep royal purple (primary accent)
+        bgPurpleLight: "#7c3aed",    // Lighter purple
+        bgPurpleDark: "#3b0764",     // Darker purple
+        textDark: "#1f2937",         // Dark text
+        textMedium: "#4b5563",       // Medium gray text
+        textLight: "#9ca3af",        // Light gray text
+        textOnPurple: "#ffffff",     // White text on purple
+        textPurple: "#5b21b6",       // Purple text
+        border: "#e5e7eb",           // Light border
+        borderPurple: "#a78bfa",     // Purple border
+      };
       
       // Wait a moment for any layout to settle
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -96,75 +102,598 @@ const ResponsePage = () => {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: bgColor,
+        backgroundColor: colors.bgCream,
         onclone: (clonedDoc) => {
           const clonedElement = clonedDoc.getElementById("response-content");
           if (clonedElement) {
-            clonedElement.style.padding = "40px";
-            clonedElement.style.backgroundColor = bgColor;
+            // Apply corporate brochure styling
+            clonedElement.style.backgroundColor = colors.bgCream;
+            clonedElement.style.padding = "0";
+            clonedElement.style.borderRadius = "0";
+            clonedElement.style.position = "relative";
+            clonedElement.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
             
-            // Convert all modern CSS colors to simple hex colors
-            // This fixes html2canvas "unsupported color function" errors
+            // ===== TITLE PAGE / HEADER SECTION =====
+            const headerSection = clonedDoc.createElement('div');
+            headerSection.style.cssText = `
+              display: flex;
+              min-height: 280px;
+              background-color: ${colors.bgCream};
+            `;
+            
+            // Left purple sidebar panel (40% width like in the reference)
+            const leftPanel = clonedDoc.createElement('div');
+            leftPanel.style.cssText = `
+              width: 40%;
+              background: linear-gradient(180deg, ${colors.bgPurple} 0%, ${colors.bgPurpleDark} 100%);
+              padding: 48px 32px;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              position: relative;
+              overflow: hidden;
+            `;
+            
+            // Decorative geometric shapes on purple panel
+            const decorShape1 = clonedDoc.createElement('div');
+            decorShape1.style.cssText = `
+              position: absolute;
+              top: 20px;
+              right: -30px;
+              width: 100px;
+              height: 100px;
+              border: 3px solid rgba(255,255,255,0.15);
+              border-radius: 50%;
+            `;
+            leftPanel.appendChild(decorShape1);
+            
+            const decorShape2 = clonedDoc.createElement('div');
+            decorShape2.style.cssText = `
+              position: absolute;
+              bottom: 40px;
+              left: -20px;
+              width: 80px;
+              height: 80px;
+              background: rgba(255,255,255,0.08);
+              transform: rotate(45deg);
+            `;
+            leftPanel.appendChild(decorShape2);
+            
+            // Vertical text on left panel
+            const verticalText = clonedDoc.createElement('div');
+            verticalText.style.cssText = `
+              position: absolute;
+              left: 16px;
+              top: 50%;
+              transform: translateY(-50%) rotate(-90deg);
+              font-size: 10px;
+              font-weight: 700;
+              letter-spacing: 4px;
+              color: rgba(255,255,255,0.5);
+              text-transform: uppercase;
+              white-space: nowrap;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            verticalText.textContent = "INFLUENCER PROPOSAL";
+            leftPanel.appendChild(verticalText);
+            
+            // Brand mark in left panel
+            const brandMark = clonedDoc.createElement('div');
+            brandMark.style.cssText = `
+              font-size: 10px;
+              font-weight: 700;
+              letter-spacing: 3px;
+              text-transform: uppercase;
+              color: rgba(255,255,255,0.7);
+              margin-bottom: 24px;
+              padding-left: 24px;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            brandMark.textContent = "LOOK AFTER YOU";
+            leftPanel.appendChild(brandMark);
+            
+            // Year/Date big number
+            const yearDisplay = clonedDoc.createElement('div');
+            yearDisplay.style.cssText = `
+              font-size: 64px;
+              font-weight: 900;
+              color: ${colors.textOnPurple};
+              line-height: 1;
+              margin-bottom: 8px;
+              padding-left: 24px;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            yearDisplay.textContent = new Date().getFullYear().toString();
+            leftPanel.appendChild(yearDisplay);
+            
+            // Month display
+            const monthDisplay = clonedDoc.createElement('div');
+            monthDisplay.style.cssText = `
+              font-size: 14px;
+              font-weight: 600;
+              letter-spacing: 2px;
+              text-transform: uppercase;
+              color: rgba(255,255,255,0.8);
+              padding-left: 24px;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            monthDisplay.textContent = new Date().toLocaleDateString('en-US', { month: 'long' });
+            leftPanel.appendChild(monthDisplay);
+            
+            headerSection.appendChild(leftPanel);
+            
+            // Right content panel (60% width)
+            const rightPanel = clonedDoc.createElement('div');
+            rightPanel.style.cssText = `
+              width: 60%;
+              padding: 48px 40px;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              background-color: ${colors.bgCream};
+            `;
+            
+            // Document type label
+            const docType = clonedDoc.createElement('div');
+            docType.style.cssText = `
+              font-size: 11px;
+              font-weight: 700;
+              letter-spacing: 3px;
+              text-transform: uppercase;
+              color: ${colors.textPurple};
+              margin-bottom: 16px;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            docType.textContent = "MARKETING PROPOSAL";
+            rightPanel.appendChild(docType);
+            
+            // Client name (large title)
+            const clientTitle = clonedDoc.createElement('div');
+            clientTitle.style.cssText = `
+              font-size: 42px;
+              font-weight: 900;
+              color: ${colors.textDark};
+              margin-bottom: 12px;
+              line-height: 1.1;
+              letter-spacing: -1px;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            clientTitle.textContent = response.clientName;
+            rightPanel.appendChild(clientTitle);
+            
+            // Campaign name subtitle
+            const campaignSubtitle = clonedDoc.createElement('div');
+            campaignSubtitle.style.cssText = `
+              font-size: 16px;
+              font-weight: 500;
+              color: ${colors.textMedium};
+              margin-bottom: 24px;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            campaignSubtitle.textContent = response.campaignName || "Influencer Campaign";
+            rightPanel.appendChild(campaignSubtitle);
+            
+            // Divider line
+            const dividerLine = clonedDoc.createElement('div');
+            dividerLine.style.cssText = `
+              width: 60px;
+              height: 4px;
+              background-color: ${colors.bgPurple};
+              margin-bottom: 24px;
+            `;
+            rightPanel.appendChild(dividerLine);
+            
+            // Stats row
+            const statsRow = clonedDoc.createElement('div');
+            statsRow.style.cssText = `
+              display: flex;
+              gap: 32px;
+            `;
+            
+            // Stat 1: Influencers
+            const stat1 = clonedDoc.createElement('div');
+            stat1.innerHTML = `
+              <div style="font-size: 28px; font-weight: 800; color: ${colors.bgPurple}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${response.influencers?.length || 0}</div>
+              <div style="font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: ${colors.textLight}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Influencers</div>
+            `;
+            statsRow.appendChild(stat1);
+            
+            // Stat 2: Date
+            const stat2 = clonedDoc.createElement('div');
+            const dateStr = new Date(response.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            stat2.innerHTML = `
+              <div style="font-size: 28px; font-weight: 800; color: ${colors.bgPurple}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${dateStr}</div>
+              <div style="font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: ${colors.textLight}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Created</div>
+            `;
+            statsRow.appendChild(stat2);
+            
+            rightPanel.appendChild(statsRow);
+            headerSection.appendChild(rightPanel);
+            
+            // Insert header section at the beginning
+            clonedElement.insertBefore(headerSection, clonedElement.firstChild);
+            
+            // ===== CONTENT SECTION =====
+            // Create content wrapper
+            const contentWrapper = clonedDoc.createElement('div');
+            contentWrapper.style.cssText = `
+              padding: 48px 48px 48px 48px;
+              background-color: ${colors.bgCream};
+            `;
+            
+            // Move all content except header into wrapper
+            const children = Array.from(clonedElement.children);
+            children.forEach((child, index) => {
+              if (index > 0) { // Skip the header section
+                contentWrapper.appendChild(child);
+              }
+            });
+            clonedElement.appendChild(contentWrapper);
+            
+            // Style all text elements
             const allElements = clonedElement.querySelectorAll('*');
             allElements.forEach((el) => {
               const htmlEl = el as HTMLElement;
+              // Reset any gradients that html2canvas can't handle in content
               const computed = window.getComputedStyle(htmlEl);
+              if (computed.backgroundImage && computed.backgroundImage !== 'none' && !htmlEl.closest('[style*="linear-gradient"]')) {
+                // Only reset if not part of our header design
+                if (!htmlEl.closest('div[style*="display: flex"]')) {
+                  htmlEl.style.backgroundImage = 'none';
+                }
+              }
+            });
+            
+            // Track section numbers for numbered headers
+            let sectionNumber = 1;
+            
+            // Style H1 headings - Big section headers with numbers
+            clonedElement.querySelectorAll('h1').forEach((el) => {
+              const h1 = el as HTMLElement;
+              const text = h1.textContent || '';
+              const cleanText = text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
               
-              // Force simple colors for all elements
-              htmlEl.style.color = textColor;
-              htmlEl.style.backgroundColor = "transparent";
-              htmlEl.style.borderColor = isDarkMode ? "#374151" : "#e5e7eb";
+              // Create a numbered section header container
+              const sectionContainer = clonedDoc.createElement('div');
+              sectionContainer.style.cssText = `
+                display: flex;
+                align-items: flex-start;
+                gap: 20px;
+                margin-top: 48px;
+                margin-bottom: 24px;
+                padding-bottom: 16px;
+                border-bottom: 3px solid ${colors.bgPurple};
+              `;
+              
+              // Section number
+              const numberEl = clonedDoc.createElement('div');
+              numberEl.style.cssText = `
+                font-size: 48px;
+                font-weight: 900;
+                color: ${colors.bgPurple};
+                line-height: 1;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              `;
+              numberEl.textContent = String(sectionNumber).padStart(2, '0');
+              sectionNumber++;
+              
+              // Section title
+              const titleEl = clonedDoc.createElement('div');
+              titleEl.style.cssText = `
+                font-size: 24px;
+                font-weight: 800;
+                color: ${colors.textDark};
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                padding-top: 12px;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              `;
+              titleEl.textContent = cleanText;
+              
+              sectionContainer.appendChild(numberEl);
+              sectionContainer.appendChild(titleEl);
+              
+              // Replace h1 with the new container
+              h1.parentNode?.replaceChild(sectionContainer, h1);
             });
             
-            // Style headings
-            clonedElement.querySelectorAll('h1, h2, h3, h4').forEach((el) => {
-              (el as HTMLElement).style.color = headingColor;
+            // Style H2 headings - Subsection headers
+            clonedElement.querySelectorAll('h2').forEach((el) => {
+              const h2 = el as HTMLElement;
+              const text = h2.textContent || '';
+              const cleanText = text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+              h2.textContent = cleanText;
+              h2.style.cssText = `
+                font-size: 14px;
+                font-weight: 700;
+                color: ${colors.bgPurple};
+                margin-top: 32px;
+                margin-bottom: 16px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid ${colors.borderPurple};
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              `;
             });
             
-            // Style h3 with accent color
+            // Style H3 headings
             clonedElement.querySelectorAll('h3').forEach((el) => {
-              (el as HTMLElement).style.color = accentColor;
+              const h3 = el as HTMLElement;
+              const text = h3.textContent || '';
+              const cleanText = text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+              h3.textContent = cleanText;
+              h3.style.cssText = `
+                font-size: 16px;
+                font-weight: 700;
+                color: ${colors.textDark};
+                margin-top: 24px;
+                margin-bottom: 12px;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              `;
+            });
+            
+            // Style H4 headings
+            clonedElement.querySelectorAll('h4').forEach((el) => {
+              const h4 = el as HTMLElement;
+              const text = h4.textContent || '';
+              const cleanText = text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+              h4.textContent = cleanText;
+              h4.style.cssText = `
+                font-size: 14px;
+                font-weight: 600;
+                color: ${colors.textMedium};
+                margin-top: 18px;
+                margin-bottom: 8px;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              `;
+            });
+            
+            // Style paragraphs
+            clonedElement.querySelectorAll('p').forEach((el) => {
+              const p = el as HTMLElement;
+              if (!p.closest('[style*="display: flex"]')) {
+                p.style.cssText = `
+                  font-size: 13px;
+                  line-height: 1.8;
+                  color: ${colors.textMedium};
+                  margin-bottom: 16px;
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                `;
+              }
+            });
+            
+            // Style list items
+            clonedElement.querySelectorAll('li').forEach((el) => {
+              const li = el as HTMLElement;
+              li.style.cssText = `
+                font-size: 13px;
+                line-height: 1.8;
+                color: ${colors.textMedium};
+                margin-bottom: 10px;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              `;
+            });
+            
+            // Style unordered lists
+            clonedElement.querySelectorAll('ul').forEach((el) => {
+              const ul = el as HTMLElement;
+              ul.style.cssText = `
+                margin: 16px 0;
+                padding-left: 24px;
+              `;
+            });
+            
+            // Style strong text
+            clonedElement.querySelectorAll('strong').forEach((el) => {
+              (el as HTMLElement).style.color = colors.textDark;
+              (el as HTMLElement).style.fontWeight = '700';
             });
             
             // Style links
             clonedElement.querySelectorAll('a').forEach((el) => {
-              (el as HTMLElement).style.color = accentColor;
+              const a = el as HTMLElement;
+              a.style.cssText = `
+                color: ${colors.bgPurple};
+                text-decoration: none;
+                font-weight: 600;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              `;
+            });
+            
+            // Style tables - Corporate style with purple header
+            clonedElement.querySelectorAll('table').forEach((el) => {
+              const table = el as HTMLElement;
+              table.style.cssText = `
+                width: 100%;
+                margin: 24px 0;
+                border-collapse: collapse;
+                background-color: ${colors.bgWhite};
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+              `;
             });
             
             // Style table headers
             clonedElement.querySelectorAll('th').forEach((el) => {
               const th = el as HTMLElement;
-              th.style.backgroundColor = accentColor;
-              th.style.color = "#ffffff";
+              th.style.cssText = `
+                background-color: ${colors.bgPurple};
+                color: ${colors.textOnPurple};
+                font-weight: 700;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                padding: 16px 20px;
+                text-align: left;
+                border: none;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              `;
             });
             
             // Style table cells
-            clonedElement.querySelectorAll('td').forEach((el) => {
-              const td = el as HTMLElement;
-              td.style.backgroundColor = isDarkMode ? "#374151" : "#f9fafb";
-              td.style.color = textColor;
-              td.style.borderColor = isDarkMode ? "#4b5563" : "#e5e7eb";
+            clonedElement.querySelectorAll('tr').forEach((el, rowIndex) => {
+              const tr = el as HTMLElement;
+              const isEvenRow = rowIndex % 2 === 0;
+              const cells = tr.querySelectorAll('td');
+              cells.forEach((cell) => {
+                const td = cell as HTMLElement;
+                td.style.cssText = `
+                  padding: 14px 20px;
+                  font-size: 13px;
+                  color: ${colors.textMedium};
+                  background-color: ${isEvenRow ? colors.bgWhite : colors.bgCream};
+                  border-bottom: 1px solid ${colors.border};
+                  border-left: none;
+                  border-right: none;
+                  border-top: none;
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                `;
+              });
             });
             
-            // Style blockquotes
+            // Style blockquotes - callout boxes like in corporate brochures
             clonedElement.querySelectorAll('blockquote').forEach((el) => {
               const bq = el as HTMLElement;
-              bq.style.backgroundColor = isDarkMode ? "#374151" : "#f3e8ff";
-              bq.style.borderLeftColor = accentColor;
-              bq.style.color = textColor;
-            });
-            
-            // Style code blocks
-            clonedElement.querySelectorAll('code, pre').forEach((el) => {
-              const code = el as HTMLElement;
-              code.style.backgroundColor = isDarkMode ? "#111827" : "#f3f4f6";
-              code.style.color = textColor;
+              bq.style.cssText = `
+                background-color: ${colors.bgPurple};
+                border-left: none;
+                border-radius: 0;
+                padding: 24px 28px;
+                margin: 24px 0;
+                color: ${colors.textOnPurple};
+                font-style: normal;
+                position: relative;
+              `;
+              
+              // Style paragraphs inside blockquote
+              bq.querySelectorAll('p').forEach((p) => {
+                (p as HTMLElement).style.cssText = `
+                  color: ${colors.textOnPurple};
+                  font-size: 14px;
+                  line-height: 1.7;
+                  margin-bottom: 0;
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                `;
+              });
             });
             
             // Style horizontal rules
             clonedElement.querySelectorAll('hr').forEach((el) => {
-              (el as HTMLElement).style.borderColor = isDarkMode ? "#374151" : "#e5e7eb";
+              const hr = el as HTMLElement;
+              hr.style.cssText = `
+                border: none;
+                height: 2px;
+                background-color: ${colors.bgPurple};
+                margin: 40px 0;
+                width: 60px;
+              `;
             });
+            
+            // Style code elements
+            clonedElement.querySelectorAll('code').forEach((el) => {
+              const code = el as HTMLElement;
+              if (!code.closest('pre')) {
+                code.style.cssText = `
+                  background-color: rgba(76, 29, 149, 0.1);
+                  color: ${colors.bgPurple};
+                  padding: 3px 8px;
+                  border-radius: 4px;
+                  font-size: 12px;
+                  font-family: 'SF Mono', Monaco, Consolas, monospace;
+                `;
+              }
+            });
+            
+            // Style pre elements
+            clonedElement.querySelectorAll('pre').forEach((el) => {
+              const pre = el as HTMLElement;
+              pre.style.cssText = `
+                background-color: ${colors.bgWhite};
+                border: 1px solid ${colors.border};
+                border-left: 4px solid ${colors.bgPurple};
+                padding: 20px;
+                overflow-x: auto;
+                margin: 24px 0;
+              `;
+              const code = pre.querySelector('code');
+              if (code) {
+                (code as HTMLElement).style.cssText = `
+                  background: transparent;
+                  border: none;
+                  padding: 0;
+                  color: ${colors.textMedium};
+                  font-family: 'SF Mono', Monaco, Consolas, monospace;
+                `;
+              }
+            });
+            
+            // ===== FOOTER SECTION =====
+            const footer = clonedDoc.createElement('div');
+            footer.style.cssText = `
+              display: flex;
+              margin-top: 48px;
+              background-color: ${colors.bgCream};
+            `;
+            
+            // Left footer panel (matches header)
+            const footerLeft = clonedDoc.createElement('div');
+            footerLeft.style.cssText = `
+              width: 40%;
+              background: linear-gradient(180deg, ${colors.bgPurpleDark} 0%, ${colors.bgPurple} 100%);
+              padding: 32px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            `;
+            
+            const footerBrand = clonedDoc.createElement('div');
+            footerBrand.style.cssText = `
+              font-size: 12px;
+              font-weight: 700;
+              letter-spacing: 3px;
+              text-transform: uppercase;
+              color: ${colors.textOnPurple};
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            footerBrand.textContent = "LOOK AFTER YOU";
+            footerLeft.appendChild(footerBrand);
+            
+            // Right footer panel
+            const footerRight = clonedDoc.createElement('div');
+            footerRight.style.cssText = `
+              width: 60%;
+              padding: 32px 40px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              background-color: ${colors.bgCream};
+              border-top: 1px solid ${colors.border};
+            `;
+            
+            const footerConfidential = clonedDoc.createElement('div');
+            footerConfidential.style.cssText = `
+              font-size: 11px;
+              font-style: italic;
+              color: ${colors.textLight};
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            footerConfidential.textContent = "Confidential Document";
+            
+            const footerClient = clonedDoc.createElement('div');
+            footerClient.style.cssText = `
+              font-size: 11px;
+              font-weight: 600;
+              color: ${colors.textMedium};
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            footerClient.textContent = `Prepared for ${response.clientName}`;
+            
+            footerRight.appendChild(footerConfidential);
+            footerRight.appendChild(footerClient);
+            
+            footer.appendChild(footerLeft);
+            footer.appendChild(footerRight);
+            contentWrapper.appendChild(footer);
           }
         }
       });
@@ -178,9 +707,9 @@ const ResponsePage = () => {
 
       const pageWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
-      const margin = 10;
-      const usableWidth = pageWidth - (margin * 2);
-      const usableHeight = pageHeight - (margin * 2);
+      const margin = 0; // No margin for full-bleed design
+      const usableWidth = pageWidth;
+      const usableHeight = pageHeight;
       
       // Calculate image dimensions to fit width
       const imgWidth = usableWidth;
@@ -213,7 +742,7 @@ const ResponsePage = () => {
           const ctx = pageCanvas.getContext('2d');
           if (ctx) {
             // Fill with background color
-            ctx.fillStyle = bgColor;
+            ctx.fillStyle = colors.bgCream;
             ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
             
             // Draw the slice

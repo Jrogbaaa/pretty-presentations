@@ -1,5 +1,109 @@
 # Changelog
 
+## [4.3.0] - 2025-12-15 🎨
+
+### 📄 Corporate Brochure PDF Design + Language Switching
+
+This release introduces a completely redesigned PDF export with a corporate brochure/annual report aesthetic, plus multi-language support and improved brief samples.
+
+#### 🎨 Corporate Brochure PDF Design
+
+**Title Page Header:**
+- **Split Layout Design:** 40% left purple panel + 60% right cream content panel (inspired by corporate annual reports)
+- **Purple Sidebar Features:**
+  - Vertical "INFLUENCER PROPOSAL" text
+  - "LOOK AFTER YOU" brand mark
+  - Large year display (e.g., "2025") with month name
+  - Decorative geometric shapes (circles, squares)
+- **Right Panel Features:**
+  - "MARKETING PROPOSAL" document type label
+  - Large client name with bold typography
+  - Campaign subtitle
+  - Purple divider line
+  - Stats row (influencer count, creation date)
+
+**Numbered Section Headers:**
+- Large purple section numbers (01, 02, 03...) with bold typography
+- Uppercase section titles with letter-spacing
+- Purple underline borders for visual hierarchy
+
+**Color Scheme:**
+- Warm cream background (`#f5f3ef`)
+- Royal purple accents (`#4c1d95`)
+- Professional contrast with dark text on cream
+
+**Table Styling:**
+- Solid purple header rows with white text
+- Alternating cream/white row backgrounds
+- Clean borders with subtle shadows
+
+**Blockquotes:**
+- Purple callout boxes with white text
+- Perfect for highlighting key insights
+
+**Footer:**
+- Split design matching header aesthetic
+- Purple left panel with brand mark
+- Cream right panel with confidential notice
+
+#### 🌐 Language Switching (English/Spanish)
+
+**New Language Context System:**
+- `lib/language-context.tsx` - React Context for global language state
+- `lib/translations.ts` - Centralized translation strings
+- `components/LanguageToggle.tsx` - UI toggle button
+
+**Translated Components:**
+- Hero section (title, subtitle, description, CTA)
+- Features section
+- How It Works section
+- Brief upload area
+- Brief form (all labels, placeholders, buttons)
+- Error messages and tips
+- Footer
+
+**Persistence:**
+- Language preference saved to localStorage
+- Persists across page refreshes
+
+#### 📝 Messier Email-Style Brief Samples
+
+**Updated Sample Generator:**
+- `lib/sample-brief-generator.ts` completely rewritten
+- Generates casual, email-style briefs that resemble real client emails
+- Varied formatting and informal greetings
+- English-only samples (Spanish translations available via language toggle)
+
+**Sample Characteristics:**
+- Informal tone ("Hey team!", "Hi there!", "Quick question...")
+- Mixed formatting (sometimes bullets, sometimes prose)
+- Realistic details (budgets, timelines, preferences)
+- Varied campaign types (beauty, tech, fitness, food, fashion)
+
+#### 🐛 Bug Fixes
+
+**PDF.js Worker Loading:**
+- Fixed CDN URL error for pdf.js worker
+- Worker file now served locally from `/public/pdf.worker.min.mjs`
+- More reliable PDF text extraction for file uploads
+
+#### 🛠️ Files Created
+- `lib/translations.ts` - Translation strings for EN/ES
+- `lib/language-context.tsx` - Language context provider
+- `components/LanguageToggle.tsx` - Language toggle UI
+- `public/pdf.worker.min.mjs` - Local pdf.js worker file
+
+#### 🛠️ Files Modified
+- `app/response/[id]/page.tsx` - Complete PDF design overhaul
+- `app/response/[id]/response-styles.css` - Corporate brochure styles
+- `app/layout.tsx` - Added LanguageProvider wrapper
+- `app/page.tsx` - Integrated translations
+- `components/BriefForm.tsx` - Integrated translations + local PDF worker
+- `components/BriefUpload.tsx` - Integrated translations
+- `lib/sample-brief-generator.ts` - Email-style English briefs
+
+---
+
 ## [4.2.0] - 2025-12-10 🔧
 
 ### 🗑️ Removed Google AI Dependency

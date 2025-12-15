@@ -1,147 +1,186 @@
 /**
  * Smart Sample Brief Generator
  * Generates contextually relevant briefs based on random brands from our database
+ * Now in English with a casual "messy email" style
  */
 
 import { Brand } from "@/types";
 
-// Campaign templates based on industry
+// Email-style opening phrases
+const EMAIL_OPENINGS = [
+  "Hey team!",
+  "Hi there,",
+  "Quick one for you...",
+  "Hope you're doing well!",
+  "Hi!",
+  "Good morning,",
+  "Hey,",
+  "Hello!",
+  "Hi all,",
+];
+
+// Casual transitions and filler phrases
+const TRANSITIONS = [
+  "So basically,",
+  "Long story short,",
+  "Here's the deal:",
+  "Quick overview:",
+  "Just to give you some context,",
+  "Anyway,",
+  "So yeah,",
+  "Ok so,",
+];
+
+const CLOSINGS = [
+  "Let me know if you need anything else!",
+  "Happy to jump on a call to discuss.",
+  "Thoughts?",
+  "Does this make sense?",
+  "Let me know what you think!",
+  "Looking forward to hearing your ideas.",
+  "Thanks in advance!",
+  "Cheers!",
+  "Talk soon,",
+  "Reach out if you have questions!",
+];
+
+// Campaign templates based on industry (now in English)
 const CAMPAIGN_TEMPLATES = {
   "Fashion & Retail": {
-    products: ["Nueva colección primavera/verano", "Línea de ropa sostenible", "Colaboración con diseñador", "Colección cápsula exclusiva"],
+    products: ["new spring/summer collection", "sustainable clothing line", "designer collaboration", "exclusive capsule collection"],
     objectives: [
-      "Generar awareness sobre el lanzamiento de la nueva colección",
-      "Posicionar la marca como referente en moda sostenible",
-      "Alcanzar 2M de impresiones en redes sociales",
-      "Aumentar ventas online en un 30%",
-      "Generar tráfico cualificado a la web de e-commerce"
+      "get the word out about our new collection launch",
+      "position the brand as a leader in sustainable fashion",
+      "reach around 2M impressions on social",
+      "boost online sales by 30% or so",
+      "drive qualified traffic to our ecommerce site"
     ],
     contentThemes: [
-      "Lookbook de temporada y styling tips",
-      "Unboxing y haul de la nueva colección",
-      "Outfits del día y combinaciones versátiles",
-      "Behind the scenes del proceso de diseño",
-      "Styling para diferentes ocasiones"
+      "seasonal lookbook and styling tips kind of content",
+      "unboxing and haul videos of the new collection",
+      "OOTD posts and versatile outfit combos",
+      "BTS of the design process if possible",
+      "styling for different occasions (casual, work, going out etc)"
     ],
     hashtags: ["#NewCollection", "#FashionStyle", "#OOTD", "#SustainableFashion"]
   },
   "Sports & Fitness": {
-    products: ["Nuevo equipamiento deportivo", "Línea de ropa técnica", "Zapatillas running", "Colección fitness"],
+    products: ["new sports equipment", "technical apparel line", "running shoes", "fitness collection"],
     objectives: [
-      "Aumentar awareness de la marca en el sector fitness",
-      "Posicionar productos como referencia en rendimiento deportivo",
-      "Generar contenido motivacional y aspiracional",
-      "Incrementar ventas de la nueva línea en 40%",
-      "Alcanzar comunidad activa de 1.5M personas"
+      "increase brand awareness in the fitness space",
+      "position products as THE reference for sports performance",
+      "create motivational/aspirational content",
+      "boost sales of the new line by 40%",
+      "reach an active community of 1.5M+ people"
     ],
     contentThemes: [
-      "Rutinas de entrenamiento con productos",
-      "Desafíos fitness y transformaciones",
-      "Tips de nutrición y recuperación",
-      "Lifestyle de atletas y deportistas",
-      "Motivación y superación personal"
+      "workout routines featuring our products",
+      "fitness challenges and transformation content",
+      "nutrition and recovery tips",
+      "athlete/fitness lifestyle content",
+      "motivation and personal improvement stuff"
     ],
     hashtags: ["#FitnessMotivation", "#ActiveLifestyle", "#TrainHard", "#SportsPerformance"]
   },
   "Food & Beverage": {
-    products: ["Nueva línea de productos gourmet", "Lanzamiento de bebida premium", "Colección recetas", "Productos orgánicos"],
+    products: ["new gourmet product line", "premium beverage launch", "recipe collection", "organic products"],
     objectives: [
-      "Generar awareness del nuevo producto",
-      "Posicionar la marca como opción premium/saludable",
-      "Aumentar trial y repetición de compra",
-      "Generar contenido gastronómico aspiracional",
-      "Alcanzar foodies y amantes de la buena comida"
+      "generate awareness for our new product",
+      "position brand as premium/healthy option",
+      "increase trial and repeat purchase",
+      "create aspirational food content",
+      "reach foodies and food lovers audience"
     ],
     contentThemes: [
-      "Recetas creativas con los productos",
-      "Momentos de disfrute y ocasiones de consumo",
-      "Unboxing y tasting de productos",
-      "Maridajes y combinaciones gourmet",
-      "Behind the scenes de la producción"
+      "creative recipes using our products",
+      "moments of enjoyment & consumption occasions",
+      "unboxing and tasting content",
+      "pairings and gourmet combinations",
+      "BTS of the production if interesting"
     ],
     hashtags: ["#Foodie", "#GourmetLife", "#FoodLovers", "#DeliciousMoments"]
   },
   "Beauty & Cosmetics": {
-    products: ["Nueva línea de skincare", "Colección de maquillaje", "Tratamiento facial innovador", "Fragancias exclusivas"],
+    products: ["new skincare line", "makeup collection", "innovative facial treatment", "exclusive fragrances"],
     objectives: [
-      "Lanzar nueva línea de productos beauty",
-      "Posicionar como marca de belleza premium/accesible",
-      "Generar tutoriales y demostraciones de uso",
-      "Aumentar engagement con comunidad beauty",
-      "Incrementar conversión online en 35%"
+      "launch new beauty product line",
+      "position as premium/accessible beauty brand",
+      "create tutorials and usage demos",
+      "increase engagement with beauty community",
+      "boost online conversion by 35%"
     ],
     contentThemes: [
-      "Rutinas de skincare y makeup tutorials",
-      "Before & after y resultados reales",
-      "Tips de belleza y trucos profesionales",
-      "Get ready with me y looks completos",
-      "Reviews honestas y primeras impresiones"
+      "skincare routines and makeup tutorials",
+      "before & after + real results",
+      "beauty tips and pro tricks",
+      "GRWM and complete looks",
+      "honest reviews and first impressions"
     ],
     hashtags: ["#BeautyRoutine", "#SkincareObsessed", "#MakeupTutorial", "#GlowUp"]
   },
   "Technology & Electronics": {
-    products: ["Nuevo smartphone", "Gadget innovador", "Accesorios tech", "Dispositivo smart home"],
+    products: ["new smartphone", "innovative gadget", "tech accessories", "smart home device"],
     objectives: [
-      "Generar buzz sobre lanzamiento tecnológico",
-      "Demostrar características y beneficios del producto",
-      "Posicionar como marca innovadora",
-      "Generar reviews auténticas y unboxings",
-      "Alcanzar early adopters y tech enthusiasts"
+      "generate buzz around tech launch",
+      "demo features and benefits of the product",
+      "position as innovative brand",
+      "get authentic reviews and unboxings",
+      "reach early adopters and tech enthusiasts"
     ],
     contentThemes: [
-      "Unboxing y primeras impresiones",
-      "Reviews técnicas y comparativas",
-      "Casos de uso en la vida diaria",
-      "Tips y trucos para aprovechar el dispositivo",
-      "Integración en ecosistema tech"
+      "unboxing and first impressions",
+      "technical reviews and comparisons",
+      "daily life use cases",
+      "tips and tricks to get the most out of the device",
+      "tech ecosystem integration"
     ],
     hashtags: ["#TechReview", "#Innovation", "#TechLife", "#Gadgets"]
   },
   "Home & Decor": {
-    products: ["Nueva colección decoración", "Línea de muebles", "Textiles para hogar", "Artículos de organización"],
+    products: ["new decor collection", "furniture line", "home textiles", "organization items"],
     objectives: [
-      "Inspirar a renovar espacios del hogar",
-      "Posicionar como marca de diseño accesible/premium",
-      "Generar ideas de decoración y styling",
-      "Aumentar tráfico a tiendas físicas y online",
-      "Crear comunidad de home decor lovers"
+      "inspire people to refresh their spaces",
+      "position as accessible/premium design brand",
+      "create decoration and styling ideas",
+      "drive traffic to physical stores and online",
+      "build a community of home decor lovers"
     ],
     contentThemes: [
-      "Room makeovers y transformaciones",
-      "Tips de decoración y organización",
-      "Seasonal decor y tendencias",
-      "DIY projects con productos de la marca",
-      "Home tours y styling"
+      "room makeovers and transformations",
+      "decoration and organization tips",
+      "seasonal decor and trends",
+      "DIY projects with our products",
+      "home tours and styling"
     ],
     hashtags: ["#HomeDecor", "#InteriorDesign", "#HomeInspo", "#CozyHome"]
   },
   "Automotive": {
-    products: ["Nuevo modelo de vehículo", "Edición especial", "Accesorios para coche", "Servicio de mantenimiento"],
+    products: ["new vehicle model", "special edition", "car accessories", "maintenance service"],
     objectives: [
-      "Generar awareness del nuevo modelo",
-      "Posicionar características diferenciales",
-      "Crear experiencias de prueba y test drive",
-      "Aumentar visitas a concesionarios",
-      "Generar contenido aspiracional de lifestyle"
+      "generate awareness of new model",
+      "position differentiating features",
+      "create test drive experiences",
+      "increase dealership visits",
+      "create aspirational lifestyle content"
     ],
     contentThemes: [
-      "Experiencias de conducción y road trips",
-      "Características y tecnología del vehículo",
-      "Lifestyle y momentos con el coche",
-      "Comparativas y reviews honestas",
-      "Aventuras y viajes"
+      "driving experiences and road trips",
+      "vehicle features and technology",
+      "lifestyle moments with the car",
+      "honest reviews and comparisons",
+      "adventures and travel content"
     ],
     hashtags: ["#CarLife", "#DrivingExperience", "#RoadTrip", "#CarReview"]
   }
 };
 
 const PLATFORMS = ["Instagram", "TikTok", "YouTube"];
-const LOCATIONS = ["Madrid, Barcelona, Valencia", "España", "Principales ciudades españolas"];
+const LOCATIONS = ["Madrid, Barcelona, Valencia area mainly", "all of Spain", "major Spanish cities"];
 const TIMELINES = [
-  "Lanzamiento: próximo mes, campaña de 3 semanas",
-  "Inicio inmediato, duración 4 semanas",
-  "Lanzamiento trimestral, campaña de 2 meses",
-  "Inicio Q1, campaña de 6 semanas"
+  "launching next month, campaign runs about 3 weeks",
+  "starting ASAP, 4 weeks duration",
+  "Q1 launch, 2 month campaign",
+  "kicking off Q1, 6 week campaign window"
 ];
 
 /**
@@ -212,7 +251,13 @@ export const loadBrandsFromCSV = async (): Promise<Brand[]> => {
 };
 
 /**
+ * Helper to pick random item from array
+ */
+const pickRandom = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
+/**
  * Generate a random sample brief based on a random brand from database
+ * Now generates casual, email-style briefs in English
  */
 export const generateRandomSampleBrief = async (): Promise<string> => {
   const brands = await loadBrandsFromCSV();
@@ -230,95 +275,115 @@ export const generateRandomSampleBrief = async (): Promise<string> => {
   const template = CAMPAIGN_TEMPLATES[industryCategory];
   
   // Generate random selections
-  const product = template.products[Math.floor(Math.random() * template.products.length)];
+  const product = pickRandom(template.products);
   const objectives = template.objectives
     .sort(() => Math.random() - 0.5)
-    .slice(0, 3 + Math.floor(Math.random() * 2)); // 3-4 objectives
+    .slice(0, 2 + Math.floor(Math.random() * 2)); // 2-3 objectives
   const contentThemes = template.contentThemes
     .sort(() => Math.random() - 0.5)
-    .slice(0, 3 + Math.floor(Math.random() * 2)); // 3-4 themes
-  const platforms = PLATFORMS.sort(() => Math.random() - 0.5).slice(0, 2 + Math.floor(Math.random() * 2)); // 2-3 platforms
-  const location = LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)];
-  const timeline = TIMELINES[Math.floor(Math.random() * TIMELINES.length)];
-  const budget = [15000, 25000, 35000, 50000, 75000, 100000][Math.floor(Math.random() * 6)];
-  const hashtag = template.hashtags[Math.floor(Math.random() * template.hashtags.length)];
+    .slice(0, 2 + Math.floor(Math.random() * 2)); // 2-3 themes
+  const platforms = PLATFORMS.sort(() => Math.random() - 0.5).slice(0, 2 + Math.floor(Math.random() * 2));
+  const location = pickRandom(LOCATIONS);
+  const timeline = pickRandom(TIMELINES);
+  const budget = pickRandom([15000, 25000, 35000, 50000, 75000, 100000]);
+  const hashtag = pickRandom(template.hashtags);
   
-  // Generate brief
-  return `Brief de Campaña - ${randomBrand.name}
-
-Cliente: ${randomBrand.name}
-Sector: ${randomBrand.industry}
-Producto: ${product}
-Presupuesto: ${budget.toLocaleString()}€
-
-Sobre la Marca:
-${randomBrand.description}
-
-Objetivos de la Campaña:
-${objectives.map(obj => `- ${obj}`).join('\n')}
-
-Target:
-- Edad: ${randomBrand.targetAge}
-- Género: ${randomBrand.targetGender}
-- Ubicación: ${location}
-- Intereses: ${randomBrand.targetInterests.slice(0, 4).join(', ')}
-
-Territorio de Contenido:
-${contentThemes.map(theme => `- ${theme}`).join('\n')}
-
-Requerimientos:
-- Contenido auténtico y natural
-- Mencionar beneficios clave del producto
-- Link a la web en stories y bio
-- Uso del hashtag ${hashtag}
-- Tag @${randomBrand.name.toLowerCase().replace(/\s+/g, '')} en publicaciones
-
-Plataformas Preferidas:
-${platforms.map(p => `- ${p}`).join('\n')}
-
-Timeline:
-${timeline}
-
-Notas Adicionales:
-- Buscamos influencers que conecten con los valores de marca: ${randomBrand.contentThemes.slice(0, 2).join(' y ')}
-- Preferencia por contenido de alta calidad visual
-- Look After You gestionará la coordinación y envío de productos`;
+  const opening = pickRandom(EMAIL_OPENINGS);
+  const transition = pickRandom(TRANSITIONS);
+  const closing = pickRandom(CLOSINGS);
+  
+  // Random name for the "sender"
+  const senderNames = ["Sarah", "Mike", "Ana", "Carlos", "Laura", "David", "Elena", "James"];
+  const sender = pickRandom(senderNames);
+  
+  // Build the messy email-style brief
+  const briefParts: string[] = [];
+  
+  // Opening
+  briefParts.push(`${opening}\n`);
+  
+  // Introduction paragraph (messy, run-on sentence style)
+  briefParts.push(`${transition} we're working with ${randomBrand.name} on their upcoming campaign for their ${product}. They're in the ${randomBrand.industry.toLowerCase()} space and they're looking to do some influencer marketing.`);
+  
+  // Budget (mentioned casually)
+  briefParts.push(`\nBudget is around €${budget.toLocaleString()} - maybe a bit flexible but that's the ballpark.\n`);
+  
+  // About the brand (if description exists)
+  if (randomBrand.description) {
+    briefParts.push(`A bit about them: ${randomBrand.description}\n`);
+  }
+  
+  // Objectives (listed casually)
+  briefParts.push(`What they're hoping to achieve:`);
+  objectives.forEach((obj, i) => {
+    // Mix up formatting - sometimes dash, sometimes number, sometimes just text
+    const formats = [`- ${obj}`, `${i + 1}. ${obj}`, `  • ${obj}`];
+    briefParts.push(pickRandom(formats));
+  });
+  
+  // Target audience (in a casual paragraph)
+  briefParts.push(`\nTarget audience is pretty much ${randomBrand.targetAge} year olds, ${randomBrand.targetGender.toLowerCase()}, based in ${location}. They're into ${randomBrand.targetInterests.slice(0, 3).join(', ')} - that kind of stuff.\n`);
+  
+  // Content ideas
+  briefParts.push(`Content-wise they're thinking:`);
+  contentThemes.forEach(theme => {
+    briefParts.push(`- ${theme}`);
+  });
+  
+  // Platform and other requirements (all jumbled together)
+  briefParts.push(`\nPlatforms: mainly ${platforms.join(' and ')}`);
+  briefParts.push(`They want influencers to use ${hashtag} and tag @${randomBrand.name.toLowerCase().replace(/\s+/g, '')} obviously`);
+  
+  // Timeline
+  briefParts.push(`\nTimeline: ${timeline}`);
+  
+  // Random additional notes (make it feel more email-like)
+  const additionalNotes = [
+    `Oh and they mentioned they want content that feels authentic, not too salesy.`,
+    `PS - they prefer higher quality visuals if possible.`,
+    `They did mention they're looking for creators who really align with their brand values.`,
+    `Also worth noting - they've worked with influencers before so they know what they want.`,
+    `The client is pretty hands-on so expect some back and forth on selections.`,
+  ];
+  briefParts.push(`\n${pickRandom(additionalNotes)}`);
+  
+  // Closing
+  briefParts.push(`\n${closing}`);
+  briefParts.push(`${sender}`);
+  
+  return briefParts.join('\n');
 };
 
 /**
- * Fallback brief if CSV loading fails
+ * Fallback brief if CSV loading fails - now in English email style
  */
 const generateFallbackBrief = (): string => {
-  return `Brief de Campaña - The Band Perfume
+  return `Hey there!
 
-Cliente: The Band
-Producto: Lanzamiento nueva línea de perfumes de lujo
-Presupuesto: 50,000€
+Quick brief for you - we're working with The Band on their new luxury perfume line launch. Pretty exciting stuff!
 
-Objetivos de la Campaña:
-- Generar awareness sobre el lanzamiento de la nueva colección
-- Posicionar The Band como marca premium en el segmento de perfumería de lujo
-- Alcanzar 2M de impresiones en redes sociales
-- Generar tráfico cualificado a la web de e-commerce
+Budget: around €50,000
 
-Target:
-- Edad: 25-45 años
-- Género: 60% mujeres, 40% hombres
-- Ubicación: España (Madrid, Barcelona, Valencia)
-- Intereses: Moda, lifestyle premium, belleza, tendencias
+So basically they want to:
+- get awareness for the new collection
+- position The Band as a premium brand in the luxury perfume space  
+- hit around 2M impressions on social
+- drive traffic to their ecommerce site
 
-Territorio de Contenido:
-- Unboxing y first impressions de la colección
-- Storytelling sobre las notas olfativas
-- Lifestyle content integrando el perfume
-- Momentos especiales (eventos, cenas, viajes)
+Target is 25-45 year olds, 60% women 40% men, mainly in Spain (Madrid, Barcelona, Valencia area). People who are into fashion, premium lifestyle, beauty, trends etc.
 
-Plataformas Preferidas:
-- Instagram
-- TikTok
+Content ideas they mentioned:
+- unboxing and first impressions of the collection
+- storytelling around the scent notes
+- lifestyle content with the perfume integrated naturally
+- special moments (events, dinners, travel)
 
-Timeline:
-- Lanzamiento: próximo mes
-- Duración campaña: 3 semanas`;
+Platforms: Instagram and TikTok mainly
+
+Timeline: launching next month, campaign runs about 3 weeks
+
+They really want authentic feeling content, not too polished or salesy if you know what I mean.
+
+Let me know what you think!
+Sarah`;
 };
-

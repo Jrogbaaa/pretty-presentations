@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import BriefForm from "@/components/BriefForm";
 import BriefUpload from "@/components/BriefUpload";
 import ProcessingOverlay from "@/components/ProcessingOverlay";
+import LanguageToggle from "@/components/LanguageToggle";
 import { HeroSection } from "@/components/ui/hero-section-dark";
 import { ShuffleHero } from "@/components/ui/shuffle-grid";
 import { Target, Zap, Sparkles, Upload, FileCheck, FileText, WifiOff } from "lucide-react";
 import type { ClientBrief } from "@/types";
 import { getUserFriendlyError } from "@/types/errors";
+import { useLanguage } from "@/lib/language-context";
 
 const HomePage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -19,6 +21,7 @@ const HomePage = () => {
   const [showUpload, setShowUpload] = useState(true);
   const [isOnline, setIsOnline] = useState(true);
   const router = useRouter();
+  const { t } = useLanguage();
 
   // Online/offline detection
   useEffect(() => {
@@ -160,15 +163,20 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
+      {/* Language Toggle - Fixed Position */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageToggle variant="dropdown" />
+      </div>
+
       {/* Animated Hero Section */}
       <HeroSection
-        title="AI Brief Responder"
+        title={t.hero.title}
         subtitle={{
-          regular: "Transform briefs into ",
-          gradient: "strategic recommendations",
+          regular: t.hero.subtitleRegular,
+          gradient: t.hero.subtitleGradient,
         }}
-        description="Our intelligent platform analyzes your client briefs and generates comprehensive influencer recommendations with detailed strategy, budget breakdowns, and performance projections."
-        ctaText="Respond to Brief"
+        description={t.hero.description}
+        ctaText={t.hero.cta}
         ctaHref="#brief-section"
         onCtaClick={handleScrollToBrief}
         gridOptions={{
@@ -190,10 +198,10 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Why Choose Our Brief Responder?
+              {t.features.title}
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Everything you need to create professional influencer recommendations
+              {t.features.subtitle}
             </p>
           </div>
           
@@ -202,9 +210,9 @@ const HomePage = () => {
               <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4">
                 <Target className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Smart Matching</h3>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">{t.features.smartMatching.title}</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                AI analyzes thousands of influencers to find the perfect fit for your campaign goals and target audience
+                {t.features.smartMatching.description}
               </p>
             </div>
             
@@ -212,9 +220,9 @@ const HomePage = () => {
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
                 <Zap className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Super Fast</h3>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">{t.features.superFast.title}</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Generate complete client-ready brief responses in minutes instead of spending hours on manual work
+                {t.features.superFast.description}
               </p>
             </div>
             
@@ -222,9 +230,9 @@ const HomePage = () => {
               <div className="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center mb-4">
                 <Sparkles className="w-6 h-6 text-pink-600 dark:text-pink-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Professional Quality</h3>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">{t.features.professionalQuality.title}</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Agency-level recommendations with detailed strategy, budgets, and KPI projections that impress clients
+                {t.features.professionalQuality.description}
               </p>
             </div>
           </div>
@@ -236,10 +244,10 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              How It Works
+              {t.howItWorks.title}
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Three simple steps to respond to your client brief
+              {t.howItWorks.subtitle}
             </p>
           </div>
           
@@ -248,9 +256,9 @@ const HomePage = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Upload className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">1. Upload Brief</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">{t.howItWorks.step1.title}</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Paste your client brief or fill out our simple form with campaign details
+                {t.howItWorks.step1.description}
               </p>
             </div>
             
@@ -258,9 +266,9 @@ const HomePage = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FileCheck className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">2. AI Analysis</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">{t.howItWorks.step2.title}</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Our AI analyzes your brief and matches the perfect influencers automatically
+                {t.howItWorks.step2.description}
               </p>
             </div>
             
@@ -268,9 +276,9 @@ const HomePage = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FileText className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">3. Get Response</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">{t.howItWorks.step3.title}</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Receive your detailed brief response with influencer recommendations and strategy
+                {t.howItWorks.step3.description}
               </p>
             </div>
           </div>
@@ -283,7 +291,7 @@ const HomePage = () => {
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
             <WifiOff className="w-5 h-5" />
             <p className="font-semibold">
-              You are currently offline. Features that require internet will not work.
+              {t.errors.offlineWarning}
             </p>
           </div>
         </div>
@@ -295,10 +303,10 @@ const HomePage = () => {
 
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Respond to Your Brief
+              {t.brief.title}
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Upload your brief or fill out the form below to generate your influencer recommendations
+              {t.brief.subtitle}
             </p>
           </div>
 
@@ -327,7 +335,7 @@ const HomePage = () => {
                       ? 'text-orange-900 dark:text-orange-300' 
                       : 'text-red-900 dark:text-red-300'
                   }`}>
-                    {rateLimitResetTime ? 'Rate Limit Reached' : 'Error'}
+                    {rateLimitResetTime ? t.errors.rateLimitTitle : t.errors.error}
                   </h3>
                   <p className={
                     rateLimitResetTime 
@@ -348,11 +356,11 @@ const HomePage = () => {
                             {minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : `${seconds}s`}
                           </p>
                           <p className="text-orange-700 dark:text-orange-400 text-xs mt-1">
-                            Try again in
+                            {t.errors.tryAgainIn}
                           </p>
                         </div>
                         <p className="text-sm text-orange-600 dark:text-orange-400">
-                          To prevent abuse, we limit requests to 5 per minute. Your limit will reset soon.
+                          {t.errors.rateLimitText}
                         </p>
                       </div>
                     );
@@ -376,20 +384,19 @@ const HomePage = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-green-900 dark:text-green-300 text-lg mb-2">
-                    Brief Successfully Analyzed!
+                    {t.brief.successTitle}
                   </h3>
                   <p className="text-green-700 dark:text-green-400 mb-4">
-                    We've extracted all the information from your brief and pre-filled the form below.
-                    Review the details and make any necessary adjustments before generating your response.
+                    {t.brief.successDescription}
                   </p>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                       <span className="text-lg">✓</span>
-                      <span>Client: {parsedBrief.clientName}</span>
+                      <span>{t.brief.clientInfo}: {parsedBrief.clientName}</span>
                     </div>
                     <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                       <span className="text-lg">✓</span>
-                      <span>Budget: €{parsedBrief.budget.toLocaleString()}</span>
+                      <span>{t.brief.budget}: €{parsedBrief.budget.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                       <span className="text-lg">✓</span>
@@ -404,7 +411,7 @@ const HomePage = () => {
                     onClick={handleResetUpload}
                     className="mt-4 text-sm text-green-700 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 underline transition-colors"
                   >
-                    Upload a different brief
+                    {t.brief.uploadDifferent}
                   </button>
                 </div>
               </div>
@@ -427,13 +434,13 @@ const HomePage = () => {
       <footer className="bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="text-center">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Look After You</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">AI-powered influencer talent agency</p>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t.footer.company}</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">{t.footer.tagline}</p>
             <p className="text-sm text-gray-500 dark:text-gray-500">
-              Powered by OpenAI
+              {t.footer.poweredBy}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-500 mt-6">
-              © 2025 Brief Responder. All rights reserved.
+              {t.footer.copyright}
             </p>
           </div>
         </div>
