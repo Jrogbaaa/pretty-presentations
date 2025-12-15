@@ -1,5 +1,91 @@
 # Changelog
 
+## [4.4.0] - 2025-12-15 🎨
+
+### 🎨 Corporate Brochure Presentation Templates
+
+This release introduces a complete redesign of the presentation slide system with a professional corporate brochure/annual report aesthetic inspired by magazine-style layouts.
+
+#### 🖼️ New Corporate Brochure Template
+
+**Template Definition (`types/templates.ts`):**
+- New `corporate-brochure` template ID added to template registry
+- Color palette: Royal Blue (`#2E3F9E`) + Cream (`#F5F3EB`)
+- Typography: Georgia serif for headings, Inter for body text
+- Layout style: Editorial split-screen with professional magazine aesthetics
+
+**Split-Panel Slide Layouts:**
+- Left/right 50-50 split design across all slides
+- Blue panels with white text and decorative patterns
+- Cream panels with content boxes and structured information
+- Consistent visual hierarchy throughout
+
+#### 📑 Updated Slide Components
+
+**CoverSlide.tsx - Introduction + Table of Contents:**
+- Left panel: Royal blue with large title, decorative accent line
+- Right panel: Cream with vertical "TABLE OF CONTENT" text
+- Numbered items (01-05) with horizontal dividers
+- Professional agency branding in footer
+
+**IndexSlide.tsx - About Us / Our Mission:**
+- Left: Cream panel with "OUR STORY" section and year badge
+- Right: Blue panel with "OUR MISSION" and numbered points
+- Skills badges and founder quote section
+- Clean professional typography
+
+**GenericSlide.tsx - Our Vision Style:**
+- Numbered steps (01-06) with progress bar indicator
+- Split-panel design with content boxes
+- World map icon for global reach visualization
+- Info boxes with icons and descriptions
+
+**ObjectiveSlide.tsx - Our Service Layout:**
+- Service items with numbered boxes (01, 02, 03...)
+- Percentage circles (50%, 50%) for statistics
+- Grid of image placeholders on right panel
+- Professional call-to-action elements
+
+**TalentStrategySlide.tsx - Our Creative Team:**
+- Left: Blue panel with skills badges and founder quote
+- Right: 6-person team grid with circular avatars
+- Metrics display at bottom with key statistics
+- Profile-style layout with names and roles
+
+**RecommendedScenarioSlide.tsx - Our Create Work:**
+- Large statistics display (25%, +15, 3x, 98%)
+- Content boxes grid on cream panel
+- Bar chart placeholder for data visualization
+- Professional metric cards
+
+#### 🔧 Template Generator Updates
+
+**lib/template-slide-generator.ts:**
+- All slide generators now detect and apply corporate brochure styling
+- Proper color values applied: `#2E3F9E` (blue), `#F5F3EB` (cream)
+- Template-specific titles (e.g., "OUR SERVICE" instead of "Campaign Objective")
+- Layout adjustments for split-panel designs
+- `templateStyle: "corporate-brochure"` added to customData
+
+#### 🎯 Template Selection
+
+**Updated Recommendation Logic:**
+- Corporate brochure now default for most professional presentations
+- Keywords trigger: "corporate", "business", "professional", "enterprise", "b2b", "agency", "proposal", "company", "service"
+- Manual selection available via template picker
+
+#### 🛠️ Files Modified
+- `types/templates.ts` - New template definition
+- `components/slides/CoverSlide.tsx` - Split-panel cover design
+- `components/slides/IndexSlide.tsx` - About Us layout
+- `components/slides/GenericSlide.tsx` - Vision/content slides
+- `components/slides/ObjectiveSlide.tsx` - Service layout
+- `components/slides/TalentStrategySlide.tsx` - Team member grid
+- `components/slides/RecommendedScenarioSlide.tsx` - Work showcase
+- `lib/template-slide-generator.ts` - Template-aware generation
+
+---
+
 ## [4.3.0] - 2025-12-15 🎨
 
 ### 📄 Corporate Brochure PDF Design + Language Switching

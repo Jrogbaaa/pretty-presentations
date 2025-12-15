@@ -3,7 +3,7 @@
  * Defines template styles, layouts, and design guidelines
  */
 
-export type TemplateId = "default" | "red-bull-event" | "scalpers-lifestyle";
+export type TemplateId = "default" | "red-bull-event" | "scalpers-lifestyle" | "corporate-brochure";
 
 export interface TemplateStyle {
   id: TemplateId;
@@ -104,6 +104,38 @@ export const SCALPERS_LIFESTYLE_TEMPLATE: TemplateStyle = {
   },
 };
 
+// Corporate Brochure Template (Magazine-style professional layout)
+export const CORPORATE_BROCHURE_TEMPLATE: TemplateStyle = {
+  id: "corporate-brochure",
+  name: "Corporate Brochure",
+  description: "Professional magazine-style brochure with split layouts, numbered sections, and corporate elegance",
+  mood: "Professional, corporate, sophisticated, editorial",
+  colorPalette: {
+    primary: "#2E3F9E", // Royal Blue
+    secondary: "#1E2A6E", // Deep Blue
+    accent: "#2E3F9E", // Royal Blue accent
+    background: "#F5F3EB", // Cream/Beige
+    text: "#1A1A2E", // Near black
+    textLight: "#6B7280", // Gray
+  },
+  typography: {
+    headingFont: "Georgia, serif",
+    bodyFont: "Inter, -apple-system, sans-serif",
+    headingStyle: "serif",
+    bodyStyle: "editorial",
+  },
+  imagery: {
+    style: "Black and white photography with blue overlays, architectural shots, corporate environments",
+    composition: "Split-screen layouts, asymmetric balance, editorial spreads",
+    treatment: "B&W with selective color, high contrast, professional",
+  },
+  slideLayouts: {
+    cover: "split-screen",
+    content: "editorial",
+    talent: "profile-rows",
+  },
+};
+
 // Default Template (Current Implementation)
 export const DEFAULT_TEMPLATE: TemplateStyle = {
   id: "default",
@@ -141,6 +173,7 @@ export const TEMPLATES: Record<TemplateId, TemplateStyle> = {
   default: DEFAULT_TEMPLATE,
   "red-bull-event": RED_BULL_EVENT_TEMPLATE,
   "scalpers-lifestyle": SCALPERS_LIFESTYLE_TEMPLATE,
+  "corporate-brochure": CORPORATE_BROCHURE_TEMPLATE,
 };
 
 // Template Selection Helper
@@ -184,5 +217,21 @@ export const recommendTemplate = (
     return "scalpers-lifestyle";
   }
 
-  return "default";
+  // Corporate Brochure indicators (professional B2B presentations)
+  if (
+    allText.includes("corporate") ||
+    allText.includes("business") ||
+    allText.includes("professional") ||
+    allText.includes("enterprise") ||
+    allText.includes("b2b") ||
+    allText.includes("agency") ||
+    allText.includes("proposal") ||
+    allText.includes("company") ||
+    allText.includes("service")
+  ) {
+    return "corporate-brochure";
+  }
+
+  // Default to corporate-brochure for most professional presentations
+  return "corporate-brochure";
 };

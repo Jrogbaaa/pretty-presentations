@@ -1,12 +1,88 @@
 # Presentation Editor UI Design System
 
-**Version**: 2.0.0  
-**Implementation Date**: October 6, 2025  
+**Version**: 3.0.0  
+**Implementation Date**: December 15, 2025  
 **Status**: ✅ Fully Implemented
 
 ## Overview
 
-A comprehensive, Stripe-inspired design system for the presentation editor interface. This design system prioritizes clean aesthetics, generous whitespace, subtle shadows, clear hierarchy, and purposeful color usage. The focus is on enabling effortless content creation with tools that are accessible but never overwhelming.
+A comprehensive design system for the presentation editor interface with multiple template styles. This design system prioritizes clean aesthetics, generous whitespace, subtle shadows, clear hierarchy, and purposeful color usage. The focus is on enabling effortless content creation with tools that are accessible but never overwhelming.
+
+## Template System
+
+### Available Templates
+
+The system now supports 4 distinct presentation templates:
+
+| Template | ID | Primary Color | Background | Style |
+|----------|-----|--------------|------------|-------|
+| Corporate Brochure | `corporate-brochure` | `#2E3F9E` (Royal Blue) | `#F5F3EB` (Cream) | Magazine/Editorial |
+| Default | `default` | `#3B82F6` (Blue) | `#FFFFFF` (White) | Clean/Professional |
+| Red Bull Event | `red-bull-event` | `#001489` (Deep Blue) | `#0A0E27` (Dark) | Energetic/Action |
+| Scalpers Lifestyle | `scalpers-lifestyle` | `#000000` (Black) | `#1A1A1A` (Charcoal) | Premium/Fashion |
+
+### Corporate Brochure Template (NEW - v4.4.0)
+
+The flagship template for professional presentations with magazine-style layouts.
+
+#### Color Palette
+```typescript
+colorPalette: {
+  primary: "#2E3F9E",    // Royal Blue
+  secondary: "#1E2A6E",  // Deep Blue
+  accent: "#2E3F9E",     // Royal Blue accent
+  background: "#F5F3EB", // Cream/Beige
+  text: "#1A1A2E",       // Near black
+  textLight: "#6B7280",  // Gray
+}
+```
+
+#### Typography
+```typescript
+typography: {
+  headingFont: "Georgia, serif",
+  bodyFont: "Inter, -apple-system, sans-serif",
+  headingStyle: "serif",
+  bodyStyle: "editorial",
+}
+```
+
+#### Slide Layouts
+
+All slides use a **split-panel layout** with 50/50 left-right design:
+
+1. **Cover Slide**
+   - Left: Royal blue panel with title, decorative accent line
+   - Right: Cream panel with vertical "TABLE OF CONTENT" text, numbered items (01-05)
+
+2. **Index Slide (About Us)**
+   - Left: Cream panel with "OUR STORY" section, year badge
+   - Right: Blue panel with "OUR MISSION", numbered points, skills badges
+
+3. **Objective Slide (Our Service)**
+   - Left: Cream panel with service items (01, 02, 03...), percentage circles
+   - Right: Blue panel with image grid placeholders
+
+4. **Generic Slide (Our Vision)**
+   - Left: Blue panel with numbered steps (01-06), progress bar
+   - Right: Cream panel with content boxes, world map icon
+
+5. **Talent Strategy Slide (Our Creative Team)**
+   - Left: Blue panel with skills badges, founder quote
+   - Right: Cream panel with 6-person team grid, metrics
+
+6. **Recommended Scenario Slide (Our Create Work)**
+   - Left: Blue panel with large statistics (25%, +15, 3x)
+   - Right: Cream panel with content boxes grid
+
+#### Visual Elements
+
+- **Numbered Sections**: Large numbers (01, 02, 03...) in Georgia serif
+- **Accent Lines**: `#F5F3EB` cream on blue, `#2E3F9E` blue on cream
+- **Decorative Patterns**: Subtle SVG patterns for depth
+- **Circular Avatars**: Team member profile images
+- **Progress Bars**: Step indicators with fill states
+- **Statistics Displays**: Large bold numbers with labels
 
 ## Design Philosophy
 

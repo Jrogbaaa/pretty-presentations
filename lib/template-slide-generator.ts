@@ -134,13 +134,16 @@ const createCoverSlide = (
   createDesign: (overrides?: Partial<SlideDesign>) => SlideDesign
 ): Slide => {
   let backgroundColor = template.colorPalette.primary;
-  const textColor = template.colorPalette.text;
+  let textColor = template.colorPalette.text;
 
   // Template-specific styling
   if (template.id === "red-bull-event") {
     backgroundColor = "#0A0E27"; // Dark blue-black
   } else if (template.id === "scalpers-lifestyle") {
     backgroundColor = "#000000"; // Pure black
+  } else if (template.id === "corporate-brochure") {
+    backgroundColor = "#2E3F9E"; // Royal blue
+    textColor = "#FFFFFF";
   }
 
   return {
@@ -164,6 +167,7 @@ const createCoverSlide = (
     design: createDesign({
       backgroundColor,
       textColor,
+      accentColor: template.colorPalette.accent,
       layout: "single-column",
     }),
   };
@@ -177,14 +181,15 @@ const createSummarySlide = (
   createDesign: (overrides?: Partial<SlideDesign>) => SlideDesign
 ): Slide => {
   const isScalpers = template.id === "scalpers-lifestyle";
+  const isCorporateBrochure = template.id === "corporate-brochure";
 
   return {
     id: generateId(),
     type: "index" as SlideType,
     order: 1,
-    title: isScalpers ? "Resumen de campaña" : "Índice",
+    title: isScalpers ? "Resumen de campaña" : isCorporateBrochure ? "About Us" : "Índice",
     content: {
-      title: isScalpers ? "Resumen de campaña" : "Índice",
+      title: isScalpers ? "Resumen de campaña" : isCorporateBrochure ? "ABOUT US" : "Índice",
       bullets: isScalpers
         ? [] // Scalpers uses key numbers instead
         : [
@@ -195,6 +200,7 @@ const createSummarySlide = (
             "Next Steps",
           ],
       customData: {
+        templateStyle: template.id,
         campaignSummary: isScalpers && content.campaignSummary
           ? content.campaignSummary
           : null,
@@ -210,7 +216,9 @@ const createSummarySlide = (
       },
     },
     design: createDesign({
-      layout: isScalpers ? "two-column" : "single-column",
+      layout: isScalpers || isCorporateBrochure ? "two-column" : "single-column",
+      backgroundColor: isCorporateBrochure ? "#F5F3EB" : template.colorPalette.background,
+      accentColor: isCorporateBrochure ? "#2E3F9E" : template.colorPalette.accent,
     }),
   };
 };
@@ -223,6 +231,7 @@ const createObjectiveSlide = (
 ): Slide => {
   const isRedBull = template.id === "red-bull-event";
   const isScalpers = template.id === "scalpers-lifestyle";
+  const isCorporateBrochure = template.id === "corporate-brochure";
 
   // Use new campaignSummary.objective or fall back to legacy objective field
   const objectiveText = content.campaignSummary?.objective || content.objective || "Drive awareness and engagement";
@@ -231,18 +240,21 @@ const createObjectiveSlide = (
     id: generateId(),
     type: "objective" as SlideType,
     order: 2,
-    title: "Campaign Objective",
+    title: isCorporateBrochure ? "Our Service" : "Campaign Objective",
     content: {
-      title: isRedBull ? "OBJECTIVE" : "Campaign Objective",
+      title: isRedBull ? "OBJECTIVE" : isCorporateBrochure ? "OUR SERVICE" : "Campaign Objective",
       subtitle: isScalpers ? content.campaignSummary?.objective?.toUpperCase() : undefined,
       body: objectiveText,
       customData: {
-        layout: isRedBull ? "split" : "centered",
+        templateStyle: template.id,
+        layout: isRedBull ? "split" : isCorporateBrochure ? "split" : "centered",
         campaignSummary: content.campaignSummary || null,
       },
     },
     design: createDesign({
-      layout: isRedBull ? "two-column" : "single-column",
+      layout: isRedBull || isCorporateBrochure ? "two-column" : "single-column",
+      backgroundColor: isCorporateBrochure ? "#F5F3EB" : template.colorPalette.background,
+      accentColor: isCorporateBrochure ? "#2E3F9E" : template.colorPalette.accent,
     }),
   };
 };
@@ -255,6 +267,7 @@ const createBriefingSlide = (
   createDesign: (overrides?: Partial<SlideDesign>) => SlideDesign
 ): Slide => {
   const isRedBull = template.id === "red-bull-event";
+  const isCorporateBrochure = template.id === "corporate-brochure";
 
   // Use legacy briefSummary or construct from campaignSummary
   const briefPoints = content.briefSummary || [
@@ -268,11 +281,12 @@ const createBriefingSlide = (
     id: generateId(),
     type: "brief-summary" as SlideType,
     order: 3,
-    title: "Briefing",
+    title: isCorporateBrochure ? "Our Vision" : "Briefing",
     content: {
-      title: "Briefing",
+      title: isCorporateBrochure ? "OUR VISION" : "Briefing",
       bullets: briefPoints,
       customData: {
+        templateStyle: template.id,
         gridLayout: isRedBull,
         campaignSummary: content.campaignSummary || null,
         columns: isRedBull
@@ -286,8 +300,9 @@ const createBriefingSlide = (
       },
     },
     design: createDesign({
-      layout: isRedBull ? "grid" : "single-column",
-      backgroundColor: isRedBull ? "#F9FAFB" : template.colorPalette.background,
+      layout: isRedBull || isCorporateBrochure ? "grid" : "single-column",
+      backgroundColor: isCorporateBrochure ? "#F5F3EB" : isRedBull ? "#F9FAFB" : template.colorPalette.background,
+      accentColor: isCorporateBrochure ? "#2E3F9E" : template.colorPalette.accent,
     }),
   };
 };
@@ -446,6 +461,7 @@ const createTalentSlide = (
   createDesign: (overrides?: Partial<SlideDesign>) => SlideDesign
 ): Slide => {
   const isScalpers = template.id === "scalpers-lifestyle";
+  const isCorporateBrochure = template.id === "corporate-brochure";
 
   // Calculate average engagement rate for comparison
   const avgEngagement = influencers.length > 0
@@ -469,9 +485,9 @@ const createTalentSlide = (
     id: generateId(),
     type: "talent-strategy" as SlideType,
     order: 8,
-    title: isScalpers ? "Pool de influencers" : "Talent Strategy",
+    title: isScalpers ? "Pool de influencers" : isCorporateBrochure ? "Our Creative Team" : "Talent Strategy",
     content: {
-      title: isScalpers ? "Pool de influencers" : "Talent Strategy",
+      title: isScalpers ? "Pool de influencers" : isCorporateBrochure ? "OUR CREATIVE TEAM" : "Talent Strategy",
       subtitle: isScalpers ? "Her & Him" : "Recommended Influencer Mix",
       body: content.talentRationale,
       influencers: influencers,
@@ -494,7 +510,8 @@ const createTalentSlide = (
         },
       ],
       customData: {
-        layoutStyle: isScalpers ? "profile-rows" : "grid-cards",
+        templateStyle: template.id,
+        layoutStyle: isScalpers ? "profile-rows" : isCorporateBrochure ? "team-grid" : "grid-cards",
         // Include detailed influencer pool data from AI
         influencerPool: content.influencerPool || null,
         // Chart data for bar chart visualization
@@ -506,7 +523,9 @@ const createTalentSlide = (
       },
     },
     design: createDesign({
-      layout: isScalpers ? "two-column" : "grid",
+      layout: isScalpers || isCorporateBrochure ? "two-column" : "grid",
+      backgroundColor: isCorporateBrochure ? "#F5F3EB" : template.colorPalette.background,
+      accentColor: isCorporateBrochure ? "#2E3F9E" : template.colorPalette.accent,
     }),
   };
 };
@@ -545,6 +564,8 @@ const createRecommendedScenarioSlide = (
   template: TemplateStyle,
   createDesign: (overrides?: Partial<SlideDesign>) => SlideDesign
 ): Slide => {
+  const isCorporateBrochure = template.id === "corporate-brochure";
+  
   // Calculate tiered metrics
   const tieredMetrics = calculateTieredMetrics(influencers);
   const totalCost = influencers.reduce((sum, inf) => sum + inf.costEstimate, 0);
@@ -579,12 +600,13 @@ const createRecommendedScenarioSlide = (
     id: generateId(),
     type: "brief-summary" as SlideType,
     order: 10,
-    title: "Escenario recomendado",
+    title: isCorporateBrochure ? "Our Create Work" : "Escenario recomendado",
     content: {
-      title: "Escenario recomendado",
+      title: isCorporateBrochure ? "OUR CREATE WORK" : "Escenario recomendado",
       subtitle: "Tiered Performance Strategy",
       body: `Strategic ${influencers.length}-influencer campaign with ${tieredMetrics.highROIPercentage.toFixed(0)}% budget in high-value tiers.`,
       customData: {
+        templateStyle: template.id,
         recommendedScenario: content.recommendedScenario || {
           influencerMix: {
             forHer: influencers.filter(i => i.name.includes("Her") || Math.random() > 0.5).map(i => i.name),
@@ -605,8 +627,9 @@ const createRecommendedScenarioSlide = (
       },
     },
     design: createDesign({
-      backgroundColor: "#000000",
-      textColor: "#FFFFFF",
+      backgroundColor: isCorporateBrochure ? "#F5F3EB" : "#000000",
+      textColor: isCorporateBrochure ? "#1A1A2E" : "#FFFFFF",
+      accentColor: isCorporateBrochure ? "#2E3F9E" : template.colorPalette.accent,
       layout: "two-column",
     }),
   };

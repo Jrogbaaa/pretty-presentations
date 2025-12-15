@@ -2,15 +2,14 @@
 
 An AI-powered platform that transforms client briefs into comprehensive influencer recommendations with detailed strategy, budget breakdowns, and performance projections.
 
-**Status**: 🟢 **Production-Ready** | **Version**: 4.3.0 | **Language**: 🇬🇧/🇪🇸 English/Spanish | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o 🤖 | **Export**: PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
+**Status**: 🟢 **Production-Ready** | **Version**: 4.4.0 | **Language**: 🇬🇧/🇪🇸 English/Spanish | **Database**: 4,008 Spanish Influencers + 218 Brands (VERIFIED ✅) | **Matching**: LAYAI Algorithm + Brand Intelligence 🧠⚡ | **Tests**: 85% Coverage ✅ | **AI**: OpenAI GPT-4o 🤖 | **Export**: PDF 📤 | **Next.js**: 16.0.0 ⚡ | **Security**: Rate Limiting + Secure API Keys + Input Sanitization 🔒🛡️
 
-**Latest**: v4.3.0 **Corporate Brochure PDF Design + Language Switching!** 🎨 Major PDF redesign and i18n:
-- ✅ NEW: Corporate brochure/annual report PDF design with split title page layout
-- ✅ Numbered section headers (01, 02, 03...) with bold typography
-- ✅ Royal purple accent color scheme on warm cream background
-- ✅ Professional tables, blockquotes, and footer matching corporate aesthetic
-- ✅ NEW: English/Spanish language toggle with full UI translation
-- ✅ NEW: Email-style brief samples (casual, varied, realistic)
+**Latest**: v4.4.0 **Corporate Brochure Presentation Templates!** 🎨 Complete slide redesign:
+- ✅ NEW: Corporate brochure template with split-panel magazine-style layouts
+- ✅ Royal Blue (#2E3F9E) + Cream (#F5F3EB) professional color scheme
+- ✅ Numbered sections (01, 02, 03...) with Georgia serif typography
+- ✅ Team member grids, service boxes, statistics displays
+- ✅ All slides updated: Cover, Index, Objective, Generic, Talent, Scenario
 
 See [CHANGELOG.md](./CHANGELOG.md) for details. 🚀✅
 
