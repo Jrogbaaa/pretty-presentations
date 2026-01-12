@@ -1,5 +1,49 @@
 # Changelog
 
+## [4.5.0] - 2026-01-12 ✨
+
+### ✨ Gamma.app Integration for Quick Presentations
+
+This release adds a convenient one-click Gamma.app integration to the response page, allowing users to instantly transform their brief responses into professional presentations.
+
+#### 🎯 New Gamma Button
+
+**Response Page Header:**
+- **New "Gamma" Button:** Amber/orange gradient button positioned next to Export PDF
+- **One-Click Workflow:** 
+  1. Copies markdown content to clipboard automatically
+  2. Opens gamma.app/create in new tab
+  3. User pastes content in Gamma's "Paste text" feature
+- **Visual Feedback:** Shows "Copied! Opening Gamma..." with checkmark on click
+- **Accessibility:** Proper aria-label and tabIndex for keyboard navigation
+
+**User Flow:**
+1. Generate a brief response
+2. Click the "Gamma" button (sparkles icon + external link indicator)
+3. Content automatically copied to clipboard
+4. Gamma.app opens in new tab
+5. Paste content into Gamma's "Paste text" feature
+6. AI generates beautiful presentation slides instantly
+
+#### 🎨 Button Design
+- Gradient background: amber-500 to orange-500
+- Hover state: amber-600 to orange-600
+- Shadow effects for depth
+- Sparkles icon with external link indicator
+- Matches existing action button styling
+
+#### 🛠️ Files Modified
+- `app/response/[id]/page.tsx` - Added Gamma button, handler, and copy state
+
+#### 💡 Benefits
+- ✅ Zero friction presentation creation
+- ✅ Leverages Gamma.app's AI for slide design
+- ✅ No manual copy-paste required
+- ✅ Works with any generated response
+- ✅ Graceful error handling (opens Gamma even if copy fails)
+
+---
+
 ## [4.4.0] - 2025-12-15 🎨
 
 ### 🎨 Corporate Brochure Presentation Templates
